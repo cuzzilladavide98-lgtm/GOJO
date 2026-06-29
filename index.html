@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>L'Allenamento Aureo</title>
+<meta name="description" content="Manuale Tecnico degli Esercizi — allenamento guidato e libreria illustrata.">
+<meta name="theme-color" content="#0c0c11">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Aureo">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="app">
+
+  <header class="appbar" id="appbar">
+    <button class="back hidden" id="backBtn">‹ Indietro</button>
+    <div class="logo" id="logo">A</div>
+    <div>
+      <h1 id="barTitle">L'Allenamento Aureo</h1>
+      <div class="sub" id="barSub">Manuale Tecnico</div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section class="view" id="view-home"></section>
+
+  <!-- LIBRARY -->
+  <section class="view hidden" id="view-library"></section>
+
+  <!-- DETAIL -->
+  <section class="view hidden" id="view-detail"></section>
+
+  <!-- WORKOUT (full screen overlay) -->
+  <section id="view-workout" class="hidden"></section>
+
+  <!-- TAB BAR -->
+  <nav class="tabbar" id="tabbar">
+    <button data-tab="home" class="active"><span class="ic">🏋</span>Allena</button>
+    <button data-tab="library"><span class="ic">📖</span>Libreria</button>
+  </nav>
+
+</div>
+
+<script src="data.js"></script>
+<script src="figures.js"></script>
+<script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
