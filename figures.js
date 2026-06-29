@@ -29,10 +29,10 @@ function renderIllu(illu) {
   const W = parts[2], H = parts[3];
 
   const BODY = `url(#bg_${uid})`;
-  const GHOST = "#e6c879";
+  const GHOST = "var(--fig-mid,#e6c879)";
   const REFA = "#57d6c6";    // teal — linea che resta pulita
   const REFB = "#8fb8ff";    // azzurro — livellamenti / pavimento
-  const ARROW = "#f4c542";   // oro — movimento
+  const ARROW = "var(--fig-arrow,#f4c542)";   // oro — movimento
   const HIC = "#ff8a5a";     // muscoli evidenziati
   const WRONG = "#ff5d5d";   // errore da evitare
   const PROP = "#4a4a55";    // attrezzi (panca, barra, peso...)
@@ -41,9 +41,9 @@ function renderIllu(illu) {
 
   s += `<defs>
     <linearGradient id="bg_${uid}" x1="0" y1="0" x2="0.4" y2="1">
-      <stop offset="0" stop-color="#f8d885"/>
-      <stop offset="0.55" stop-color="#e6ac4c"/>
-      <stop offset="1" stop-color="#b9802c"/>
+      <stop offset="0" stop-color="var(--fig-hi,#f8d885)"/>
+      <stop offset="0.55" stop-color="var(--fig-mid,#e6ac4c)"/>
+      <stop offset="1" stop-color="var(--fig-lo,#b9802c)"/>
     </linearGradient>
     <marker id="ah_${uid}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 z" fill="${ARROW}"/>

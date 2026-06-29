@@ -7,9 +7,26 @@
   "use strict";
   var AU = window.AU;
   var byId = AU.byId, esc = AU.esc, fmt = AU.fmt, PREF = AU.PREF;
+  var IC = AU.IC;
 
   var WO = { steps: [], idx: 0, remaining: 0, running: false, raf: null, last: 0, title: "", curWork: null, saved: false };
   var RING = 2 * Math.PI * 88;
+
+  function domainIntro(cb) {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!PREF.domainIntro || reduce) { cb(); return; }
+    var ov = document.createElement("div");
+    ov.className = "domain-intro";
+    ov.innerHTML = '<div class="di-rings"><span></span><span></span><span></span></div>' +
+      '<div class="di-eye">' + (AU.EYE || "") + '</div>' +
+      '<div class="di-text">Espansione del Dominio</div>';
+    document.body.appendChild(ov);
+    domainSound();
+    var done = false;
+    function finish() { if (done) return; done = true; ov.classList.add("out"); setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 280); cb(); }
+    ov.addEventListener("click", finish);
+    setTimeout(finish, 1350);
+  }
 
   function buildSteps(list) {
     var steps = [{ mode: "prep", ex: list[0], sec: 8 }];
@@ -29,7 +46,7 @@
     byId("view-workout").classList.remove("hidden");
     byId("appbar").classList.add("hidden");
     byId("tabbar").classList.add("hidden");
-    loadStep(true);
+    domainIntro(function () { loadStep(true); });
   }
   window.startWorkout = startWorkout;
 
@@ -65,11 +82,11 @@
       '<circle class="ring-fg" id="woRing" cx="100" cy="100" r="88" stroke-dasharray="' + RING + '"></circle></svg>';
     byId("view-workout").innerHTML =
       '<div class="wo-top">' +
-        '<button class="close" id="woClose">&times;</button>' +
+        '<button class="close" id="woClose" aria-label="Termina allenamento">' + IC.close + '</button>' +
         '<div class="wo-progress" id="woProg"></div>' +
-        '<div style="width:40px"></div></div>' +
+        '<a class="wo-music" href="https://music.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube Music">' + IC.music + '</a></div>' +
       '<div class="wo-bar"><div id="woBarFill"></div></div>' +
-      '<div class="wo-mode" id="woMode"></div>' +
+      '<div class="wo-modewrap"><span class="wo-mode" id="woMode"></span></div>' +
       '<div class="wo-illu" id="woIllu"></div>' +
       '<div class="wo-name" id="woName"></div>' +
       '<div class="wo-cat" id="woCat"></div>' +
@@ -77,17 +94,17 @@
         '<div class="timer-num"><div class="t" id="woTime">0</div><div class="lab" id="woLab"></div></div></div>' +
       '<div class="logger hidden" id="woLogger">' +
         '<div class="lg-label" id="woLgLabel">Registra</div>' +
-        '<div class="lg-stepper"><button class="lg-btn" id="woMinus">&minus;</button>' +
+        '<div class="lg-stepper"><button class="lg-btn" id="woMinus" aria-label="Diminuisci">&minus;</button>' +
         '<div class="lg-val"><span id="woVal">0</span> <small id="woUnit"></small></div>' +
-        '<button class="lg-btn" id="woPlus">+</button></div></div>' +
+        '<button class="lg-btn" id="woPlus" aria-label="Aumenta">+</button></div></div>' +
       '<div class="wo-cue" id="woCue"></div>' +
       '<div class="wo-hint" id="woHint"></div>' +
       '<button class="skip-link" id="woSkip">Salta esercizio</button>' +
       '<div class="wo-next" id="woNext"></div>' +
       '<div class="wo-controls">' +
-        '<button class="ctrl" id="woPrev">&#9198;</button>' +
-        '<button class="ctrl play" id="woPlay">&#10074;&#10074;</button>' +
-        '<button class="ctrl" id="woNextBtn">&#9197;</button></div>';
+        '<button class="ctrl" id="woPrev" aria-label="Esercizio precedente">' + IC.prev + '</button>' +
+        '<button class="ctrl play" id="woPlay" aria-label="Avvia o metti in pausa">' + IC.pause + '</button>' +
+        '<button class="ctrl" id="woNextBtn" aria-label="Avanti">' + IC.next + '</button></div>';
 
     byId("woClose").onclick = endWorkout;
     byId("woPlay").onclick = togglePlay;
@@ -105,11 +122,14 @@
     byId("woVal").textContent = WO.curWork.rec.value;
   }
 
+  function pop(el) { if (!el) return; el.classList.remove("anim"); void el.offsetWidth; el.classList.add("anim"); }
+
   function loadStep(rebuildShell) {
     if (rebuildShell) renderWorkoutShell();
     if (WO.idx >= WO.steps.length) { showFinish(); return; }
     var st = WO.steps[WO.idx];
     WO.remaining = st.sec; WO.last = performance.now();
+    byId("view-workout").setAttribute("data-mode", st.mode);
 
     if (st.mode === "work") { WO.curWork = st; st.rec.reached = true; }
     else if (st.mode === "rest") { WO.curWork = st.from; }
@@ -127,7 +147,7 @@
     byId("woCat").textContent = st.ex.categoria;
 
     if (st.mode === "work") {
-      byId("woCue").textContent = st.ex.illu.note || "";
+      byId("woCue").textContent = "";
       byId("woHint").innerHTML = '<span>Ritmo: <b>' + esc(short(st.ex.ritmo)) + '</b></span><span>Respiro: <b>' + esc(short(st.ex.respiro)) + '</b></span>';
       byId("woLab").textContent = st.ex.tipo === "hold" ? "tieni" : st.ex.tipo === "carry" ? "cammina" : "secondi";
     } else if (st.mode === "rest") {
@@ -135,9 +155,9 @@
       byId("woHint").innerHTML = '<span>Controlla le ripetizioni svolte, poi preparati</span>';
       byId("woLab").textContent = "recupero";
     } else {
-      byId("woCue").textContent = "Si parte con: " + st.ex.nome;
-      byId("woHint").innerHTML = '<span>Mettiti in posizione</span>';
-      byId("woLab").textContent = "via tra";
+      byId("woCue").textContent = "Mettiti in posizione";
+      byId("woHint").innerHTML = "";
+      byId("woLab").textContent = "secondi";
     }
 
     var lg = byId("woLogger");
@@ -151,10 +171,11 @@
     byId("woSkip").style.display = (st.mode === "prep") ? "none" : "block";
 
     var nx = WO.steps[WO.idx + 1];
-    byId("woNext").innerHTML = nx ? ("Poi: <b>" + esc(nx.mode === "rest" ? "recupero" : nx.ex.nome) + "</b>") : "Ultimo esercizio";
+    byId("woNext").innerHTML = (st.mode === "prep") ? "" : (nx ? ("Poi: <b>" + esc(nx.mode === "rest" ? "recupero" : nx.ex.nome) + "</b>") : "Ultimo esercizio");
 
+    pop(byId("woTimerWrap")); pop(byId("woName")); pop(byId("woIllu"));
     updateTimerUI(st);
-    if (WO.running) { byId("woPlay").innerHTML = "&#10074;&#10074;"; loop(); } else byId("woPlay").innerHTML = "&#9654;";
+    if (WO.running) { byId("woPlay").innerHTML = IC.pause; loop(); } else byId("woPlay").innerHTML = IC.play;
   }
 
   function short(t) { return t.length > 30 ? t.slice(0, 29) + "…" : t; }
@@ -175,7 +196,12 @@
       var dt = (now - WO.last) / 1000; WO.last = now;
       var st = WO.steps[WO.idx]; var prev = WO.remaining;
       WO.remaining -= dt;
-      if (Math.ceil(prev) !== Math.ceil(WO.remaining) && WO.remaining > 0 && WO.remaining <= 3) beep(660, 0.07);
+      var cs = Math.ceil(WO.remaining);
+      if (cs !== Math.ceil(prev) && WO.remaining > 0 && cs <= 3) {
+        beep(660, 0.08); vibrate([25]);
+        var tw = byId("woTimerWrap"); if (tw) tw.classList.add("countdown");
+        var tn = byId("woTime"); if (tn) { tn.classList.remove("tick"); void tn.offsetWidth; tn.classList.add("tick"); }
+      }
       if (WO.remaining <= 0) {
         beep(st.mode === "work" ? 880 : 520, 0.18);
         vibrate(st.mode === "work" ? [120, 60, 120] : [80]);
@@ -208,7 +234,7 @@
 
   function togglePlay() {
     WO.running = !WO.running;
-    byId("woPlay").innerHTML = WO.running ? "&#10074;&#10074;" : "&#9654;";
+    byId("woPlay").innerHTML = WO.running ? IC.pause : IC.play;
     if (WO.running) { WO.last = performance.now(); loop(); } else if (WO.raf) cancelAnimationFrame(WO.raf);
   }
 
@@ -220,8 +246,8 @@
     var works = workSteps();
     var done = works.filter(function (w) { return w.rec.reached && !w.rec.skipped; });
     var sk = works.filter(function (w) { return w.rec.skipped; });
-    var h = '<div class="wo-top"><button class="close" id="woClose2">&times;</button><div></div><div style="width:40px"></div></div>';
-    h += '<div class="wo-finish"><div class="big">&#127942;</div><h2>Sessione completata!</h2>' +
+    var h = '<div class="wo-top"><button class="close" id="woClose2" aria-label="Chiudi">' + IC.close + '</button><div></div><div style="width:40px"></div></div>';
+    h += '<div class="wo-finish"><div class="domain-burst"></div><div class="big">' + IC.trophy + '</div><div class="dx-over">Espansione del Dominio</div><h2>Sessione completata!</h2>' +
       '<p>' + esc(WO.title) + ' - ' + done.length + ' svolti' + (sk.length ? ' - ' + sk.length + ' saltati' : '') + '</p></div>';
     h += '<div class="finish-list">';
     works.filter(function (w) { return w.rec.reached; }).forEach(function (w) {
@@ -257,8 +283,29 @@
     } catch (e) {}
   }
   function vibrate(p) { if (PREF.vibrate && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
+  function domainSound() {
+    if (!PREF.sound || !actx) return;
+    try {
+      var t = actx.currentTime;
+      var o = actx.createOscillator(), g = actx.createGain(), f = actx.createBiquadFilter();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(300, t + 0.7);
+      f.type = "lowpass"; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(1800, t + 0.7);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.15, t + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.95);
+      o.connect(f); f.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 1.0);
+      [521, 523.5, 784].forEach(function (fr) {
+        var oo = actx.createOscillator(), gg = actx.createGain();
+        oo.type = "sine"; oo.frequency.value = fr;
+        gg.gain.setValueAtTime(0.0001, t + 0.25); gg.gain.exponentialRampToValueAtTime(0.045, t + 0.5); gg.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+        oo.connect(gg); gg.connect(actx.destination); oo.start(t + 0.25); oo.stop(t + 1.35);
+      });
+      var io = actx.createOscillator(), ig = actx.createGain();
+      io.type = "sine"; io.frequency.setValueAtTime(170, t + 0.62); io.frequency.exponentialRampToValueAtTime(54, t + 0.95);
+      ig.gain.setValueAtTime(0.0001, t + 0.6); ig.gain.exponentialRampToValueAtTime(0.22, t + 0.66); ig.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+      io.connect(ig); ig.connect(actx.destination); io.start(t + 0.6); io.stop(t + 1.15);
+    } catch (e) {}
+  }
 
   document.addEventListener("visibilitychange", function () {
-    if (document.hidden && WO.running) { WO.running = false; var p = byId("woPlay"); if (p) p.innerHTML = "&#9654;"; if (WO.raf) cancelAnimationFrame(WO.raf); }
+    if (document.hidden && WO.running) { WO.running = false; var p = byId("woPlay"); if (p) p.innerHTML = IC.play; if (WO.raf) cancelAnimationFrame(WO.raf); }
   });
 })();

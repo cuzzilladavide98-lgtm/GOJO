@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>L'Allenamento Aureo</title>
-<meta name="description" content="Manuale Tecnico degli Esercizi - allenamento guidato, illustrato, con storico e grafici.">
+<meta name="description" content="Manuale Tecnico degli Esercizi - allenamento guidato, illustrato, con storico, grafici e musica.">
 <meta name="theme-color" content="#15130C">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
 
   <header class="appbar" id="appbar">
     <button class="back hidden" id="backBtn" aria-label="Indietro">&#8592;</button>
-    <div class="logo" id="logo">A</div>
+    <div class="logo" id="logo"><svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="lgI" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="#EAF4FF"/><stop offset="34%" stop-color="#93CBFF"/><stop offset="70%" stop-color="#3D8BFF"/><stop offset="100%" stop-color="#1E57B4"/></radialGradient></defs><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="#0a0a12"/><circle cx="24" cy="24" r="11.5" fill="url(#lgI)"/><circle cx="24" cy="24" r="4.8" fill="#0a0c18"/><circle cx="20.5" cy="20.5" r="2.2" fill="#fff"/><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="none" stroke="#BBD8FF" stroke-width="1.8"/></svg></div>
     <div>
       <h1 id="barTitle">L'Allenamento Aureo</h1>
       <div class="sub" id="barSub">Manuale Tecnico</div>
@@ -31,6 +31,7 @@
   <section class="view hidden" id="view-library"></section>
   <section class="view hidden" id="view-detail"></section>
   <section class="view hidden" id="view-history"></section>
+  <section class="view hidden" id="view-music"></section>
 
   <section id="view-workout" class="hidden"></section>
 
@@ -42,6 +43,10 @@
     <button data-tab="library">
       <span class="ic"><svg viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/></svg></span>
       Libreria
+    </button>
+    <button data-tab="music">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg></span>
+      Musica
     </button>
     <button data-tab="history">
       <span class="ic"><svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.98 8.98 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></span>
@@ -56,6 +61,7 @@
 <script src="chart.js"></script>
 <script src="app.js"></script>
 <script src="workout.js"></script>
+<script src="music.js"></script>
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function(){}); });

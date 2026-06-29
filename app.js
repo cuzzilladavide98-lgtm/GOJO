@@ -6,13 +6,57 @@
   "use strict";
 
   var byId = function (id) { return document.getElementById(id); };
+  var IC = {
+    play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
+    prev: '<svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>',
+    next: '<svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>',
+    skip: '<svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6z"/></svg>',
+    close: '<svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
+    trophy: '<svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 16.9V19H7v2h10v-2h-4v-2.1a5.01 5.01 0 0 0 3.61-3.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 1.99-.9 1.99-2L22 5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>',
+    music: '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>'
+  };
 
-  var PREF = { sound: true, vibrate: true };
+  var EYE = '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="heI" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="#EAF4FF"/><stop offset="34%" stop-color="#93CBFF"/><stop offset="70%" stop-color="#3D8BFF"/><stop offset="100%" stop-color="#1E57B4"/></radialGradient></defs><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="#0a0a12"/><circle cx="24" cy="24" r="11.5" fill="url(#heI)"/><circle cx="24" cy="24" r="4.8" fill="#0a0c18"/><circle cx="20.5" cy="20.5" r="2.2" fill="#fff"/><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="none" stroke="#BBD8FF" stroke-width="1.8"/></svg>';
+
+  var PREF = { sound: true, vibrate: true, theme: "blue", domainIntro: true, onboarded: false };
   try {
     var saved = localStorage.getItem("aureo_pref");
     if (saved) PREF = Object.assign(PREF, JSON.parse(saved));
   } catch (e) {}
   function savePref() { try { localStorage.setItem("aureo_pref", JSON.stringify(PREF)); } catch (e) {} }
+  function applyTheme() { document.documentElement.setAttribute("data-theme", PREF.theme || "gold"); }
+  var THEMES = [{ id: "gold", name: "Aureo", c: "#FBD27B" }, { id: "blue", name: "Lapse", c: "#6FB6FF" }, { id: "red", name: "Reverse", c: "#FF7A7A" }, { id: "purple", name: "Hollow", c: "#C4A0FF" }];
+  var GOJO_QUOTES = ["\"Nah, I'd win.\" - Gojo", "Sono semplicemente il piu forte.", "\"Throughout Heaven and Earth, I alone am the honored one.\"", "Fin dove arriva il tuo limite? Oltre.", "Va tutto bene: sono io il piu forte.", "Nessun limite. Solo tecnica."];
+  var qi = Math.floor(Math.random() * 6);
+  var SLIDES = [
+    { over: "Benvenuto", h: "L'Allenamento Aureo", p: "17 esercizi illustrati dal manuale tecnico, spiegati fase per fase." },
+    { over: "Allenati", h: "Guidato, a tempo", p: "Timer, recuperi automatici, registra le ripetizioni e salva lo storico con i grafici." },
+    { over: "La tua energia", h: "Scegli il dominio", p: "Tema, musica e intro: rendi l'app davvero tua. Pronto?", themes: true }
+  ];
+  function showOnboarding() {
+    var i = 0;
+    var ov = document.createElement("div"); ov.className = "onb"; document.body.appendChild(ov);
+    function close() { PREF.onboarded = true; savePref(); ov.classList.add("out"); setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 280); }
+    function render() {
+      var s = SLIDES[i];
+      var dots = SLIDES.map(function (_, j) { return '<i class="' + (j === i ? "on" : "") + '"></i>'; }).join("");
+      var themes = s.themes ? ('<div class="onb-themes">' + THEMES.map(function (t) { return '<button data-otheme="' + t.id + '" class="' + (PREF.theme === t.id ? "on" : "") + '" style="background:' + t.c + '" aria-label="' + t.name + '"></button>'; }).join("") + '</div>') : "";
+      ov.innerHTML = '<button class="onb-skip" data-onb="skip">Salta</button>' +
+        '<div class="onb-eye">' + EYE + '</div>' +
+        '<div class="onb-body"><div class="onb-over">' + esc(s.over) + '</div><h2>' + esc(s.h) + '</h2><p>' + esc(s.p) + '</p>' + themes + '</div>' +
+        '<div class="onb-dots">' + dots + '</div>' +
+        '<button class="btn" data-onb="next">' + (i < SLIDES.length - 1 ? "Avanti" : "Inizia") + '</button>';
+    }
+    ov.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-onb],[data-otheme]"); if (!b) return;
+      if (b.dataset.otheme) { PREF.theme = b.dataset.otheme; savePref(); applyTheme(); render(); return; }
+      if (b.dataset.onb === "skip") { close(); return; }
+      if (b.dataset.onb === "next") { if (i < SLIDES.length - 1) { i++; render(); } else { close(); renderHome(); } }
+    });
+    render();
+  }
 
   function loadHistory() {
     try { return JSON.parse(localStorage.getItem("aureo_history") || "[]"); } catch (e) { return []; }
@@ -50,7 +94,7 @@
 
   var lastListView = "home";
   function show(view) {
-    ["home", "library", "detail", "history"].forEach(function (v) {
+    ["home", "library", "detail", "history", "music"].forEach(function (v) {
       byId("view-" + v).classList.toggle("hidden", v !== view);
     });
     byId("backBtn").classList.toggle("hidden", view !== "detail");
@@ -61,7 +105,8 @@
     var titles = {
       home: ["L'Allenamento Aureo", "Manuale Tecnico"],
       library: ["Libreria esercizi", "17 schede tecniche"],
-      history: ["Storico", "I tuoi allenamenti"]
+      history: ["Storico", "I tuoi allenamenti"],
+      music: ["Musica", "Allenati con la tua musica"]
     };
     if (titles[view]) { byId("barTitle").textContent = titles[view][0]; byId("barSub").textContent = titles[view][1]; }
     window.scrollTo(0, 0);
@@ -71,6 +116,7 @@
     var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.tab === "library") renderLibrary();
     if (b.dataset.tab === "history") renderHistory();
+    if (b.dataset.tab === "music" && window.renderMusicView) window.renderMusicView();
     show(b.dataset.tab);
   });
   byId("backBtn").addEventListener("click", function () { show(lastListView); });
@@ -78,10 +124,12 @@
   function renderHome() {
     var hist = loadHistory();
     var h = "";
-    h += '<div class="hero"><div class="glow"></div>' +
+    h += '<div class="hero"><div class="glow"></div><div class="hero-eye">' + EYE + '</div>' +
+      '<div class="hero-over">Dominio &middot; Limitless</div>' +
       '<h2>Pronto ad allenarti?</h2>' +
       '<p>17 esercizi, 4 blocchi, tecnica illustrata. Avvia una sessione guidata con timer, registra le ripetizioni e tieni lo storico.</p>' +
-      '<button class="btn" data-act="start-all">&#9654; Allenamento completo</button>' +
+      '<div class="gojo-quote" id="gojoQuote">' + esc(GOJO_QUOTES[qi % GOJO_QUOTES.length]) + '</div>' +
+      '<button class="btn" data-act="start-all">' + IC.play + ' Allenamento completo</button>' +
       '<button class="btn secondary" data-act="go-library">Sfoglia la libreria</button>' +
       '</div>';
 
@@ -113,7 +161,9 @@
     h += '<div class="card-box">' +
       '<div class="toggle-row"><div>Suono ai cambi</div><div class="sw ' + (PREF.sound ? "on" : "") + '" data-toggle="sound"></div></div>' +
       '<div class="toggle-row"><div>Vibrazione</div><div class="sw ' + (PREF.vibrate ? "on" : "") + '" data-toggle="vibrate"></div></div>' +
+      '<div class="toggle-row"><div>Intro &laquo;Espansione del Dominio&raquo;</div><div class="sw ' + (PREF.domainIntro ? "on" : "") + '" data-toggle="domainIntro"></div></div>' +
       '</div>';
+    h += '<div class="section-title">Tema energia</div><div class="theme-row">' + THEMES.map(function (t) { return '<button class="theme-sw' + (PREF.theme === t.id ? " on" : "") + '" data-theme="' + t.id + '"><span style="background:' + t.c + '"></span>' + t.name + '</button>'; }).join("") + '</div>';
     h += '<div class="footer-note">Tratto dal "Manuale Tecnico degli Esercizi - L\'Allenamento Aureo".<br>Scala il range alle tue capacita, priorita alla tecnica, fermati in caso di dolore.</div>';
 
     byId("view-home").innerHTML = h;
@@ -123,6 +173,7 @@
     var act = e.target.closest("[data-act]");
     var blk = e.target.closest("[data-block]");
     var tg = e.target.closest("[data-toggle]");
+    var th = e.target.closest("[data-theme]");
     if (act) {
       if (act.dataset.act === "start-all") window.startWorkout(allEx(), "Allenamento completo");
       if (act.dataset.act === "go-library") { renderLibrary(); show("library"); }
@@ -131,6 +182,8 @@
       window.startWorkout(exByN(+blk.dataset.block), BLOCCHI[+blk.dataset.block - 1].nome);
     } else if (tg) {
       var k = tg.dataset.toggle; PREF[k] = !PREF[k]; savePref(); tg.classList.toggle("on", PREF[k]);
+    } else if (th) {
+      PREF.theme = th.dataset.theme; savePref(); applyTheme(); renderHome();
     }
   });
 
@@ -193,7 +246,7 @@
     e.errori.forEach(function (er) {
       h += '<div class="err"><div class="bad">' + esc(er[0]) + '</div><div class="fix">' + esc(er[1]) + '</div></div>';
     });
-    h += '<button class="btn" data-start-one="' + e.id + '">&#9654; Avvia questo esercizio</button></div>';
+    h += '<button class="btn" data-start-one="' + e.id + '">' + IC.play + ' Avvia questo esercizio</button></div>';
     byId("view-detail").innerHTML = h;
     show("detail");
   }
@@ -206,9 +259,9 @@
     var hist = loadHistory();
     var h = "";
     if (!hist.length) {
-      h += '<div class="empty"><div class="big">&#128197;</div><h3>Ancora nessun allenamento</h3>' +
+      h += '<div class="empty"><div class="big">' + IC.calendar + '</div><h3>Ancora nessun allenamento</h3>' +
         '<p>Avvia una sessione: al termine la troverai qui, giorno per giorno, con le ripetizioni registrate.</p>' +
-        '<button class="btn" data-act="hist-start">&#9654; Inizia ora</button></div>';
+        '<button class="btn" data-act="hist-start">' + IC.play + ' Inizia ora</button></div>';
       byId("view-history").innerHTML = h; return;
     }
     var totSess = hist.length;
@@ -255,11 +308,14 @@
   });
 
   window.AU = {
-    byId: byId, esc: esc, fmt: fmt, PREF: PREF,
+    byId: byId, esc: esc, fmt: fmt, PREF: PREF, IC: IC,
     addSession: addSession, renderHome: renderHome, renderHistory: renderHistory, show: show,
-    unitFor: unitFor, defaultVal: defaultVal
+    unitFor: unitFor, defaultVal: defaultVal, EYE: EYE
   };
 
+  applyTheme();
   renderHome();
   show("home");
+  if (!PREF.onboarded) showOnboarding();
+  setInterval(function () { var q = byId("gojoQuote"); if (!q) return; qi = (qi + 1) % GOJO_QUOTES.length; q.classList.add("fade"); setTimeout(function () { q.textContent = GOJO_QUOTES[qi]; q.classList.remove("fade"); }, 380); }, 7000);
 })();

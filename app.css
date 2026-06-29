@@ -265,3 +265,256 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .sw.on{background:var(--md-primary);border-color:var(--md-primary);}
 .sw.on::after{left:25px;top:5px;width:24px;height:24px;background:var(--md-on-primary);}
 .footer-note{font-size:12px;color:var(--muted2);text-align:center;margin:26px 0 6px;line-height:1.5;}
+
+
+/* icone SVG Material (controlli, pulsanti, stati) */
+.btn svg{width:20px;height:20px;fill:currentColor;flex:0 0 auto;}
+.wo-controls .ctrl svg{width:26px;height:26px;fill:currentColor;display:block;}
+.wo-controls .play svg{width:32px;height:32px;}
+.wo-top .close svg{width:24px;height:24px;fill:currentColor;display:block;}
+.wo-finish .big,.empty .big{display:flex;justify-content:center;}
+.wo-finish .big svg{width:74px;height:74px;fill:var(--md-primary);}
+.empty .big svg{width:60px;height:60px;fill:var(--md-on-surface-variant);}
+
+
+/* ---------- Musica ---------- */
+.music-hero{display:flex;gap:14px;align-items:center;background:var(--md-sc-low);border-radius:var(--r-l);padding:18px;margin-top:8px;}
+.music-hero .mh-ic{width:46px;height:46px;flex:0 0 auto;border-radius:var(--r-s);background:#FF0033;display:flex;align-items:center;justify-content:center;}
+.music-hero .mh-ic svg{width:30px;height:30px;fill:#fff;}
+.music-hero .mh-t{font-size:18px;font-weight:600;}
+.music-hero .mh-s{font-size:13px;color:var(--md-on-surface-variant);margin-top:2px;}
+.yt-launch{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:52px;border-radius:var(--r-full);
+  background:#FF0033;color:#fff;font-size:15px;font-weight:600;margin-top:14px;text-decoration:none;position:relative;overflow:hidden;}
+.yt-launch:active{filter:brightness(.94);}
+.yt-launch svg{width:24px;height:24px;fill:#fff;}
+.music-embed{position:relative;width:100%;padding-top:56.25%;border-radius:var(--r-m);overflow:hidden;background:#000;margin-top:6px;}
+.music-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0;}
+.mp-hint{font-size:13px;color:var(--md-on-surface-variant);margin:4px 0 10px;}
+.mp-input{width:100%;height:48px;border-radius:var(--r-s);border:1px solid var(--md-outline);background:var(--md-sc-high);
+  color:var(--md-on-surface);font-size:15px;padding:0 14px;margin-bottom:10px;outline:none;-webkit-appearance:none;}
+.mp-input:focus{border-color:var(--md-primary);border-width:2px;padding:0 13px;}
+.mp-input::placeholder{color:var(--muted2);}
+.ql-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.ql-open{flex:1;display:flex;align-items:center;gap:10px;min-width:0;background:var(--md-sc-low);border-radius:var(--r-m);
+  padding:14px 16px;color:var(--md-on-surface);text-decoration:none;font-weight:500;position:relative;overflow:hidden;}
+.ql-open span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ql-open svg{width:22px;height:22px;fill:var(--md-primary);flex:0 0 auto;}
+.ql-del{width:46px;height:46px;flex:0 0 auto;border-radius:var(--r-full);background:var(--md-sc-low);
+  display:flex;align-items:center;justify-content:center;color:var(--md-on-surface-variant);position:relative;overflow:hidden;}
+.ql-del svg{width:20px;height:20px;fill:currentColor;}
+.wo-music{width:40px;height:40px;border-radius:var(--r-full);display:flex;align-items:center;justify-content:center;
+  color:var(--md-on-surface-variant);text-decoration:none;position:relative;overflow:hidden;}
+.wo-music svg{width:24px;height:24px;fill:currentColor;}
+.tabbar button{font-size:11px;}
+.tabbar .ic{width:56px;}
+
+/* =====================================================================
+   Allenamento: gerarchia visiva adattiva (uso durante l'esercizio)
+   ===================================================================== */
+.wo-modewrap{text-align:center;margin-top:12px;}
+.wo-mode{display:inline-block;margin:0;font-size:12px;letter-spacing:1.4px;text-transform:uppercase;
+  font-weight:700;padding:6px 16px;border-radius:var(--r-full);}
+.wo-mode.work{background:rgba(251,210,123,.18);color:var(--md-primary);}
+.wo-mode.rest{background:rgba(127,216,201,.18);color:var(--md-tertiary);}
+.wo-mode.prep{background:var(--md-sc-high);color:var(--md-on-surface-variant);}
+
+.wo-name{font-size:24px;}
+.wo-cue:empty{display:none;}
+
+/* fase ESEGUI: il timer e l'eroe, illustrazione piccola di riferimento */
+#view-workout[data-mode="work"] .wo-illu{max-width:96px;width:30%;}
+#view-workout[data-mode="work"] .timer-wrap{width:216px;height:216px;margin-top:10px;}
+#view-workout[data-mode="work"] .timer-num .t{font-size:70px;font-weight:600;}
+
+/* fase RECUPERO: illustrazione grande (anticipa il movimento) */
+#view-workout[data-mode="rest"] .wo-illu{max-width:150px;width:44%;}
+#view-workout[data-mode="rest"] .timer-wrap{width:158px;height:158px;}
+#view-workout[data-mode="rest"] .timer-num .t{font-size:50px;}
+
+/* fase PREPARATI: illustrazione grande */
+#view-workout[data-mode="prep"] .wo-illu{max-width:160px;width:46%;}
+#view-workout[data-mode="prep"] .timer-wrap{width:166px;height:166px;}
+#view-workout[data-mode="prep"] .timer-num .t{font-size:54px;}
+
+/* ring piu spesso */
+.timer-wrap .ring-bg{stroke-width:10;}
+.timer-wrap .ring-fg{stroke-width:10;}
+
+/* controlli grandi (palestra) */
+.wo-controls{gap:22px;margin-top:16px;}
+.wo-controls .ctrl{width:62px;height:62px;}
+.wo-controls .ctrl svg{width:28px;height:28px;}
+.wo-controls .play{width:88px;height:88px;}
+.wo-controls .play svg{width:38px;height:38px;}
+
+/* stepper ripetizioni grande */
+.logger .lg-btn{width:56px;height:56px;font-size:30px;}
+.logger .lg-val{font-size:38px;min-width:120px;}
+.logger .lg-val small{font-size:15px;}
+
+/* uscita / musica piu grandi e chiari */
+.wo-top .close{width:48px;height:48px;}
+.wo-top .close svg{width:26px;height:26px;}
+.wo-music{width:48px;height:48px;}
+.wo-music svg{width:26px;height:26px;}
+
+/* =====================================================================
+   Estetica Jujutsu Kaisen (energia maledetta) + animazioni di fase
+   Oro = colore primario; blu/viola = energia; rosso = urgenza countdown
+   ===================================================================== */
+:root{
+  --ce-blue:#5BA8FF;
+  --ce-purple:#A479FF;
+  --ce-red:#FF5A5A;
+  --ce-grad:linear-gradient(90deg,var(--ce-blue),var(--ce-purple));
+}
+
+/* aura "dominio" dietro l'allenamento */
+#view-workout::before{content:"";position:absolute;left:50%;top:6%;width:420px;height:420px;transform:translateX(-50%);
+  background:radial-gradient(circle, rgba(91,168,255,.10), rgba(164,121,255,.06) 45%, transparent 70%);
+  pointer-events:none;z-index:0;}
+#view-workout > *{position:relative;z-index:1;}
+
+/* progress allenamento come "carica" di energia maledetta */
+.wo-bar > div{background:var(--ce-grad);}
+
+/* logo: aura cursed energy attorno all'oro */
+.appbar .logo{box-shadow:0 0 0 2px rgba(91,168,255,.18),0 0 16px rgba(164,121,255,.28);}
+
+/* hero home: bagliore oro + bagliore energia */
+.hero::after{content:"";position:absolute;left:-44px;bottom:-54px;width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle, rgba(91,168,255,.16), transparent 70%);pointer-events:none;}
+
+/* --- micro-animazioni di transizione di fase --- */
+@keyframes timerIn{from{opacity:0;transform:scale(.84)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tick{0%{transform:scale(1)}28%{transform:scale(1.18)}100%{transform:scale(1)}}
+.timer-wrap.anim{animation:timerIn .42s cubic-bezier(.2,.7,.2,1);}
+.wo-name.anim{animation:fadeUp .42s ease both;}
+.wo-illu.anim{animation:fadeUp .46s ease both;}
+
+/* --- conto alla rovescia 3-2-1 (ultimi secondi) --- */
+@keyframes ringPulse{0%,100%{filter:drop-shadow(0 0 2px rgba(255,90,90,.45))}50%{filter:drop-shadow(0 0 16px rgba(255,90,90,.95))}}
+.timer-wrap.countdown .ring-fg{stroke:var(--ce-red);animation:ringPulse .9s ease-in-out infinite;}
+.timer-wrap.countdown .timer-num .t{color:var(--ce-red);}
+.timer-num .t{display:inline-block;}
+.timer-num .t.tick{animation:tick .5s ease;}
+
+/* --- finish: Espansione del Dominio --- */
+.wo-finish{position:relative;}
+.domain-burst{position:absolute;left:50%;top:18px;width:320px;height:320px;transform:translateX(-50%);pointer-events:none;
+  background:radial-gradient(circle, rgba(164,121,255,.38), rgba(91,168,255,.18) 42%, transparent 70%);
+  border-radius:50%;animation:burst 1.1s ease-out both;}
+@keyframes burst{0%{opacity:0;transform:translateX(-50%) scale(.4)}45%{opacity:1}100%{opacity:.85;transform:translateX(-50%) scale(1)}}
+.dx-over{font-size:12px;letter-spacing:3px;text-transform:uppercase;font-weight:800;margin-top:8px;
+  background:var(--ce-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.wo-finish .big svg{filter:drop-shadow(0 0 12px rgba(164,121,255,.55));}
+
+/* =====================================================================
+   Gojo / Six Eyes - logo occhio + motivo Limitless nella Home
+   ===================================================================== */
+.appbar .logo{background:radial-gradient(circle at 40% 34%,#1b1426,#0a0912);
+  border:1.5px solid rgba(251,210,123,.55);overflow:hidden;padding:0;}
+.appbar .logo svg{width:30px;height:30px;display:block;}
+
+.hero{overflow:hidden;}
+.hero::before{content:"";position:absolute;right:-60px;top:-90px;width:300px;height:300px;border-radius:50%;
+  background:repeating-radial-gradient(circle at 70% 30%, rgba(120,170,255,.05) 0 1px, transparent 1px 17px);
+  pointer-events:none;}
+.hero-eye{position:absolute;right:-14px;top:50%;transform:translateY(-50%);width:148px;opacity:.16;
+  pointer-events:none;filter:drop-shadow(0 0 12px rgba(91,168,255,.55));}
+.hero-eye svg{width:100%;height:auto;display:block;}
+.hero-over{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;font-weight:800;margin-bottom:8px;
+  background:var(--ce-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero h2,.hero p,.hero .btn,.hero-over{position:relative;z-index:1;}
+
+/* =====================================================================
+   Temi "energia" (Gojo) - override del primary; oro = default
+   ===================================================================== */
+:root[data-theme="blue"]{--md-primary:#6FB6FF;--md-on-primary:#00284D;--md-primary-container:#1E4C7A;--md-on-primary-container:#CFE5FF;}
+:root[data-theme="red"]{--md-primary:#FF7A7A;--md-on-primary:#4D0006;--md-primary-container:#7A2024;--md-on-primary-container:#FFD8D6;}
+:root[data-theme="purple"]{--md-primary:#C4A0FF;--md-on-primary:#2A1257;--md-primary-container:#4A2E86;--md-on-primary-container:#ECDCFF;}
+
+/* selettore tema */
+.theme-row{display:flex;gap:10px;}
+.theme-sw{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;padding:12px 6px;border-radius:var(--r-m);
+  background:var(--md-sc-low);border:1.5px solid transparent;font-size:12px;color:var(--md-on-surface-variant);
+  position:relative;overflow:hidden;}
+.theme-sw span{width:30px;height:30px;border-radius:50%;box-shadow:0 0 12px rgba(0,0,0,.5);}
+.theme-sw.on{border-color:var(--md-primary);color:var(--md-on-surface);}
+
+/* citazione Gojo */
+.gojo-quote{margin-top:14px;font-size:13px;font-style:italic;color:var(--md-on-surface-variant);
+  border-left:2px solid var(--md-primary);padding-left:10px;transition:opacity .4s;}
+.gojo-quote.fade{opacity:0;}
+
+/* =====================================================================
+   Intro "Espansione del Dominio"
+   ===================================================================== */
+.domain-intro{position:fixed;inset:0;z-index:100;overflow:hidden;
+  background:radial-gradient(circle at 50% 45%, #16142e, #07060d 72%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;animation:diIn .25s ease;}
+.domain-intro.out{animation:diOut .28s ease forwards;}
+@keyframes diIn{from{opacity:0}to{opacity:1}}
+@keyframes diOut{to{opacity:0}}
+.di-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.di-rings span{position:absolute;border-radius:50%;border:2px solid var(--ce-blue);opacity:0;}
+.di-rings span:nth-child(1){animation:diRing 1.25s ease-out 0s;}
+.di-rings span:nth-child(2){border-color:var(--ce-purple);animation:diRing 1.25s ease-out .16s;}
+.di-rings span:nth-child(3){border-color:var(--md-primary);animation:diRing 1.25s ease-out .32s;}
+@keyframes diRing{0%{width:24px;height:24px;opacity:.9}100%{width:720px;height:720px;opacity:0}}
+.di-eye{width:124px;filter:drop-shadow(0 0 20px rgba(91,168,255,.7));animation:diEye 1.05s cubic-bezier(.2,.7,.2,1) both;}
+.di-eye svg{width:100%;height:auto;display:block;}
+@keyframes diEye{0%{opacity:0;transform:scale(.4)}55%{opacity:1;transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+.di-text{margin-top:22px;font-size:14px;letter-spacing:4px;text-transform:uppercase;font-weight:800;
+  background:var(--ce-grad);-webkit-background-clip:text;background-clip:text;color:transparent;animation:diText 1s ease both .25s;}
+@keyframes diText{0%{opacity:0;letter-spacing:12px}100%{opacity:1;letter-spacing:4px}}
+
+/* =====================================================================
+   Illustrazioni tinte dal tema (figure-manichino seguono l'energia)
+   ===================================================================== */
+:root{--fig-hi:#f8d885;--fig-mid:#e6ac4c;--fig-lo:#b9802c;--fig-arrow:#f4c542;}
+:root[data-theme="blue"]{--fig-hi:#CFE8FF;--fig-mid:#6FB6FF;--fig-lo:#2C6FD6;--fig-arrow:#8FCBFF;}
+:root[data-theme="red"]{--fig-hi:#FFD0CE;--fig-mid:#FF7A7A;--fig-lo:#C53A3A;--fig-arrow:#FF9D9D;}
+:root[data-theme="purple"]{--fig-hi:#E6D5FF;--fig-mid:#C4A0FF;--fig-lo:#7A4FD0;--fig-arrow:#D2B6FF;}
+:root[data-theme="gold"]{--fig-hi:#f8d885;--fig-mid:#e6ac4c;--fig-lo:#b9802c;--fig-arrow:#f4c542;}
+
+/* =====================================================================
+   Onboarding primo avvio
+   ===================================================================== */
+.onb{position:fixed;inset:0;z-index:120;overflow:hidden;
+  background:radial-gradient(circle at 50% 24%, #16142e, #07060d 76%);
+  display:flex;flex-direction:column;animation:diIn .3s ease;
+  padding:calc(var(--safe-t) + 34px) 26px calc(var(--safe-b) + 26px);}
+.onb.out{animation:diOut .28s ease forwards;}
+.onb-skip{position:absolute;top:calc(var(--safe-t) + 24px);right:20px;color:var(--md-on-surface-variant);font-size:14px;font-weight:600;padding:6px;}
+.onb-eye{width:92px;margin:6px auto 0;filter:drop-shadow(0 0 16px rgba(91,168,255,.6));}
+.onb-eye svg{width:100%;height:auto;display:block;}
+.onb-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.onb-over{font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:800;margin-bottom:10px;
+  background:var(--ce-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.onb-body h2{font-size:27px;font-weight:600;margin:0 0 14px;}
+.onb-body p{font-size:15px;color:var(--md-on-surface-variant);max-width:300px;margin:0;line-height:1.5;}
+.onb-themes{display:flex;gap:14px;margin-top:26px;}
+.onb-themes button{width:48px;height:48px;border-radius:50%;border:2.5px solid transparent;box-shadow:0 0 14px rgba(0,0,0,.5);position:relative;overflow:hidden;}
+.onb-themes button.on{border-color:#fff;transform:scale(1.08);}
+.onb-dots{display:flex;gap:8px;justify-content:center;margin:18px 0;}
+.onb-dots i{width:8px;height:8px;border-radius:50%;background:var(--md-sc-highest);transition:.2s;}
+.onb-dots i.on{background:var(--md-primary);width:22px;border-radius:4px;}
+
+/* =====================================================================
+   Ottimizzazioni iPhone 13 mini / iOS Safari + accessibilita
+   ===================================================================== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+button,.tabbar,.appbar,.wo-top,.wo-controls,.lg-stepper,.theme-row,.onb,.domain-intro,.wo-mode{
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+.btn,.ctrl,.lg-btn,.tabbar button,.skip-link,.theme-sw,.chip,.block-card,.ex-row,.hist-head,
+.wo-music,.wo-top .close,.appbar .back,.yt-launch,.ql-open,.ql-del,.sw,.onb-skip{touch-action:manipulation;}
+input{font-size:16px;}            /* niente auto-zoom al focus su iOS */
+.mp-input{font-size:16px;}
+.view,#view-workout,.music-embed{-webkit-overflow-scrolling:touch;}
+@supports (height:100dvh){.domain-intro,.onb{min-height:100dvh;}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;scroll-behavior:auto !important;}
+}
