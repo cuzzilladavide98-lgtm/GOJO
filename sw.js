@@ -1,12 +1,14 @@
-/* Service worker — cache offline per L'Allenamento Aureo */
-var CACHE = "aureo-v1";
+/* Service worker - cache offline per L'Allenamento Aureo */
+var CACHE = "aureo-v4";
 var ASSETS = [
   "./",
   "./index.html",
   "./app.css",
   "./data.js",
   "./figures.js",
+  "./chart.js",
   "./app.js",
+  "./workout.js",
   "./manifest.webmanifest",
   "./icons/icon-180.png",
   "./icons/icon-192.png",
