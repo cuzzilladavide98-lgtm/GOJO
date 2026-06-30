@@ -733,7 +733,7 @@
         '<button class="ed-b" data-edit-up="' + id + '" aria-label="Su">&#8593;</button>' +
         '<button class="ed-b" data-edit-dn="' + id + '" aria-label="Giu">&#8595;</button>' +
         '<button class="ed-b rm" data-edit-rm="' + id + '" aria-label="Rimuovi">&#10005;</button></div></div>' +
-        '<input class="ed-tgt" data-edit-target="' + id + '" value="' + esc(targetFor(b, id)) + '" placeholder="serie x reps - RPE"></div>';
+        '<div class="ed-tgt-ro">' + esc(targetFor(b, id)) + '</div></div>';
     }).join("");
     var h = '<div class="bk"><div class="bk-hero"><div class="bk-badge">Modifica</div><h2>' + esc(b.nome) + '</h2><p>Aggiungi, togli, riordina o cambia i target. Si salva da solo.</p></div>' +
       '<div class="bk-list ed-list">' + rows + '</div>' +
@@ -783,23 +783,21 @@
 
   function renderHomeSection() {
     var tr = getTrack();
-    var nb = blockByN(nextN()), l = lastCavci(), ds = daysSince();
+    var nb = blockByN(nextN()), ds = daysSince();
     var nEx = exIdsFor(nb).length;
-    var hint;
-    if (ds >= 14) hint = '<div class="cv-hint warn">Pausa lunga (' + ds + 'g): parti con Recupero o Reset, poi riprendi al 60-70%.</div>';
-    else if (ds >= 7) hint = '<div class="cv-hint">Stop di ' + ds + 'g: riparti con volume ridotto (2 serie, RPE 6-7, niente test).</div>';
-    else if (l) hint = '<div class="cv-hint">Ultimo: ' + esc(blockByN(l.block).nome) + (ds >= 0 ? ' &middot; ' + (ds === 0 ? 'oggi' : ds + 'g fa') : '') + '. Non ricominciare: continua.</div>';
-    else hint = '<div class="cv-hint">Inizia la rotazione dal primo blocco. Non e un calendario: e una sequenza.</div>';
+    var warn = "";
+    if (ds >= 14) warn = '<div class="cv-hint warn">Pausa lunga: meglio Recupero o Reset, poi riprendi piano.</div>';
+    else if (ds >= 7) warn = '<div class="cv-hint">Qualche giorno di stop: riparti con calma, niente test.</div>';
     var strip = curBlocks().map(function (b) { return '<button class="cv-step' + (b.n === nb.n ? ' on' : '') + '" data-cavci-open="' + b.key + '"><span class="cv-sn">' + b.n + '</span><span class="cv-snm">' + esc(b.nome.replace('Forza ', '').replace(' a Corpo Libero', '')) + '</span></button>'; }).join("");
     var toggle = '<div class="cv-track"><button class="cv-tb' + (tr !== "corpo" ? " on" : "") + '" data-cavci-track="standard">Attrezzi</button><button class="cv-tb' + (tr === "corpo" ? " on" : "") + '" data-cavci-track="corpo">Corpo libero</button></div>';
-    return '<div class="section-title">Rotazione CAVCI</div>' + toggle +
-      '<div class="cv-next" data-th="' + nb.theme + '"><div class="cv-eye">' + (AU.EYE || "") + '</div>' +
-      '<div class="cv-next-top"><span class="cv-badge">Prossima tappa' + (tr === "corpo" ? ' &middot; Corpo libero' : '') + '</span><span class="cv-n">' + nb.n + '/7</span></div>' +
+    return '<div class="cv-next" data-th="' + nb.theme + '"><div class="cv-eye">' + (AU.EYE || "") + '</div>' +
+      '<div class="cv-badge">Prossima &middot; ' + nb.n + '/7</div>' +
       '<h3>' + esc(nb.nome) + '</h3><p>' + esc(nb.sub) + ' &middot; ' + nEx + ' esercizi</p>' +
-      '<div class="cv-actions"><button class="btn" data-cavci-start="' + nb.key + '">' + (AU.IC.play || "") + ' Avvia</button><button class="btn secondary cv-open" data-cavci-open="' + nb.key + '">Apri</button></div>' +
-      hint + '</div>' +
-      '<div class="cv-strip">' + strip + '</div>' +
-      '<button class="btn secondary cv-reset" data-cavci-reset>Protocollo 0 - Reset posturale</button>';
+      '<button class="btn cv-go" data-cavci-start="' + nb.key + '">' + (AU.IC.play || "") + ' Inizia</button>' +
+      '<button class="cv-open-link" data-cavci-open="' + nb.key + '">Vedi esercizi e modifica</button>' +
+      warn + '</div>' +
+      '<div class="cv-stripwrap"><div class="cv-strip-lab">Vai a un altro blocco</div><div class="cv-strip">' + strip + '</div></div>' +
+      '<div class="cv-foot">' + toggle + '<button class="cv-reset-mini" data-cavci-reset>Reset posturale</button></div>';
   }
 
   if (AU) {
