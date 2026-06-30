@@ -16,7 +16,8 @@
     trophy: '<svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M9 20h6M12 14v6"/></svg>',
     calendar: '<svg viewBox="0 0 24 24"><path d="M5 6h14v13H5zM5 10h14M9 4v3M15 4v3"/></svg>',
     music: '<svg viewBox="0 0 24 24"><path d="M9 17V5l10-2v12"/><circle cx="6.5" cy="17" r="2.6"/><circle cx="16.5" cy="15" r="2.6"/></svg>',
-    check: '<svg viewBox="0 0 24 24"><path d="M5 12 10 17 20 6"/></svg>'
+    check: '<svg viewBox="0 0 24 24"><path d="M5 12 10 17 20 6"/></svg>',
+    trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg>'
   };
 
   var EYE = '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="heI" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="#EAF4FF"/><stop offset="34%" stop-color="#93CBFF"/><stop offset="70%" stop-color="#3D8BFF"/><stop offset="100%" stop-color="#1E57B4"/></radialGradient></defs><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="#0a0a12"/><circle cx="24" cy="24" r="11.5" fill="url(#heI)"/><circle cx="24" cy="24" r="4.8" fill="#0a0c18"/><circle cx="20.5" cy="20.5" r="2.2" fill="#fff"/><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="none" stroke="#BBD8FF" stroke-width="1.8"/></svg>';
@@ -336,7 +337,7 @@
           h += '<div class="log-row"><span>' + it.n + '. ' + esc(it.nome) + '</span>' +
             '<b>' + (it.skipped ? '<span style="color:var(--muted)">saltato</span>' : (it.value + ' ' + it.unit + (it.sets ? ' &middot; ' + it.sets.length + ' serie' : '') + (it.rpe ? ' &middot; RPE ' + it.rpe : ''))) + '</b></div>';
         });
-        h += '</div></div>';
+        h += '<button class="sess-del" data-del-sess="' + s.id + '">' + IC.trash + ' Elimina sessione</button></div></div>';
       });
     });
     h += '<button class="btn secondary" data-act="clear-hist" style="margin-top:18px">Cancella tutto lo storico</button>';
@@ -344,14 +345,17 @@
   }
 
   byId("view-history").addEventListener("click", function (e) {
+    var dc = e.target.closest("[data-del-confirm]");
+    if (dc) { var id = dc.dataset.delConfirm; saveHistory(loadHistory().filter(function (x) { return String(x.id) !== String(id); })); renderHistory(); renderHome(); return; }
+    var ds = e.target.closest("[data-del-sess]");
+    if (ds) { var sid = ds.dataset.delSess; ds.setAttribute("data-del-confirm", sid); ds.removeAttribute("data-del-sess"); ds.classList.add("confirm"); ds.innerHTML = IC.trash + " Tocca ancora per eliminare"; return; }
     var t = e.target.closest("[data-toggle-sess]");
+    if (t) { var b = byId("sb_" + t.dataset.toggleSess); if (b) b.classList.toggle("hidden"); return; }
     var act = e.target.closest("[data-act]");
-    if (t) { var b = byId("sb_" + t.dataset.toggleSess); if (b) b.classList.toggle("hidden"); }
-    else if (act) {
+    if (act) {
       if (act.dataset.act === "hist-start") startSession(allEx(), "Allenamento completo");
-      if (act.dataset.act === "clear-hist") {
-        if (confirm("Cancellare tutto lo storico degli allenamenti?")) { clearHistory(); renderHistory(); renderHome(); }
-      }
+      else if (act.dataset.act === "clear-hist") { act.setAttribute("data-act", "clear-hist-2"); act.textContent = "Tocca ancora per cancellare TUTTO"; act.classList.add("danger"); }
+      else if (act.dataset.act === "clear-hist-2") { clearHistory(); renderHistory(); renderHome(); }
     }
   });
 

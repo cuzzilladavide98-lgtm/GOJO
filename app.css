@@ -960,3 +960,12 @@ h2,.detail h2,.hero h2,.bk-hero h2,.lib-intro h2,.onb-body h2{letter-spacing:-.4
 /* storico piu arioso */
 .stat-row{margin-top:6px;}
 .hist-card{margin-bottom:10px;border-radius:var(--r-m);}
+
+
+/* === v27: elimina singola sessione (conferma a doppio tocco, iOS-safe) === */
+.sess-del{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;
+  color:var(--md-error);background:transparent;border:1px solid rgba(255,107,107,.4);border-radius:var(--r-full);
+  padding:9px 16px;position:relative;overflow:hidden;touch-action:manipulation;}
+.sess-del svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.sess-del.confirm{background:var(--md-error);color:#fff;border-color:var(--md-error);box-shadow:0 0 18px rgba(255,107,107,.45);}
+.btn.secondary.danger{background:var(--md-error);color:#fff;}
