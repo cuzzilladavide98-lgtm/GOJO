@@ -835,3 +835,128 @@ html{color-scheme:dark;}
   position:relative;overflow:hidden;touch-action:manipulation;}
 .lg-stepper.big .lg-val{font-size:36px;font-weight:700;font-variant-numeric:tabular-nums;color:#fff;min-width:96px;text-align:center;}
 .lg-stepper.big .lg-val small{font-size:14px;color:var(--md-on-surface-variant);font-weight:500;}
+
+/* === v22 fix input Forza: campi numerici digitabili (iOS-safe) === */
+.set-step{gap:5px;}
+.set-step .ss-btn{width:32px;height:38px;font-size:19px;flex:0 0 auto;}
+.ss-in{flex:1;min-width:0;height:38px;border-radius:var(--r-s);background:var(--md-sc-high);
+  color:var(--md-on-surface);border:1px solid var(--md-outline);text-align:center;
+  font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;padding:0 2px;}
+.ss-in::placeholder{color:var(--muted2);font-weight:500;}
+.ss-in:focus{outline:none;border-color:var(--md-primary);box-shadow:0 0 0 2px rgba(196,160,255,.35);}
+.set-row.done .ss-in{color:var(--md-primary);border-color:rgba(196,160,255,.4);}
+
+/* === v23: layout arioso + sezioni a scomparsa (progressive disclosure) === */
+.view{padding:8px 18px calc(110px + var(--safe-b));}
+.section-title{margin:26px 4px 12px;}
+.cv-next{padding:18px;}
+.cv-strip{margin-top:12px;}
+/* riga "ultimo allenamento" compatta */
+.last-card{display:block;width:100%;text-align:left;background:var(--md-sc-low);
+  border:1px solid var(--md-outline-variant);border-radius:var(--r-m);padding:14px 16px;margin-top:12px;
+  position:relative;overflow:hidden;touch-action:manipulation;}
+.last-card:active{background:var(--md-sc);}
+.last-card .lc-k{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--md-primary);font-weight:700;}
+.last-card .lc-t{font-size:16px;font-weight:600;color:#fff;margin-top:3px;}
+.last-card .lc-m{font-size:12px;color:var(--md-on-surface-variant);margin-top:2px;}
+/* header a fisarmonica */
+.acc-h{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;
+  background:var(--md-sc-low);border:1px solid var(--md-outline-variant);border-radius:var(--r-m);
+  padding:16px;margin-top:12px;position:relative;overflow:hidden;touch-action:manipulation;
+  transition:border-color .2s var(--ease),background .2s var(--ease);}
+.acc-h:active{background:var(--md-sc);}
+.acc-tx{min-width:0;}
+.acc-t{font-size:16px;font-weight:600;color:var(--md-on-surface);}
+.acc-s{font-size:12px;color:var(--md-on-surface-variant);margin-top:2px;}
+.acc-cx{font-size:26px;line-height:1;color:var(--md-on-surface-variant);flex:0 0 auto;
+  transition:transform .22s var(--ease),color .2s var(--ease);}
+.acc-h.open{border-color:var(--md-primary);background:var(--md-sc);}
+.acc-h.open .acc-cx{transform:rotate(90deg);color:var(--md-primary);}
+.acc-b{padding:10px 2px 2px;animation:accIn .22s var(--ease);}
+.acc-b.hidden{display:none;}
+@keyframes accIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.acc-b .section-title:first-child{margin-top:6px;}
+
+/* === v24: pagina riassuntiva "menu successivo" (anteprima blocco, no-scroll) === */
+#view-block{padding:4px 18px calc(20px + var(--safe-b));}
+.bk{display:flex;flex-direction:column;}
+.bk-hero{position:relative;overflow:hidden;background:var(--md-sc-low);border:1px solid var(--md-outline-variant);
+  border-left:3px solid var(--md-primary);border-radius:var(--r-l);padding:18px;margin-top:8px;
+  box-shadow:0 0 26px rgba(196,160,255,.12);}
+.bk-eye{position:absolute;right:-24px;top:-24px;width:120px;opacity:.10;pointer-events:none;}
+.bk-eye svg{width:100%;height:auto;display:block;}
+.bk-badge{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:var(--md-primary);position:relative;z-index:1;}
+.bk-hero h2{margin:8px 0 2px;font-size:24px;font-weight:600;color:#fff;position:relative;z-index:1;}
+.bk-hero p{margin:0;font-size:13px;color:var(--md-on-surface-variant);position:relative;z-index:1;}
+.bk-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+.bk-row{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;
+  background:var(--md-sc-low);border:1px solid var(--md-outline-variant);border-radius:var(--r-m);
+  padding:13px 14px;position:relative;overflow:hidden;touch-action:manipulation;}
+.bk-row:active{background:var(--md-sc);}
+.bk-rn{font-size:15px;font-weight:600;color:var(--md-on-surface);}
+.bk-rn i{font-style:normal;font-size:11px;opacity:.55;}
+.bk-rm{font-size:11px;color:var(--md-on-surface-variant);text-align:right;flex:0 0 auto;max-width:46%;}
+.bk-go{margin-top:16px;}
+.bk-note{margin-top:10px;font-size:12px;color:var(--md-on-surface-variant);text-align:center;}
+
+/* =====================================================================
+   v26 - Direzione estetica JJK / Gojo Focus
+   (font display, scala tipografica, accenti energia, transizioni)
+   ===================================================================== */
+:root{
+  --font-display:"Space Grotesk","Sora",-apple-system,BlinkMacSystemFont,"Roboto",system-ui,sans-serif;
+  --ce-grad:linear-gradient(105deg,#C4A0FF 0%,#7FB6FF 48%,#00E5FF 100%);
+}
+.appbar h1,.section-title,.hero h2,.detail h2,.cv-next h3,.bk-hero h2,.lib-intro h2,
+.timer-num .t,.block-num,.stat .num,.wo-name,.cv-n,.cv-badge,.bk-badge,.acc-t,.mu-head-t,
+.empty h3,.wo-finish h2,.lc-t,.bk-rn,.e-name,.b-name,.trk-name,.rb-time,.ss-in,.mu-now-t,.di-text,.onb-body h2{
+  font-family:var(--font-display);
+}
+.appbar h1{letter-spacing:.2px;font-weight:600;font-size:21px;}
+h2,.detail h2,.hero h2,.bk-hero h2,.lib-intro h2,.onb-body h2{letter-spacing:-.4px;}
+.section-title{font-size:13px;letter-spacing:.9px;text-transform:uppercase;font-weight:700;}
+.timer-num .t{letter-spacing:-1px;}
+.stat .num{letter-spacing:-.5px;}
+.block-num{font-weight:600;}
+
+/* accenti "energia maledetta" a gradiente */
+.cv-badge,.bk-badge,.hero-over,.onb-over,.di-text{
+  background:var(--ce-grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+
+/* scala un filo piu generosa (aria) */
+.cv-next h3{font-size:25px;}
+.bk-hero h2{font-size:26px;}
+.b-name{font-size:16px;}
+
+/* transizioni: comparsa a cascata + feedback al tocco */
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.view .block-card,.view .acc-h,.view .last-card,.view .bk-row,.view .cv-next,.view .a2hs,
+.view .nudge,.view .hist-card,.view .lib-intro,.view .cv-track,.view .cv-strip,.view .bk-hero{
+  animation:riseIn .32s var(--ease) both;}
+.view .block-card:nth-of-type(2){animation-delay:.04s}
+.view .block-card:nth-of-type(3){animation-delay:.08s}
+.view .block-card:nth-of-type(4){animation-delay:.12s}
+.view .block-card:nth-of-type(5){animation-delay:.16s}
+.bk-list .bk-row:nth-child(2){animation-delay:.05s}
+.bk-list .bk-row:nth-child(3){animation-delay:.10s}
+.bk-list .bk-row:nth-child(4){animation-delay:.15s}
+.bk-list .bk-row:nth-child(5){animation-delay:.20s}
+.block-card,.ex-row,.acc-h,.last-card,.cv-step,.bk-row,.hist-head,.theme-sw,.cv-tb,.cv-chip,.btn{
+  transition:transform .12s var(--ease),background .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease),filter .15s var(--ease);}
+.block-card:active,.ex-row:active,.acc-h:active,.last-card:active,.cv-step:active,.bk-row:active,.hist-head:active{transform:scale(.985);}
+
+/* occhio che pulsa (energia viva) */
+.cv-eye,.bk-eye{animation:eyePulse 6s var(--ease) infinite;}
+@keyframes eyePulse{0%,100%{opacity:.10;transform:translateZ(0) scale(1)}50%{opacity:.17;transform:translateZ(0) scale(1.05)}}
+
+/* libreria: intestazione con occhio */
+.lib-intro{display:flex;align-items:center;gap:14px;margin:10px 2px 6px;}
+.lib-intro .lib-eye{width:52px;flex:0 0 auto;filter:drop-shadow(0 0 12px rgba(196,160,255,.4));animation:eyeGlow 5s var(--ease) infinite;}
+.lib-intro .lib-eye svg{width:100%;height:auto;display:block;}
+@keyframes eyeGlow{0%,100%{filter:drop-shadow(0 0 10px rgba(196,160,255,.35))}50%{filter:drop-shadow(0 0 18px rgba(0,229,255,.45))}}
+.lib-intro h2{margin:0;font-size:24px;}
+.lib-intro p{margin:3px 0 0;font-size:13px;color:var(--md-on-surface-variant);line-height:1.35;}
+
+/* storico piu arioso */
+.stat-row{margin-top:6px;}
+.hist-card{margin-bottom:10px;border-radius:var(--r-m);}

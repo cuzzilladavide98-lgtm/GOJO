@@ -97,11 +97,11 @@
 
   var lastListView = "home";
   function show(view) {
-    ["home", "library", "detail", "history", "music"].forEach(function (v) {
+    ["home", "library", "detail", "history", "block"].forEach(function (v) {
       byId("view-" + v).classList.toggle("hidden", v !== view);
     });
-    byId("backBtn").classList.toggle("hidden", view !== "detail");
-    byId("logo").classList.toggle("hidden", view === "detail");
+    byId("backBtn").classList.toggle("hidden", view !== "detail" && view !== "block");
+    byId("logo").classList.toggle("hidden", view === "detail" || view === "block");
     byId("tabbar").querySelectorAll("button").forEach(function (b) {
       b.classList.toggle("active", b.dataset.tab === view);
     });
@@ -109,37 +109,60 @@
       home: ["L'Allenamento Aureo", "Manuale Tecnico"],
       library: ["Libreria esercizi", "17 schede tecniche"],
       history: ["Storico", "I tuoi allenamenti"],
-      music: ["Musica", "Allenati con la tua musica"]
     };
     if (titles[view]) { byId("barTitle").textContent = titles[view][0]; byId("barSub").textContent = titles[view][1]; }
-    if (view !== "detail") applyTheme();
+    if (view !== "detail" && view !== "block") applyTheme();
     window.scrollTo(0, 0);
   }
 
   function startSession(list, title, ctx) { applyTheme(ctx); if (PREF.mode === "forza" && window.startTracker) window.startTracker(list, title); else window.startWorkout(list, title); }
 
+  var pendingStart = null;
+  function openSummary(opts) {
+    applyTheme(opts.theme);
+    pendingStart = opts.start || null;
+    var rows = (opts.rows || []).map(function (r) {
+      return '<button class="bk-row" ' + (r.attr || "") + '><span class="bk-rn">' + esc(r.name) + (r.opt ? ' <i>opz</i>' : '') + '</span><span class="bk-rm">' + esc(r.meta || "") + '</span></button>';
+    }).join("");
+    var h = '<div class="bk"><div class="bk-hero"><div class="bk-eye">' + EYE + '</div>' +
+      '<div class="bk-badge">' + esc(opts.badge || "") + '</div>' +
+      '<h2>' + esc(opts.title) + '</h2><p>' + esc(opts.sub || "") + '</p></div>' +
+      '<div class="bk-list">' + rows + '</div>' +
+      '<button class="btn bk-go" data-go="1">' + IC.play + ' ' + esc(opts.startLabel || "Avvia") + '</button>' +
+      (opts.note ? '<div class="bk-note">' + esc(opts.note) + '</div>' : '') + '</div>';
+    byId("view-block").innerHTML = h;
+    byId("barTitle").textContent = opts.title; byId("barSub").textContent = opts.bar || "Anteprima";
+    show("block");
+  }
+  function openManualeBlock(n) {
+    var b = BLOCCHI[n - 1]; if (!b) return; var list = exByN(n);
+    openSummary({
+      theme: n, bar: "Manuale Tecnico", badge: "Blocco " + n,
+      title: b.nome.replace(/^Blocco \d+ . /, ""), sub: b.desc,
+      rows: list.map(function (e) { return { name: e.n + ". " + e.nome, meta: e.categoria, attr: 'data-ex="' + e.id + '"' }; }),
+      startLabel: "Avvia (" + (PREF.mode === "forza" ? "Forza" : "Guidato") + ")",
+      start: function () { startSession(list, b.nome, n); }
+    });
+  }
+
   byId("tabbar").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.tab === "library") renderLibrary();
     if (b.dataset.tab === "history") renderHistory();
-    if (b.dataset.tab === "music" && window.renderMusicView) window.renderMusicView();
     show(b.dataset.tab);
   });
   byId("backBtn").addEventListener("click", function () { show(lastListView); });
 
+  var openAcc = {};
+  function acc(key, title, sub, body) {
+    return '<button class="acc-h" id="acch-' + key + '" data-acc="' + key + '"><div class="acc-tx"><div class="acc-t">' + title + '</div><div class="acc-s">' + sub + '</div></div><span class="acc-cx">&rsaquo;</span></button>' +
+      '<div class="acc-b hidden" id="acc-' + key + '">' + body + '</div>';
+  }
   function renderHome() {
     applyTheme();
     var hist = loadHistory();
     var h = "";
     if (window.CAVCI) h += window.CAVCI.renderHomeSection();
-    h += '<div class="hero"><div class="glow"></div><div class="hero-eye">' + EYE + '</div>' +
-      '<div class="hero-over">Dominio &middot; Limitless</div>' +
-      '<h2>Pronto ad allenarti?</h2>' +
-      '<p>17 esercizi, 4 blocchi, tecnica illustrata. Avvia una sessione guidata con timer, registra le ripetizioni e tieni lo storico.</p>' +
-      '<div class="gojo-quote" id="gojoQuote">' + esc(GOJO_QUOTES[qi % GOJO_QUOTES.length]) + '</div>' +
-      '<button class="btn" data-act="start-all">' + IC.play + ' Allenamento completo</button>' +
-      '<button class="btn secondary" data-act="go-library">Sfoglia la libreria</button>' +
-      '</div>';
 
     var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone;
     if (!standalone && localStorage.getItem("aureo_a2hs") !== "1") h += '<div class="a2hs"><span class="nx">Aggiungi a Home: dati al sicuro e schermo intero.</span><button class="a2hs-x" data-act="a2hs-dismiss" aria-label="Chiudi">' + IC.close + '</button></div>';
@@ -149,53 +172,43 @@
       var last = hist[0];
       var done = last.items.filter(function (i) { return !i.skipped; }).length;
       var sk = last.items.filter(function (i) { return i.skipped; }).length;
-      h += '<div class="section-title">Ultimo allenamento</div>';
-      h += '<button class="block-card" data-act="go-history"><div class="block-num">&#10003;</div>' +
-        '<div><div class="b-name">' + esc(last.title) + '</div>' +
-        '<div class="b-desc">' + dayLabel(last.date) + ' - ' + timeLabel(last.date) + '</div>' +
-        '<div class="b-meta">' + done + ' svolti' + (sk ? ' - ' + sk + ' saltati' : '') + '</div></div>' +
-        '<div class="chev">&rsaquo;</div></button>';
+      h += '<button class="last-card" data-act="go-history"><div class="lc-k">Ultimo allenamento</div><div class="lc-t">' + esc(last.title) + '</div><div class="lc-m">' + dayLabel(last.date) + ' &middot; ' + done + ' svolti' + (sk ? ' &middot; ' + sk + ' saltati' : '') + '</div></button>';
     }
 
-    h += '<div class="section-title">Come vuoi allenarti?</div>';
-    h += '<div class="seg">' +
-      '<button class="seg-b' + (PREF.mode !== "forza" ? " on" : "") + '" data-segmode="guided">Guidato</button>' +
-      '<button class="seg-b' + (PREF.mode === "forza" ? " on" : "") + '" data-segmode="forza">Forza</button></div>';
-    h += '<div class="seg-cap">' + (PREF.mode === "forza" ? "Diario forza: registra serie, ripetizioni e carico con recupero. Tu detti il ritmo." : "Flusso guidato: premi Play, segui timer e illustrazioni. Zero attrito.") + '</div>';
-    h += '<div class="section-title">Manuale Tecnico (17 esercizi)</div>';
+    var blocchi = "";
     BLOCCHI.forEach(function (b) {
       var list = exByN(b.n);
       var mins = Math.round(list.reduce(function (s, e) { return s + e.work + e.rest; }, 0) / 60);
-      h += '<button class="block-card" data-block="' + b.n + '">' +
-        '<div class="block-num">' + b.n + '</div>' +
-        '<div><div class="b-name">' + esc(b.nome.replace(/^Blocco \d+ . /, "")) + '</div>' +
-        '<div class="b-desc">' + esc(b.desc) + '</div>' +
-        '<div class="b-meta">' + list.length + ' esercizi - ~' + mins + ' min</div></div>' +
-        '<div class="chev">&rsaquo;</div></button>';
+      blocchi += '<button class="block-card" data-block="' + b.n + '"><div class="block-num">' + b.n + '</div><div><div class="b-name">' + esc(b.nome.replace(/^Blocco \d+ . /, "")) + '</div><div class="b-desc">' + esc(b.desc) + '</div><div class="b-meta">' + list.length + ' esercizi - ~' + mins + ' min</div></div><div class="chev">&rsaquo;</div></button>';
     });
+    h += acc("manuale", "Manuale Tecnico", "17 esercizi guidati, per blocco",
+      '<button class="btn" data-act="start-all">' + IC.play + ' Allenamento completo</button>' + blocchi + '<button class="btn secondary" data-act="go-library">Sfoglia la libreria</button>');
 
-    h += '<div class="section-title">Impostazioni</div>';
-    h += '<div class="card-box">' +
+    var modeSeg = '<div class="seg"><button class="seg-b' + (PREF.mode !== "forza" ? " on" : "") + '" data-segmode="guided">Guidato</button><button class="seg-b' + (PREF.mode === "forza" ? " on" : "") + '" data-segmode="forza">Forza</button></div>' +
+      '<div class="seg-cap">' + (PREF.mode === "forza" ? "Diario forza: serie, ripetizioni e carico. Tu detti il ritmo." : "Flusso guidato: Play, timer e illustrazioni. I blocchi di forza CAVCI usano comunque il diario.") + '</div>';
+    var toggles = '<div class="card-box">' +
       '<div class="toggle-row"><div>Suono ai cambi</div><div class="sw ' + (PREF.sound ? "on" : "") + '" data-toggle="sound"></div></div>' +
       '<div class="toggle-row"><div>Vibrazione</div><div class="sw ' + (PREF.vibrate ? "on" : "") + '" data-toggle="vibrate"></div></div>' +
       '<div class="toggle-row"><div>Intro &laquo;Espansione del Dominio&raquo;</div><div class="sw ' + (PREF.domainIntro ? "on" : "") + '" data-toggle="domainIntro"></div></div>' +
-      '<div class="toggle-row"><div>Promemoria all\'apertura</div><div class="sw ' + (PREF.reminder ? "on" : "") + '" data-toggle="reminder"></div></div>' +
-      '</div>';
-    h += '<div class="section-title">Tema energia</div><div class="theme-row">' + THEMES.map(function (t) { return '<button class="theme-sw' + (PREF.theme === t.id ? " on" : "") + '" data-theme="' + t.id + '"><span style="background:' + t.c + '"></span>' + t.name + '</button>'; }).join("") + '</div>';
-    h += '<div class="seg-cap">' + (PREF.theme === "auto" ? "Automatico: l'accento segue il blocco che alleni - Riscaldamento blu, Potenza ciano (Six Eyes), Forza rosso, Condizionamento viola. Home e sessione completa restano Six Eyes." : "Tema fisso. Scegli Automatico per far cambiare l'accento in base al blocco.") + '</div>';
-    h += '<div class="section-title">Dati e backup</div>';
-    h += '<div class="card-box"><div class="data-row">' +
-      '<button class="btn mini secondary" data-act="export-json">Backup JSON</button>' +
-      '<button class="btn mini secondary" data-act="export-csv">Esporta CSV</button></div>' +
-      '<button class="btn mini secondary" data-act="import" style="margin-top:8px">Importa backup</button>' +
-      '<input type="file" id="importFile" accept="application/json,.json" style="display:none">' +
-      '<div class="seg-cap">I dati restano sul dispositivo: esporta ogni tanto per non perderli (iOS puo cancellare i dati locali dopo ~7 giorni di inutilizzo).</div></div>';
-    h += '<div class="footer-note">Tratto dal "Manuale Tecnico degli Esercizi - L\'Allenamento Aureo".<br>Scala il range alle tue capacita, priorita alla tecnica, fermati in caso di dolore.</div>';
+      '<div class="toggle-row"><div>Promemoria all\'apertura</div><div class="sw ' + (PREF.reminder ? "on" : "") + '" data-toggle="reminder"></div></div></div>';
+    h += acc("impostazioni", "Impostazioni", "Modalita, suono, promemoria", modeSeg + toggles);
+
+    var themeRow = '<div class="theme-row">' + THEMES.map(function (t) { return '<button class="theme-sw' + (PREF.theme === t.id ? " on" : "") + '" data-theme="' + t.id + '"><span style="background:' + t.c + '"></span>' + t.name + '</button>'; }).join("") + '</div>' +
+      '<div class="seg-cap">' + (PREF.theme === "auto" ? "Automatico: l'accento segue il contesto. La rotazione CAVCI resta Hollow Purple." : "Tema fisso. Scegli Automatico per adattarlo al contesto.") + '</div>';
+    h += acc("tema", "Tema energia", "Accento dell'app", themeRow);
+
+    var backup = '<div class="card-box"><div class="data-row"><button class="btn mini secondary" data-act="export-json">Backup JSON</button><button class="btn mini secondary" data-act="export-csv">Esporta CSV</button></div><button class="btn mini secondary" data-act="import" style="margin-top:8px">Importa backup</button><input type="file" id="importFile" accept="application/json,.json" style="display:none"><div class="seg-cap">I dati restano sul dispositivo: esporta ogni tanto (iOS puo cancellarli dopo ~7 giorni di inutilizzo).</div></div>';
+    h += acc("backup", "Dati e backup", "Esporta o importa", backup);
+
+    h += '<div class="footer-note">Scala il range alle tue capacita, priorita alla tecnica, fermati in caso di dolore.</div>';
 
     byId("view-home").innerHTML = h;
+    Object.keys(openAcc).forEach(function (k) { if (openAcc[k]) { var b = byId("acc-" + k), hd = byId("acch-" + k); if (b) b.classList.remove("hidden"); if (hd) hd.classList.add("open"); } });
   }
 
   byId("view-home").addEventListener("click", function (e) {
+    var ach = e.target.closest("[data-acc]");
+    if (ach) { var ak = ach.dataset.acc, ab = byId("acc-" + ak); if (ab) { var nh = ab.classList.toggle("hidden"); openAcc[ak] = !nh; ach.classList.toggle("open", !nh); } return; }
     var act = e.target.closest("[data-act]");
     var blk = e.target.closest("[data-block]");
     var tg = e.target.closest("[data-toggle]");
@@ -210,7 +223,7 @@
       if (act.dataset.act === "import") { var fi = byId("importFile"); if (fi) fi.click(); }
       if (act.dataset.act === "a2hs-dismiss") { try { localStorage.setItem("aureo_a2hs", "1"); } catch (e) {} renderHome(); }
     } else if (blk) {
-      startSession(exByN(+blk.dataset.block), BLOCCHI[+blk.dataset.block - 1].nome, +blk.dataset.block);
+      openManualeBlock(+blk.dataset.block);
     } else if (tg) {
       var k = tg.dataset.toggle; PREF[k] = !PREF[k]; savePref(); tg.classList.toggle("on", PREF[k]);
       if (k === "reminder" && PREF[k] && window.EX) window.EX.requestReminder(function (ok) { if (!ok) { PREF.reminder = false; savePref(); renderHome(); } });
@@ -223,24 +236,17 @@
   byId("view-home").addEventListener("change", function (e) { var f = e.target.closest("#importFile"); if (f && f.files && f.files[0] && window.EX) window.EX.importJSON(f.files[0]); });
 
   function renderLibrary() {
-    var h = "";
+    var h = '<div class="lib-intro"><div class="lib-eye">' + EYE + '</div><div><h2>Libreria</h2><p>I 17 esercizi del manuale, per blocco. Tocca un blocco per esplorarlo.</p></div></div>';
     BLOCCHI.forEach(function (b) {
       var list = exByN(b.n); if (!list.length) return;
-      h += '<div class="section-title">' + esc(b.nome) + '</div>';
-      list.forEach(function (e) {
-        h += '<button class="ex-row" data-ex="' + e.id + '">' +
-          '<div class="ex-thumb">' + renderIllu(e.illu, true) + '</div>' +
-          '<div style="flex:1;min-width:0">' +
-          '<div class="e-num">Esercizio ' + e.n + '</div>' +
-          '<div class="e-name">' + esc(e.nome) + '</div>' +
-          '<div class="e-cat">' + esc(e.categoria) + '</div>' +
-          '<span class="badge ' + e.priorita + '">' + e.priorita + '</span>' +
-          '</div><div class="chev">&rsaquo;</div></button>';
-      });
+      var mins = Math.round(list.reduce(function (s, e) { return s + e.work + e.rest; }, 0) / 60);
+      h += '<button class="block-card" data-block="' + b.n + '"><div class="block-num">' + b.n + '</div><div><div class="b-name">' + esc(b.nome.replace(/^Blocco \d+ . /, "")) + '</div><div class="b-desc">' + esc(b.desc) + '</div><div class="b-meta">' + list.length + ' esercizi - ~' + mins + ' min</div></div><div class="chev">&rsaquo;</div></button>';
     });
     byId("view-library").innerHTML = h;
   }
   byId("view-library").addEventListener("click", function (e) {
+    var blk = e.target.closest("[data-block]");
+    if (blk) { lastListView = "library"; openManualeBlock(+blk.dataset.block); return; }
     var row = e.target.closest("[data-ex]");
     if (row) { lastListView = "library"; openDetail(row.dataset.ex); }
   });
@@ -271,24 +277,27 @@
       h += '</div>';
     }
 
-    h += '<div class="section-title">Analisi del movimento</div>';
-    e.fasi.forEach(function (f) {
-      h += '<div class="phase"><div class="ph-dot"></div><div>' +
-        '<div class="ph-label">' + esc(f[0]) + '</div><div class="ph-text">' + esc(f[1]) + '</div></div></div>';
-    });
     h += '<div class="rrt">' +
       '<div class="item"><div class="k">Ritmo</div><div class="v">' + esc(e.ritmo) + '</div></div>' +
       '<div class="item"><div class="k">Respiro</div><div class="v">' + esc(e.respiro) + '</div></div>' +
       '<div class="item"><div class="k">Tensione</div><div class="v">' + esc(e.tensione) + '</div></div></div>';
-    h += '<div class="section-title">Errori da evitare &rarr; correzione</div>';
-    e.errori.forEach(function (er) {
-      h += '<div class="err"><div class="bad">' + esc(er[0]) + '</div><div class="fix">' + esc(er[1]) + '</div></div>';
-    });
+    var fasiH = ""; e.fasi.forEach(function (f) { fasiH += '<div class="phase"><div class="ph-dot"></div><div><div class="ph-label">' + esc(f[0]) + '</div><div class="ph-text">' + esc(f[1]) + '</div></div></div>'; });
+    var errH = ""; e.errori.forEach(function (er) { errH += '<div class="err"><div class="bad">' + esc(er[0]) + '</div><div class="fix">' + esc(er[1]) + '</div></div>'; });
+    h += acc("detphases", "Analisi del movimento", "Fasi, una per una", fasiH);
+    h += acc("deterr", "Errori da evitare", "...e come correggerli", errH);
     h += '<button class="btn" data-start-one="' + e.id + '">' + IC.play + ' Avvia questo esercizio</button></div>';
     byId("view-detail").innerHTML = h;
     show("detail");
   }
+  byId("view-block").addEventListener("click", function (e) {
+    var go = e.target.closest("[data-go]"); if (go) { if (typeof pendingStart === "function") pendingStart(); return; }
+    var ex = e.target.closest("[data-ex]"); if (ex) { lastListView = "home"; openDetail(ex.dataset.ex); return; }
+    var cex = e.target.closest("[data-cavci-ex]"); if (cex && window.CAVCI) { window.CAVCI.openEx(cex.dataset.cavciEx); return; }
+  });
+
   byId("view-detail").addEventListener("click", function (e) {
+    var ach = e.target.closest("[data-acc]");
+    if (ach) { var ab = byId("acc-" + ach.dataset.acc); if (ab) ab.classList.toggle("hidden"); ach.classList.toggle("open"); return; }
     var s = e.target.closest("[data-start-one]");
     if (s) { var ex = EXERCISES.filter(function (x) { return x.id === s.dataset.startOne; })[0]; startSession([ex], ex.nome, ex.blocco); }
   });
@@ -350,7 +359,7 @@
     byId: byId, esc: esc, fmt: fmt, PREF: PREF, IC: IC,
     addSession: addSession, renderHome: renderHome, renderHistory: renderHistory, show: show,
     unitFor: unitFor, defaultVal: defaultVal, EYE: EYE, exerciseLogs: exerciseLogs,
-    loadHistory: loadHistory, saveHistory: saveHistory, savePref: savePref, applyTheme: applyTheme
+    loadHistory: loadHistory, saveHistory: saveHistory, savePref: savePref, applyTheme: applyTheme, openSummary: openSummary
   };
 
   try { if (!localStorage.getItem("aureo_v17")) { if (!PREF.theme || PREF.theme === "cyan") { PREF.theme = "auto"; savePref(); } localStorage.setItem("aureo_v17", "1"); } } catch (e) {}

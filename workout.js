@@ -76,6 +76,7 @@
     byId("appbar").classList.remove("hidden");
     byId("tabbar").classList.remove("hidden");
     if (AU.applyTheme) AU.applyTheme();
+    if (AU.show) AU.show("home");
   }
 
   function renderWorkoutShell() {
@@ -85,7 +86,7 @@
       '<div class="wo-top">' +
         '<button class="close" id="woClose" aria-label="Termina allenamento">' + IC.close + '</button>' +
         '<div class="wo-progress" id="woProg"></div>' +
-        '<a class="wo-music" href="https://music.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube Music">' + IC.music + '</a></div>' +
+        '<div style="width:40px"></div></div>' +
       '<div class="wo-bar"><div id="woBarFill"></div></div>' +
       '<div class="wo-stage">' +
         '<div class="wo-modewrap"><span class="wo-mode" id="woMode"></span></div>' +
@@ -289,7 +290,7 @@
 
   // ---- audio / haptics ----
   var actx = null;
-  function initAudio() { if (!PREF.sound) return; try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch (e) {} }
+  function initAudio() { try { if (navigator.audioSession) navigator.audioSession.type = "ambient"; } catch (e) {} if (!PREF.sound) return; try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch (e) {} }
   function beep(freq, dur) {
     if (!PREF.sound || !actx) return;
     try {

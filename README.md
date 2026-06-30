@@ -191,3 +191,31 @@ Il builder ora supporta `swap` (falcata opposta automatica) e `start` (posa di p
 - **Intensita del fantasma calibrata**: piu marcato sui movimenti composti (squat, stacco, dip, trazione, affondo: contrasto inizio->fine evidente) e piu tenue sulla locomozione (corsa, camminata, sled, crawl: la falcata opposta resta una traccia leggera, niente affollamento). Il builder espone `ghostOp` per regolare caso per caso.
 - **Stress test iPhone 13 mini (jsdom)**: 11 fasi tutte superate, 0 errori - navigazione intensiva, rendering di tutte le figure, player guidato completo coi sottomenu, diario Forza, musica, backup e temi. Dettagli e check di compatibilita iOS 26 in AUDIT.md.
 Service worker a `aureo-v21`.
+
+## v22 - FIX: inserimento peso/reps e carichi precedenti
+Risolto il problema per cui non si riusciva a inserire peso e ripetizioni (e quindi non si vedevano i precedenti):
+- **Causa 1**: i blocchi di forza CAVCI si aprivano in modalita Guidata, che non ha i campi peso/precedenti. Ora **Upper, Lower, Sled e Kettlebell** (sia con attrezzi sia a corpo libero) si aprono automaticamente nel **diario Forza**; Corsa, Cyclette, Recupero e Reset restano guidati.
+- **Causa 2**: per digitare i valori usavo `prompt()`, che iOS blocca nelle PWA installate. Ora Kg e Reps sono **campi numerici digitabili** (tastiera nativa, niente zoom), affiancati dai pulsanti -/+ per le micro-regolazioni.
+- I **carichi precedenti** vengono precompilati dai tuoi dati reali (es. RDL parte da 90 kg) e sotto ogni esercizio resta l'indicazione "Ultima: ...".
+Verifica: il blocco Lower apre il diario, RDL precompilato a 90 kg, valore digitato salvato correttamente; stress test 11/11 PASS, 0 errori. Service worker a `aureo-v22`.
+
+## v23 - Layout arioso e a strati (meno confusione)
+La Home ora mostra poche cose, ben leggibili, e approfondisce al tocco:
+- In vista resta solo l'essenziale: la **Rotazione CAVCI** (Prossima tappa + selettore Attrezzi/Corpo libero + striscia + Reset) e una riga compatta con l'ultimo allenamento.
+- Tutto il resto - **Manuale Tecnico**, **Impostazioni**, **Tema energia**, **Dati e backup** - e raccolto in **sezioni a scomparsa**: una riga pulita che si apre con un tocco (chevron che ruota) e si richiude. Niente piu muro di contenuti.
+- Nelle schede esercizio, **Analisi del movimento** ed **Errori da evitare** sono anch'essi a fisarmonica: la scheda si apre compatta (illustrazione, record, ritmo/respiro/tensione) e approfondisci al tocco.
+- Piu spazio e respiro: margini e padding aumentati.
+Le sezioni aperte restano aperte tra un aggiornamento e l'altro della Home. Verifica jsdom + stress test: tutto PASS, 0 errori. Service worker a `aureo-v23`.
+
+## v24-25 - Anteprima del "menu successivo" + via la sezione Musica + audio non invadente
+- **Pagina riassuntiva prima di agire (no-scroll)**: toccando una tappa nella striscia CAVCI (un giorno diverso) o un blocco del Manuale non parte piu subito l'allenamento: si apre una **pagina di anteprima elegante** del blocco - titolo, tappa N/7, lista esercizi con prescrizioni (tocca un esercizio per approfondire) e un grande **Avvia**. La "Prossima tappa" di oggi resta avviabile al volo. Dopo la sessione si torna sempre alla Home.
+- **Sezione YouTube Music rimossa**: tab e player tolti (era superflua).
+- **Musica di sottofondo rispettata**: l'audio dell'app ora usa la categoria **"ambient"** (Web Audio Session): i suoni dei cambi/countdown si **mixano** con la musica del tuo lettore esterno **senza fermarla**. Service worker a `aureo-v25`.
+
+## v26 - Direzione estetica JJK / Gojo Focus + Libreria/Storico
+- **Tipografia display**: titoli, numeri (timer, contatori), badge e nomi usano ora **Space Grotesk** (font geometrico/tecnico, vibe "Six Eyes"), con fallback di sistema se offline. Scala dei font piu generosa e arieggiata; section-title in maiuscoletto spaziato.
+- **Accenti "energia maledetta"**: badge e overline con testo a **gradiente viola->azzurro->ciano**; occhio di Gojo che pulsa lentamente nelle card CAVCI e anteprime.
+- **Transizioni**: card e righe entrano "a cascata" (rise-in scaglionato), feedback di pressione (leggera scala) su card, righe e bottoni, curve MD3 emphasized.
+- **Libreria a strati**: ora mostra i 4 blocchi; toccando un blocco si apre la pagina di anteprima (esercizi + Avvia) e da li si entra nel dettaglio. Niente piu muro di 17 voci.
+- **Storico** piu arioso (spaziatura, font display sui titoli), sessioni espandibili al tocco come prima.
+Service worker a `aureo-v26`. (Font e gradient-text si vedono al meglio sul telefono; offline c'e il fallback di sistema.)

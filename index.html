@@ -13,6 +13,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -31,7 +34,7 @@
   <section class="view hidden" id="view-library"></section>
   <section class="view hidden" id="view-detail"></section>
   <section class="view hidden" id="view-history"></section>
-  <section class="view hidden" id="view-music"></section>
+  <section class="view hidden" id="view-block"></section>
 
   <section id="view-workout" class="hidden"></section>
 
@@ -43,10 +46,6 @@
     <button data-tab="library">
       <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 6v13M12 6C10.5 5 7.5 4.5 5 5v13c2.5-.5 5.5 0 7 1M12 6c1.5-1 4.5-1.5 7-1v13c-2.5-.5-5.5 0-7 1"/></svg></span>
       Libreria
-    </button>
-    <button data-tab="music">
-      <span class="ic"><svg viewBox="0 0 24 24"><path d="M9 17V5l10-2v12"/><circle cx="6.5" cy="17" r="2.6"/><circle cx="16.5" cy="15" r="2.6"/></svg></span>
-      Musica
     </button>
     <button data-tab="history">
       <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v3h3M12 8v4l3 2"/></svg></span>
@@ -62,7 +61,6 @@
 <script src="app.js"></script>
 <script src="workout.js"></script>
 <script src="tracker.js"></script>
-<script src="music.js"></script>
 <script src="extras.js"></script>
 <script src="cavci.js"></script>
 <script src="seed.js"></script>

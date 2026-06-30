@@ -37,17 +37,27 @@
   }
 
   function stepper(kind, i, j, val) {
+    var shown = kind === "w" ? (val ? val : "") : (val || val === 0 ? val : "");
     return '<div class="set-step">' +
       '<button class="ss-btn" data-step="' + kind + "_" + i + "_" + j + '_-1" aria-label="Meno">&minus;</button>' +
-      '<span class="ss-val" data-edit="' + kind + "_" + i + "_" + j + '">' + (kind === "w" ? (val ? val : "-") : val) + '</span>' +
+      '<input class="ss-in" type="text" inputmode="' + (kind === "w" ? "decimal" : "numeric") + '" data-in="' + kind + "_" + i + "_" + j + '" value="' + shown + '" placeholder="' + (kind === "w" ? "kg" : "rep") + '" aria-label="' + (kind === "w" ? "Carico in kg" : "Ripetizioni") + '">' +
       '<button class="ss-btn" data-step="' + kind + "_" + i + "_" + j + '_1" aria-label="Piu">+</button></div>';
+  }
+  function flushInputs() {
+    var ins = byId("view-workout").querySelectorAll("[data-in]");
+    for (var k = 0; k < ins.length; k++) {
+      var inp = ins[k], p = inp.dataset.in.split("_");
+      var item = TR.items[+p[1]]; if (!item) continue; var set = item.sets[+p[2]]; if (!set) continue;
+      var nv = parseFloat(String(inp.value).replace(",", ".")); if (isNaN(nv) || nv < 0) nv = 0;
+      if (p[0] === "w") set.w = Math.round(nv * 10) / 10; else set.r = Math.round(nv);
+    }
   }
 
   function render() {
     var h = '<div class="wo-top">' +
       '<button class="close" id="trkClose" aria-label="Termina e salva">' + IC.close + '</button>' +
       '<div class="wo-progress">' + esc(TR.title) + ' &middot; Forza</div>' +
-      '<a class="wo-music" href="https://music.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube Music">' + IC.music + '</a></div>';
+      '<div style="width:40px"></div></div>';
     h += '<div class="trk" id="trkList">';
     TR.items.forEach(function (it, i) {
       var doneSets = it.sets.filter(function (s) { return s.done; }).length;
@@ -85,12 +95,10 @@
   byId("view-workout").addEventListener("click", function (e) {
     if (byId("view-workout").getAttribute("data-mode") !== "tracker") return;
     var st = e.target.closest("[data-step]"), dn = e.target.closest("[data-done]"),
-      ad = e.target.closest("[data-add]"), rb = e.target.closest("[data-rest]"), rp = e.target.closest("[data-rpe]"), ed = e.target.closest("[data-edit]");
-    if (ed) {
-      var pe = ed.dataset.edit.split("_"); var se = TR.items[+pe[1]].sets[+pe[2]]; var cur = pe[0] === "w" ? se.w : se.r;
-      var inp = window.prompt(pe[0] === "w" ? "Carico (kg)" : "Ripetizioni", String(cur || 0));
-      if (inp !== null) { var nv = parseFloat(String(inp).replace(",", ".")); if (!isNaN(nv) && nv >= 0) { if (pe[0] === "w") se.w = Math.round(nv * 10) / 10; else se.r = Math.round(nv); render(); } }
-    } else if (st) {
+      ad = e.target.closest("[data-add]"), rb = e.target.closest("[data-rest]"), rp = e.target.closest("[data-rpe]");
+    if (e.target.closest("[data-in]")) return;
+    flushInputs();
+    if (st) {
       var p = st.dataset.step.split("_"); var s = TR.items[+p[1]].sets[+p[2]]; var d = +p[3];
       if (p[0] === "w") s.w = Math.max(0, Math.round((s.w + d * 2.5) * 10) / 10);
       else s.r = Math.max(0, s.r + d);
@@ -111,6 +119,11 @@
       if (a === "skip") stopRest();
       else { TR.restRem = Math.max(0, TR.restRem + (a === "+15" ? 15 : -15)); updateRest(); }
     }
+  });
+
+  byId("view-workout").addEventListener("change", function (e) {
+    if (byId("view-workout").getAttribute("data-mode") !== "tracker") return;
+    if (e.target.closest("[data-in]")) flushInputs();
   });
 
   function startRest(sec) { TR.restRem = sec; TR.restTot = sec; if (TR.timer) clearInterval(TR.timer); TR.timer = setInterval(tick, 250); var b = byId("restBar"); if (b) b.classList.remove("hidden"); updateRest(); }
@@ -147,6 +160,7 @@
     byId("appbar").classList.remove("hidden");
     byId("tabbar").classList.remove("hidden");
     if (AU.applyTheme) AU.applyTheme();
+    if (AU.show) AU.show("home");
   }
   function showDone() {
     var n = TR.items.reduce(function (a, it) { return a + it.sets.filter(function (s) { return s.done; }).length; }, 0);
@@ -161,7 +175,7 @@
   }
 
   var actx = null;
-  function initAudio() { if (!PREF.sound) return; try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch (e) {} }
+  function initAudio() { try { if (navigator.audioSession) navigator.audioSession.type = "ambient"; } catch (e) {} if (!PREF.sound) return; try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch (e) {} }
   function beep(freq, dur) { if (!PREF.sound || !actx) return; try { var o = actx.createOscillator(), g = actx.createGain(); o.frequency.value = freq; o.type = "sine"; o.connect(g); g.connect(actx.destination); g.gain.setValueAtTime(0.001, actx.currentTime); g.gain.exponentialRampToValueAtTime(0.22, actx.currentTime + 0.01); g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur); o.start(); o.stop(actx.currentTime + dur + 0.02); } catch (e) {} }
   function vibrate(p) { if (PREF.vibrate && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
 })();

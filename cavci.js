@@ -658,21 +658,21 @@
   var AU = window.AU;
   var esc = AU ? AU.esc : function (x) { return x; };
   var BLOCKS = [
-    { n: 1, key: "upper", nome: "Forza Upper", sub: "Spinta + Trazione", kind: "struttura", theme: "purple", ex: ["dip", "chinup", "facepull"] },
-    { n: 2, key: "lower", nome: "Forza Lower", sub: "Hinge + Ginocchio", kind: "struttura", theme: "purple", ex: ["rdl", "splitsquat", "revnordic"] },
-    { n: 3, key: "sled", nome: "Sled Motore", sub: "Locomozione caricata", kind: "struttura", theme: "purple", ex: ["sledpush", "sleddrag"] },
+    { n: 1, key: "upper", nome: "Forza Upper", sub: "Spinta + Trazione", kind: "struttura", theme: "purple", mode: "forza", ex: ["dip", "chinup", "facepull"] },
+    { n: 2, key: "lower", nome: "Forza Lower", sub: "Hinge + Ginocchio", kind: "struttura", theme: "purple", mode: "forza", ex: ["rdl", "splitsquat", "revnordic"] },
+    { n: 3, key: "sled", nome: "Sled Motore", sub: "Locomozione caricata", kind: "struttura", theme: "purple", mode: "forza", ex: ["sledpush", "sleddrag"] },
     { n: 4, key: "corsa", nome: "Corsa Zona 2", sub: "Condizionamento", kind: "jolly", theme: "purple", ex: ["camminata", "corsa"] },
     { n: 5, key: "cyclette", nome: "Cyclette", sub: "Cardio basso impatto", kind: "jolly", theme: "purple", ex: ["cyclette", "sideplank"] },
-    { n: 6, key: "kettlebell", nome: "Kettlebell", sub: "Coordinazione balistica", kind: "jolly", theme: "purple", ex: ["kbswing", "goblet", "row", "carry", "tgu"] },
+    { n: 6, key: "kettlebell", nome: "Kettlebell", sub: "Coordinazione balistica", kind: "jolly", theme: "purple", mode: "forza", ex: ["kbswing", "goblet", "row", "carry", "tgu"] },
     { n: 7, key: "recupero", nome: "Recupero", sub: "Rigenerazione", kind: "jolly", theme: "purple", ex: ["camminata", "mobility", "childpose", "deadhang"] }
   ];
   var BLOCKS_BW = [
-    { n: 1, key: "upper", nome: "Upper a Corpo Libero", sub: "Spinta + Trazione (floor)", kind: "struttura", theme: "purple", ex: ["pushup", "bwrow", "pikepush"] },
-    { n: 2, key: "lower", nome: "Lower a Corpo Libero", sub: "Squat + Hinge unilaterale", kind: "struttura", theme: "purple", ex: ["bwsquat", "bwlunge", "slrdl"] },
+    { n: 1, key: "upper", nome: "Upper a Corpo Libero", sub: "Spinta + Trazione (floor)", kind: "struttura", theme: "purple", mode: "forza", ex: ["pushup", "bwrow", "pikepush"] },
+    { n: 2, key: "lower", nome: "Lower a Corpo Libero", sub: "Squat + Hinge unilaterale", kind: "struttura", theme: "purple", mode: "forza", ex: ["bwsquat", "bwlunge", "slrdl"] },
     { n: 3, key: "sled", nome: "Locomozione a Terra", sub: "Bear & Crab crawl", kind: "struttura", theme: "purple", ex: ["bearcrawl", "crabwalk"] },
     { n: 4, key: "corsa", nome: "Cardio a Terra", sub: "Basso impatto", kind: "jolly", theme: "purple", ex: ["mtnclimber", "highknees"] },
     { n: 5, key: "cyclette", nome: "Recupero Attivo", sub: "Cardio dolce a terra", kind: "jolly", theme: "purple", ex: ["supinecycle", "sideplank"] },
-    { n: 6, key: "kettlebell", nome: "Controllo & Core", sub: "Coordinazione a corpo libero", kind: "jolly", theme: "purple", ex: ["hollowhold", "birddog", "bwgetup"] },
+    { n: 6, key: "kettlebell", nome: "Controllo & Core", sub: "Coordinazione a corpo libero", kind: "jolly", theme: "purple", mode: "forza", ex: ["hollowhold", "birddog", "bwgetup"] },
     { n: 7, key: "recupero", nome: "Recupero", sub: "Rigenerazione", kind: "jolly", theme: "purple", ex: ["camminata", "mobility", "childpose", "breath90"] }
   ];
   var RESET = { n: 0, key: "reset", nome: "Protocollo 0 - Reset", sub: "Postura / Equilibrio", theme: "purple", ex: ["breath90", "deadbug", "glutebridge", "hipflexor", "slbalance", "tibialis"] };
@@ -693,8 +693,23 @@
     AU.applyTheme(b.theme);
     window.CAVCI._pending = (b.key === "reset") ? null : b.n;
     var l = listOf(b);
-    if (AU.PREF.mode === "forza" && window.startTracker) window.startTracker(l, b.nome);
+    var mode = b.mode || AU.PREF.mode;
+    if (mode === "forza" && window.startTracker) window.startTracker(l, b.nome);
     else if (window.startWorkout) window.startWorkout(l, b.nome);
+  }
+
+  function openBlock(b) {
+    if (!b || !AU || !AU.openSummary) return;
+    var mode = b.mode || AU.PREF.mode;
+    AU.openSummary({
+      theme: b.theme, bar: "Rotazione CAVCI",
+      badge: b.key === "reset" ? "Protocollo 0" : ("Tappa " + b.n + " / 7"),
+      title: b.nome, sub: b.sub,
+      rows: b.ex.map(function (id) { var e = EX[id]; return { name: e.nome, meta: e.presc || "", opt: e.opt, attr: 'data-cavci-ex="' + id + '"' }; }),
+      startLabel: "Avvia " + (mode === "forza" ? "(Forza)" : "(Guidato)"),
+      note: mode === "forza" ? "Diario Forza: registri carico, ripetizioni e RPE." : "Guidato: timer, illustrazioni e ritmo, zero attrito.",
+      start: function () { start(b); }
+    });
   }
 
   function openEx(id) {
@@ -710,13 +725,13 @@
       var nums = logs.filter(function (l) { return !l.skipped && typeof l.value === "number"; }).map(function (l) { return l.value; });
       if (nums.length) h += '<div class="pr-line">Record personale: <b>' + Math.max.apply(null, nums) + ' ' + esc(logs[0].unit || "") + '</b></div>';
     }
-    h += '<div class="section-title">Analisi del movimento</div>';
-    e.fasi.forEach(function (f) { h += '<div class="phase"><div class="ph-dot"></div><div><div class="ph-label">' + esc(f[0]) + '</div><div class="ph-text">' + esc(f[1]) + '</div></div></div>'; });
     h += '<div class="rrt"><div class="item"><div class="k">Ritmo</div><div class="v">' + esc(e.ritmo) + '</div></div>' +
       '<div class="item"><div class="k">Respiro</div><div class="v">' + esc(e.respiro) + '</div></div>' +
       '<div class="item"><div class="k">Tensione</div><div class="v">' + esc(e.tensione) + '</div></div></div>';
-    h += '<div class="section-title">Errori da evitare &rarr; correzione</div>';
-    e.errori.forEach(function (er) { h += '<div class="err"><div class="bad">' + esc(er[0]) + '</div><div class="fix">' + esc(er[1]) + '</div></div>'; });
+    var fasiH = ""; e.fasi.forEach(function (f) { fasiH += '<div class="phase"><div class="ph-dot"></div><div><div class="ph-label">' + esc(f[0]) + '</div><div class="ph-text">' + esc(f[1]) + '</div></div></div>'; });
+    var errH = ""; e.errori.forEach(function (er) { errH += '<div class="err"><div class="bad">' + esc(er[0]) + '</div><div class="fix">' + esc(er[1]) + '</div></div>'; });
+    h += '<button class="acc-h" data-acc="detphases"><div class="acc-tx"><div class="acc-t">Analisi del movimento</div><div class="acc-s">Fasi, una per una</div></div><span class="acc-cx">&rsaquo;</span></button><div class="acc-b hidden" id="acc-detphases">' + fasiH + '</div>';
+    h += '<button class="acc-h" data-acc="deterr"><div class="acc-tx"><div class="acc-t">Errori da evitare</div><div class="acc-s">...e come correggerli</div></div><span class="acc-cx">&rsaquo;</span></button><div class="acc-b hidden" id="acc-deterr">' + errH + '</div>';
     var b = blockOf(id);
     h += '<button class="btn" data-cavci-start="' + (b ? b.key : "reset") + '">' + (AU.IC.play || "") + ' Avvia ' + esc(b ? b.nome : "Reset") + '</button></div>';
     AU.byId("view-detail").innerHTML = h;
@@ -733,7 +748,7 @@
     else if (ds >= 7) hint = '<div class="cv-hint">Stop di ' + ds + 'g: riparti con volume ridotto (2 serie, RPE 6-7, niente test).</div>';
     else if (l) hint = '<div class="cv-hint">Ultimo: ' + esc(blockByN(l.block).nome) + (ds >= 0 ? ' &middot; ' + (ds === 0 ? 'oggi' : ds + 'g fa') : '') + '. Non ricominciare: continua.</div>';
     else hint = '<div class="cv-hint">Inizia la rotazione dal primo blocco. Non e un calendario: e una sequenza.</div>';
-    var strip = curBlocks().map(function (b) { return '<button class="cv-step' + (b.n === nb.n ? ' on' : '') + '" data-cavci-start="' + b.key + '"><span class="cv-sn">' + b.n + '</span><span class="cv-snm">' + esc(b.nome.replace('Forza ', '').replace(' a Corpo Libero', '')) + '</span></button>'; }).join("");
+    var strip = curBlocks().map(function (b) { return '<button class="cv-step' + (b.n === nb.n ? ' on' : '') + '" data-cavci-open="' + b.key + '"><span class="cv-sn">' + b.n + '</span><span class="cv-snm">' + esc(b.nome.replace('Forza ', '').replace(' a Corpo Libero', '')) + '</span></button>'; }).join("");
     var toggle = '<div class="cv-track"><button class="cv-tb' + (tr !== "corpo" ? " on" : "") + '" data-cavci-track="standard">Attrezzi</button><button class="cv-tb' + (tr === "corpo" ? " on" : "") + '" data-cavci-track="corpo">Corpo libero</button></div>';
     return '<div class="section-title">Rotazione CAVCI</div>' + toggle +
       '<div class="cv-next" data-th="' + nb.theme + '"><div class="cv-eye">' + (AU.EYE || "") + '</div>' +
@@ -748,8 +763,9 @@
 
   if (AU) {
     AU.byId("view-home").addEventListener("click", function (e) {
-      var st = e.target.closest("[data-cavci-start]"), rs = e.target.closest("[data-cavci-reset]"), ex = e.target.closest("[data-cavci-ex]"), tk = e.target.closest("[data-cavci-track]");
+      var st = e.target.closest("[data-cavci-start]"), rs = e.target.closest("[data-cavci-reset]"), ex = e.target.closest("[data-cavci-ex]"), tk = e.target.closest("[data-cavci-track]"), op = e.target.closest("[data-cavci-open]");
       if (tk) { setTrack(tk.dataset.cavciTrack); if (AU.renderHome) AU.renderHome(); }
+      else if (op) openBlock(blockByKey(op.dataset.cavciOpen));
       else if (st) start(blockByKey(st.dataset.cavciStart));
       else if (rs) start(RESET);
       else if (ex) openEx(ex.dataset.cavciEx);
@@ -759,6 +775,6 @@
     });
   }
 
-  window.CAVCI = { EX: EX, BLOCKS: BLOCKS, RESET: RESET, renderHomeSection: renderHomeSection, start: start, openEx: openEx, nextN: nextN, _pending: null };
+  window.CAVCI = { EX: EX, BLOCKS: BLOCKS, RESET: RESET, renderHomeSection: renderHomeSection, start: start, openEx: openEx, openBlock: openBlock, nextN: nextN, _pending: null };
   if (AU && AU.renderHome) AU.renderHome();
 })();
