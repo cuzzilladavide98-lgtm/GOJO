@@ -98,7 +98,7 @@
 
   var lastListView = "home";
   function show(view) {
-    ["home", "library", "detail", "history", "block"].forEach(function (v) {
+    ["home", "library", "detail", "history", "block", "settings"].forEach(function (v) {
       byId("view-" + v).classList.toggle("hidden", v !== view);
     });
     byId("backBtn").classList.toggle("hidden", view !== "detail" && view !== "block");
@@ -110,6 +110,7 @@
       home: ["L'Allenamento Aureo", "Manuale Tecnico"],
       library: ["Libreria esercizi", "17 schede tecniche"],
       history: ["Storico", "I tuoi allenamenti"],
+      settings: ["Profilo", "Preferenze e dati"],
     };
     if (titles[view]) { byId("barTitle").textContent = titles[view][0]; byId("barSub").textContent = titles[view][1]; }
     if (view !== "detail" && view !== "block") applyTheme();
@@ -129,7 +130,7 @@
       '<div class="bk-badge">' + esc(opts.badge || "") + '</div>' +
       '<h2>' + esc(opts.title) + '</h2><p>' + esc(opts.sub || "") + '</p></div>' +
       '<div class="bk-list">' + rows + '</div>' +
-      '<button class="btn bk-go" data-go="1">' + IC.play + ' ' + esc(opts.startLabel || "Avvia") + '</button>' +
+      '<button class="btn bk-go" data-go="1">' + IC.play + ' ' + esc(opts.startLabel || "Avvia") + '</button>' + (opts.extra || "") +
       (opts.note ? '<div class="bk-note">' + esc(opts.note) + '</div>' : '') + '</div>';
     byId("view-block").innerHTML = h;
     byId("barTitle").textContent = opts.title; byId("barSub").textContent = opts.bar || "Anteprima";
@@ -150,6 +151,7 @@
     var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.tab === "library") renderLibrary();
     if (b.dataset.tab === "history") renderHistory();
+    if (b.dataset.tab === "settings") renderSettings();
     show(b.dataset.tab);
   });
   byId("backBtn").addEventListener("click", function () { show(lastListView); });
@@ -169,43 +171,43 @@
     if (!standalone && localStorage.getItem("aureo_a2hs") !== "1") h += '<div class="a2hs"><span class="nx">Aggiungi a Home: dati al sicuro e schermo intero.</span><button class="a2hs-x" data-act="a2hs-dismiss" aria-label="Chiudi">' + IC.close + '</button></div>';
     var dsl = hist.length ? Math.floor((Date.now() - new Date(hist[0].date).getTime()) / 86400000) : -1;
     if (dsl >= 3) h += '<div class="nudge"><span class="nx">Non ti alleni da <span class="nd">' + dsl + ' giorni</span>. Riattiva il dominio.</span></div>';
-    if (hist.length) {
-      var last = hist[0];
-      var done = last.items.filter(function (i) { return !i.skipped; }).length;
-      var sk = last.items.filter(function (i) { return i.skipped; }).length;
-      h += '<button class="last-card" data-act="go-history"><div class="lc-k">Ultimo allenamento</div><div class="lc-t">' + esc(last.title) + '</div><div class="lc-m">' + dayLabel(last.date) + ' &middot; ' + done + ' svolti' + (sk ? ' &middot; ' + sk + ' saltati' : '') + '</div></button>';
-    }
+    byId("view-home").innerHTML = h;
+  }
 
-    var blocchi = "";
-    BLOCCHI.forEach(function (b) {
-      var list = exByN(b.n);
-      var mins = Math.round(list.reduce(function (s, e) { return s + e.work + e.rest; }, 0) / 60);
-      blocchi += '<button class="block-card" data-block="' + b.n + '"><div class="block-num">' + b.n + '</div><div><div class="b-name">' + esc(b.nome.replace(/^Blocco \d+ . /, "")) + '</div><div class="b-desc">' + esc(b.desc) + '</div><div class="b-meta">' + list.length + ' esercizi - ~' + mins + ' min</div></div><div class="chev">&rsaquo;</div></button>';
-    });
-    h += acc("manuale", "Manuale Tecnico", "17 esercizi guidati, per blocco",
-      '<button class="btn" data-act="start-all">' + IC.play + ' Allenamento completo</button>' + blocchi + '<button class="btn secondary" data-act="go-library">Sfoglia la libreria</button>');
-
+  function renderSettings() {
+    applyTheme();
     var modeSeg = '<div class="seg"><button class="seg-b' + (PREF.mode !== "forza" ? " on" : "") + '" data-segmode="guided">Guidato</button><button class="seg-b' + (PREF.mode === "forza" ? " on" : "") + '" data-segmode="forza">Forza</button></div>' +
-      '<div class="seg-cap">' + (PREF.mode === "forza" ? "Diario forza: serie, ripetizioni e carico. Tu detti il ritmo." : "Flusso guidato: Play, timer e illustrazioni. I blocchi di forza CAVCI usano comunque il diario.") + '</div>';
+      '<div class="seg-cap">' + (PREF.mode === "forza" ? "Diario forza: serie, ripetizioni e carico." : "Guidato: Play, timer e illustrazioni. I blocchi di forza CAVCI usano comunque il diario.") + '</div>';
     var toggles = '<div class="card-box">' +
       '<div class="toggle-row"><div>Suono ai cambi</div><div class="sw ' + (PREF.sound ? "on" : "") + '" data-toggle="sound"></div></div>' +
       '<div class="toggle-row"><div>Vibrazione</div><div class="sw ' + (PREF.vibrate ? "on" : "") + '" data-toggle="vibrate"></div></div>' +
       '<div class="toggle-row"><div>Intro &laquo;Espansione del Dominio&raquo;</div><div class="sw ' + (PREF.domainIntro ? "on" : "") + '" data-toggle="domainIntro"></div></div>' +
       '<div class="toggle-row"><div>Promemoria all\'apertura</div><div class="sw ' + (PREF.reminder ? "on" : "") + '" data-toggle="reminder"></div></div></div>';
-    h += acc("impostazioni", "Impostazioni", "Modalita, suono, promemoria", modeSeg + toggles);
-
     var themeRow = '<div class="theme-row">' + THEMES.map(function (t) { return '<button class="theme-sw' + (PREF.theme === t.id ? " on" : "") + '" data-theme="' + t.id + '"><span style="background:' + t.c + '"></span>' + t.name + '</button>'; }).join("") + '</div>' +
-      '<div class="seg-cap">' + (PREF.theme === "auto" ? "Automatico: l'accento segue il contesto. La rotazione CAVCI resta Hollow Purple." : "Tema fisso. Scegli Automatico per adattarlo al contesto.") + '</div>';
-    h += acc("tema", "Tema energia", "Accento dell'app", themeRow);
-
-    var backup = '<div class="card-box"><div class="data-row"><button class="btn mini secondary" data-act="export-json">Backup JSON</button><button class="btn mini secondary" data-act="export-csv">Esporta CSV</button></div><button class="btn mini secondary" data-act="import" style="margin-top:8px">Importa backup</button><input type="file" id="importFile" accept="application/json,.json" style="display:none"><div class="seg-cap">I dati restano sul dispositivo: esporta ogni tanto (iOS puo cancellarli dopo ~7 giorni di inutilizzo).</div></div>';
-    h += acc("backup", "Dati e backup", "Esporta o importa", backup);
-
-    h += '<div class="footer-note">Scala il range alle tue capacita, priorita alla tecnica, fermati in caso di dolore.</div>';
-
-    byId("view-home").innerHTML = h;
-    Object.keys(openAcc).forEach(function (k) { if (openAcc[k]) { var b = byId("acc-" + k), hd = byId("acch-" + k); if (b) b.classList.remove("hidden"); if (hd) hd.classList.add("open"); } });
+      '<div class="seg-cap">' + (PREF.theme === "auto" ? "Automatico: l'accento segue il contesto. La rotazione CAVCI resta Hollow Purple." : "Tema fisso. Scegli Automatico per adattarlo.") + '</div>';
+    var backup = '<div class="card-box"><div class="data-row"><button class="btn mini secondary" data-act="export-json">Backup JSON</button><button class="btn mini secondary" data-act="export-csv">Esporta CSV</button></div><button class="btn mini secondary" data-act="import" style="margin-top:8px">Importa backup</button><input type="file" id="importFile" accept="application/json,.json" style="display:none"><div class="seg-cap">I dati restano sul dispositivo: esporta ogni tanto (iOS puo cancellarli dopo ~7 giorni).</div></div>';
+    byId("view-settings").innerHTML =
+      '<div class="section-title">Come vuoi allenarti?</div>' + modeSeg +
+      '<div class="section-title">Preferenze</div>' + toggles +
+      '<div class="section-title">Tema energia</div>' + themeRow +
+      '<div class="section-title">Dati e backup</div>' + backup;
   }
+  byId("view-settings").addEventListener("click", function (e) {
+    var act = e.target.closest("[data-act]"), tg = e.target.closest("[data-toggle]"), th = e.target.closest(".theme-sw"), sg = e.target.closest("[data-segmode]");
+    if (act) {
+      if (act.dataset.act === "export-json" && window.EX) window.EX.exportJSON();
+      else if (act.dataset.act === "export-csv" && window.EX) window.EX.exportCSV();
+      else if (act.dataset.act === "import") { var fi = byId("importFile"); if (fi) fi.click(); }
+    } else if (tg) {
+      var k = tg.dataset.toggle; PREF[k] = !PREF[k]; savePref(); tg.classList.toggle("on", PREF[k]);
+      if (k === "reminder" && PREF[k] && window.EX) window.EX.requestReminder(function (ok) { if (!ok) { PREF.reminder = false; savePref(); renderSettings(); } });
+    } else if (th) {
+      PREF.theme = th.dataset.theme; savePref(); applyTheme(); renderSettings();
+    } else if (sg) {
+      PREF.mode = sg.dataset.segmode; savePref(); renderSettings();
+    }
+  });
+  byId("view-settings").addEventListener("change", function (e) { var f = e.target.closest("#importFile"); if (f && f.files && f.files[0] && window.EX) window.EX.importJSON(f.files[0]); });
 
   byId("view-home").addEventListener("click", function (e) {
     var ach = e.target.closest("[data-acc]");
@@ -237,7 +239,7 @@
   byId("view-home").addEventListener("change", function (e) { var f = e.target.closest("#importFile"); if (f && f.files && f.files[0] && window.EX) window.EX.importJSON(f.files[0]); });
 
   function renderLibrary() {
-    var h = '<div class="lib-intro"><div class="lib-eye">' + EYE + '</div><div><h2>Libreria</h2><p>I 17 esercizi del manuale, per blocco. Tocca un blocco per esplorarlo.</p></div></div>';
+    var h = '<div class="lib-intro"><div class="lib-eye">' + EYE + '</div><div><h2>Libreria</h2><p>I 17 esercizi del manuale, per blocco. Tocca un blocco per esplorarlo.</p></div></div>' + '<button class="btn" data-act="start-all">' + IC.play + ' Allenamento completo</button>';
     BLOCCHI.forEach(function (b) {
       var list = exByN(b.n); if (!list.length) return;
       var mins = Math.round(list.reduce(function (s, e) { return s + e.work + e.rest; }, 0) / 60);
@@ -246,6 +248,8 @@
     byId("view-library").innerHTML = h;
   }
   byId("view-library").addEventListener("click", function (e) {
+    var act = e.target.closest("[data-act]");
+    if (act && act.dataset.act === "start-all") { startSession(allEx(), "Allenamento completo"); return; }
     var blk = e.target.closest("[data-block]");
     if (blk) { lastListView = "library"; openManualeBlock(+blk.dataset.block); return; }
     var row = e.target.closest("[data-ex]");

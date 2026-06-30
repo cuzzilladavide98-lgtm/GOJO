@@ -969,3 +969,30 @@ h2,.detail h2,.hero h2,.bk-hero h2,.lib-intro h2,.onb-body h2{letter-spacing:-.4
 .sess-del svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .sess-del.confirm{background:var(--md-error);color:#fff;border-color:var(--md-error);box-shadow:0 0 18px rgba(255,107,107,.45);}
 .btn.secondary.danger{background:var(--md-error);color:#fff;}
+
+
+/* === v28: CAVCI consultabile e modificabile + hero compatto === */
+.cv-chips{display:none;}
+.cv-actions{display:flex;gap:8px;margin-top:14px;}
+.cv-actions .btn{margin-top:0;flex:1;width:auto;}
+.cv-actions .cv-open{flex:0 0 auto;padding:0 20px;}
+.ed-list{margin-top:14px;}
+.ed-row{background:var(--md-sc-low);border:1px solid var(--md-outline-variant);border-radius:var(--r-m);padding:12px 14px;margin-bottom:8px;}
+.ed-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.ed-rn{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--md-on-surface);text-align:left;min-width:0;background:transparent;}
+.ed-ctrl{display:flex;gap:6px;flex:0 0 auto;}
+.ed-b{width:34px;height:34px;border-radius:var(--r-s);background:var(--md-sc-high);color:var(--md-on-surface);
+  font-size:16px;display:flex;align-items:center;justify-content:center;touch-action:manipulation;position:relative;overflow:hidden;}
+.ed-b.rm{color:var(--md-error);}
+.ed-tgt{width:100%;margin-top:10px;height:40px;border-radius:var(--r-s);background:var(--md-sc-high);
+  color:var(--md-on-surface);border:1px solid var(--md-outline);text-align:left;font-size:16px;padding:0 12px;}
+.ed-tgt:focus{outline:none;border-color:var(--md-primary);box-shadow:0 0 0 2px rgba(196,160,255,.3);}
+.btn.danger-soft{color:var(--md-error);background:var(--md-secondary-container);}
+
+
+/* === v29: shell fisso "a orologio" (la pagina non scrolla mai) === */
+html,body{overflow:hidden;overscroll-behavior:none;}
+#app{height:100dvh;height:100vh;overflow:hidden;}
+.view{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#view-home{overflow-y:hidden;}
+.tabbar button{font-size:11px;}

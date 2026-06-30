@@ -680,13 +680,22 @@
   function getTrack() { try { return localStorage.getItem("aureo_cavci_track") || "standard"; } catch (e) { return "standard"; } }
   function setTrack(t) { try { localStorage.setItem("aureo_cavci_track", t); } catch (e) {} }
   function curBlocks() { return getTrack() === "corpo" ? BLOCKS_BW : BLOCKS; }
+  var curBlk = null;
+  function loadCustom() { try { return JSON.parse(localStorage.getItem("aureo_cavci_custom") || "{}"); } catch (e) { return {}; } }
+  function saveCustom(o) { try { localStorage.setItem("aureo_cavci_custom", JSON.stringify(o)); } catch (e) {} }
+  function ckey(b) { return getTrack() + "|" + b.key; }
+  function isCustom(b) { return !!loadCustom()[ckey(b)]; }
+  function exIdsFor(b) { var c = loadCustom()[ckey(b)]; return (c && c.ex && c.ex.length) ? c.ex.filter(function (id) { return EX[id]; }) : b.ex; }
+  function targetFor(b, id) { var c = loadCustom()[ckey(b)]; if (c && c.targets && c.targets[id] != null) return c.targets[id]; return (EX[id] && EX[id].presc) || ""; }
+  function setCustom(b, fn) { var o = loadCustom(), k = ckey(b); if (!o[k]) o[k] = { ex: b.ex.slice(), targets: {} }; if (!o[k].ex) o[k].ex = b.ex.slice(); if (!o[k].targets) o[k].targets = {}; fn(o[k]); saveCustom(o); }
+  function resetCustom(b) { var o = loadCustom(); delete o[ckey(b)]; saveCustom(o); }
   function blockByN(n) { var bs = curBlocks(); return bs[((n - 1) % 7 + 7) % 7]; }
   function blockByKey(k) { if (k === "reset") return RESET; return curBlocks().filter(function (b) { return b.key === k; })[0]; }
   function blockOf(id) { var all = BLOCKS.concat(BLOCKS_BW); for (var i = 0; i < all.length; i++) if (all[i].ex.indexOf(id) >= 0) return all[i]; if (RESET.ex.indexOf(id) >= 0) return RESET; return null; }
   function lastCavci() { if (!AU) return null; var h = AU.loadHistory(); for (var i = 0; i < h.length; i++) if (h[i].cavci) return { block: h[i].cavci, date: h[i].date }; return null; }
   function nextN() { var l = lastCavci(); return l ? (l.block % 7) + 1 : 1; }
   function daysSince() { var l = lastCavci(); if (!l) return -1; return Math.floor((Date.now() - new Date(l.date).getTime()) / 86400000); }
-  function listOf(b) { return b.ex.map(function (id, i) { var e = EX[id]; var o = { id: id, n: i + 1 }; for (var k in e) o[k] = e[k]; return o; }); }
+  function listOf(b) { return exIdsFor(b).map(function (id, i) { var e = EX[id]; var o = { id: id, n: i + 1 }; for (var k in e) o[k] = e[k]; o.presc = targetFor(b, id); return o; }); }
 
   function start(b) {
     if (!b || !AU) return;
@@ -700,16 +709,49 @@
 
   function openBlock(b) {
     if (!b || !AU || !AU.openSummary) return;
+    curBlk = b;
     var mode = b.mode || AU.PREF.mode;
     AU.openSummary({
       theme: b.theme, bar: "Rotazione CAVCI",
       badge: b.key === "reset" ? "Protocollo 0" : ("Tappa " + b.n + " / 7"),
       title: b.nome, sub: b.sub,
-      rows: b.ex.map(function (id) { var e = EX[id]; return { name: e.nome, meta: e.presc || "", opt: e.opt, attr: 'data-cavci-ex="' + id + '"' }; }),
+      rows: exIdsFor(b).map(function (id) { var e = EX[id]; return { name: e.nome, meta: targetFor(b, id), opt: e.opt, attr: 'data-cavci-ex="' + id + '"' }; }),
       startLabel: "Avvia " + (mode === "forza" ? "(Forza)" : "(Guidato)"),
-      note: mode === "forza" ? "Diario Forza: registri carico, ripetizioni e RPE." : "Guidato: timer, illustrazioni e ritmo, zero attrito.",
+      note: mode === "forza" ? "Diario Forza: carico, ripetizioni e RPE." : "Guidato: timer e illustrazioni.",
+      extra: '<button class="btn secondary" data-edit-open="1">Modifica routine</button>',
       start: function () { start(b); }
     });
+  }
+
+  function renderEditor() {
+    var b = curBlk; if (!b || !AU) return;
+    var ids = exIdsFor(b);
+    var rows = ids.map(function (id) {
+      var e = EX[id];
+      return '<div class="ed-row"><div class="ed-top"><button class="ed-rn" data-cavci-ex="' + id + '">' + esc(e.nome) + '</button>' +
+        '<div class="ed-ctrl">' +
+        '<button class="ed-b" data-edit-up="' + id + '" aria-label="Su">&#8593;</button>' +
+        '<button class="ed-b" data-edit-dn="' + id + '" aria-label="Giu">&#8595;</button>' +
+        '<button class="ed-b rm" data-edit-rm="' + id + '" aria-label="Rimuovi">&#10005;</button></div></div>' +
+        '<input class="ed-tgt" data-edit-target="' + id + '" value="' + esc(targetFor(b, id)) + '" placeholder="serie x reps - RPE"></div>';
+    }).join("");
+    var h = '<div class="bk"><div class="bk-hero"><div class="bk-badge">Modifica</div><h2>' + esc(b.nome) + '</h2><p>Aggiungi, togli, riordina o cambia i target. Si salva da solo.</p></div>' +
+      '<div class="bk-list ed-list">' + rows + '</div>' +
+      '<button class="btn secondary" data-edit-add="1">+ Aggiungi esercizio</button>' +
+      (isCustom(b) ? '<button class="btn secondary danger-soft" data-edit-reset="1">Ripristina predefinito</button>' : '') +
+      '<button class="btn" data-edit-done="1">Fatto</button></div>';
+    AU.byId("view-block").innerHTML = h;
+    AU.byId("barTitle").textContent = "Modifica"; AU.byId("barSub").textContent = b.nome;
+    AU.show("block");
+  }
+  function renderPicker() {
+    var b = curBlk; if (!b || !AU) return;
+    var have = exIdsFor(b);
+    var pool = Object.keys(EX).filter(function (id) { return have.indexOf(id) < 0; });
+    var rows = pool.map(function (id) { var e = EX[id]; return '<button class="bk-row" data-edit-pick="' + id + '"><span class="bk-rn">' + esc(e.nome) + '</span><span class="bk-rm">' + esc(e.categoria) + '</span></button>'; }).join("");
+    var h = '<div class="bk"><div class="bk-hero"><div class="bk-badge">Aggiungi</div><h2>Scegli un esercizio</h2><p>Tocca per aggiungerlo a ' + esc(b.nome) + '.</p></div>' +
+      '<div class="bk-list">' + rows + '</div><button class="btn secondary" data-edit-back="1">Annulla</button></div>';
+    AU.byId("view-block").innerHTML = h; AU.show("block");
   }
 
   function openEx(id) {
@@ -742,7 +784,7 @@
   function renderHomeSection() {
     var tr = getTrack();
     var nb = blockByN(nextN()), l = lastCavci(), ds = daysSince();
-    var chips = nb.ex.map(function (id) { var e = EX[id]; return '<button class="cv-chip" data-cavci-ex="' + id + '">' + esc(e.nome) + (e.opt ? ' <i>opz</i>' : '') + '</button>'; }).join("");
+    var nEx = exIdsFor(nb).length;
     var hint;
     if (ds >= 14) hint = '<div class="cv-hint warn">Pausa lunga (' + ds + 'g): parti con Recupero o Reset, poi riprendi al 60-70%.</div>';
     else if (ds >= 7) hint = '<div class="cv-hint">Stop di ' + ds + 'g: riparti con volume ridotto (2 serie, RPE 6-7, niente test).</div>';
@@ -753,9 +795,8 @@
     return '<div class="section-title">Rotazione CAVCI</div>' + toggle +
       '<div class="cv-next" data-th="' + nb.theme + '"><div class="cv-eye">' + (AU.EYE || "") + '</div>' +
       '<div class="cv-next-top"><span class="cv-badge">Prossima tappa' + (tr === "corpo" ? ' &middot; Corpo libero' : '') + '</span><span class="cv-n">' + nb.n + '/7</span></div>' +
-      '<h3>' + esc(nb.nome) + '</h3><p>' + esc(nb.sub) + '</p>' +
-      '<div class="cv-chips">' + chips + '</div>' +
-      '<button class="btn" data-cavci-start="' + nb.key + '">' + (AU.IC.play || "") + ' Avvia ' + esc(nb.nome) + '</button>' +
+      '<h3>' + esc(nb.nome) + '</h3><p>' + esc(nb.sub) + ' &middot; ' + nEx + ' esercizi</p>' +
+      '<div class="cv-actions"><button class="btn" data-cavci-start="' + nb.key + '">' + (AU.IC.play || "") + ' Avvia</button><button class="btn secondary cv-open" data-cavci-open="' + nb.key + '">Apri</button></div>' +
       hint + '</div>' +
       '<div class="cv-strip">' + strip + '</div>' +
       '<button class="btn secondary cv-reset" data-cavci-reset>Protocollo 0 - Reset posturale</button>';
@@ -773,7 +814,26 @@
     AU.byId("view-detail").addEventListener("click", function (e) {
       var st = e.target.closest("[data-cavci-start]"); if (st) start(blockByKey(st.dataset.cavciStart));
     });
+    AU.byId("view-block").addEventListener("click", function (e) {
+      var b = curBlk, t;
+      if ((t = e.target.closest("[data-edit-open]"))) { if (b) openEditor(b); return; }
+      if ((t = e.target.closest("[data-edit-add]"))) { renderPicker(); return; }
+      if ((t = e.target.closest("[data-edit-back]"))) { renderEditor(); return; }
+      if ((t = e.target.closest("[data-edit-done]"))) { if (b) openBlock(b); return; }
+      if (!b) return;
+      if ((t = e.target.closest("[data-edit-pick]"))) { setCustom(b, function (c) { if (c.ex.indexOf(t.dataset.editPick) < 0) c.ex.push(t.dataset.editPick); }); renderEditor(); return; }
+      if ((t = e.target.closest("[data-edit-rm]"))) { setCustom(b, function (c) { var i = c.ex.indexOf(t.dataset.editRm); if (i >= 0 && c.ex.length > 1) c.ex.splice(i, 1); }); renderEditor(); return; }
+      if ((t = e.target.closest("[data-edit-up]"))) { setCustom(b, function (c) { var i = c.ex.indexOf(t.dataset.editUp); if (i > 0) { var x = c.ex.splice(i, 1)[0]; c.ex.splice(i - 1, 0, x); } }); renderEditor(); return; }
+      if ((t = e.target.closest("[data-edit-dn]"))) { setCustom(b, function (c) { var i = c.ex.indexOf(t.dataset.editDn); if (i >= 0 && i < c.ex.length - 1) { var x = c.ex.splice(i, 1)[0]; c.ex.splice(i + 1, 0, x); } }); renderEditor(); return; }
+      if ((t = e.target.closest("[data-edit-reset]"))) { resetCustom(b); renderEditor(); return; }
+    });
+    AU.byId("view-block").addEventListener("change", function (e) {
+      var b = curBlk; if (!b) return;
+      var t = e.target.closest("[data-edit-target]");
+      if (t) { var id = t.dataset.editTarget, val = t.value; setCustom(b, function (c) { c.targets[id] = val; }); }
+    });
   }
+  function openEditor(b) { curBlk = b; renderEditor(); }
 
   window.CAVCI = { EX: EX, BLOCKS: BLOCKS, RESET: RESET, renderHomeSection: renderHomeSection, start: start, openEx: openEx, openBlock: openBlock, nextN: nextN, _pending: null };
   if (AU && AU.renderHome) AU.renderHome();
