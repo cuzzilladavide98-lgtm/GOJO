@@ -21,14 +21,16 @@
 
   var EYE = '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="heI" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="#EAF4FF"/><stop offset="34%" stop-color="#93CBFF"/><stop offset="70%" stop-color="#3D8BFF"/><stop offset="100%" stop-color="#1E57B4"/></radialGradient></defs><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="#0a0a12"/><circle cx="24" cy="24" r="11.5" fill="url(#heI)"/><circle cx="24" cy="24" r="4.8" fill="#0a0c18"/><circle cx="20.5" cy="20.5" r="2.2" fill="#fff"/><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="none" stroke="#BBD8FF" stroke-width="1.8"/></svg>';
 
-  var PREF = { sound: true, vibrate: true, theme: "cyan", domainIntro: true, onboarded: false, mode: "guided" };
+  var PREF = { sound: true, vibrate: true, theme: "auto", domainIntro: true, onboarded: false, mode: "guided", reminder: false, reminderDays: 2 };
   try {
     var saved = localStorage.getItem("aureo_pref");
     if (saved) PREF = Object.assign(PREF, JSON.parse(saved));
   } catch (e) {}
   function savePref() { try { localStorage.setItem("aureo_pref", JSON.stringify(PREF)); } catch (e) {} }
-  function applyTheme() { document.documentElement.setAttribute("data-theme", PREF.theme || "cyan"); }
-  var THEMES = [{ id: "cyan", name: "Six Eyes", c: "#00E5FF" }, { id: "blue", name: "Lapse", c: "#6FB6FF" }, { id: "purple", name: "Hollow", c: "#C4A0FF" }, { id: "red", name: "Reverse", c: "#FF7A7A" }, { id: "gold", name: "Aureo", c: "#FBD27B" }];
+  var THEME_BY_BLOCK = { 1: "blue", 2: "cyan", 3: "red", 4: "purple" };
+  function resolveTheme(ctx) { if (PREF.theme && PREF.theme !== "auto") return PREF.theme; if (typeof ctx === "string") return ctx; return (ctx && THEME_BY_BLOCK[ctx]) || "cyan"; }
+  function applyTheme(ctx) { document.documentElement.setAttribute("data-theme", resolveTheme(ctx)); }
+  var THEMES = [{ id: "auto", name: "Automatico", c: "#00E5FF" }, { id: "cyan", name: "Six Eyes", c: "#00E5FF" }, { id: "blue", name: "Lapse", c: "#6FB6FF" }, { id: "purple", name: "Hollow", c: "#C4A0FF" }, { id: "red", name: "Reverse", c: "#FF7A7A" }, { id: "gold", name: "Aureo", c: "#FBD27B" }];
   var GOJO_QUOTES = ["\"Nah, I'd win.\" - Gojo", "Sono semplicemente il piu forte.", "\"Throughout Heaven and Earth, I alone am the honored one.\"", "Fin dove arriva il tuo limite? Oltre.", "Va tutto bene: sono io il piu forte.", "Nessun limite. Solo tecnica."];
   var qi = Math.floor(Math.random() * 6);
   var SLIDES = [
@@ -63,7 +65,7 @@
     try { return JSON.parse(localStorage.getItem("aureo_history") || "[]"); } catch (e) { return []; }
   }
   function saveHistory(arr) { try { localStorage.setItem("aureo_history", JSON.stringify(arr.slice(0, 200))); } catch (e) {} }
-  function addSession(sess) { var h = loadHistory(); h.unshift(sess); saveHistory(h); }
+  function addSession(sess) { if (window.CAVCI && window.CAVCI._pending != null) { sess.cavci = window.CAVCI._pending; window.CAVCI._pending = null; } var h = loadHistory(); h.unshift(sess); saveHistory(h); }
   function clearHistory() { try { localStorage.removeItem("aureo_history"); } catch (e) {} }
   function exerciseLogs(id) {
     var out = [];
@@ -110,10 +112,11 @@
       music: ["Musica", "Allenati con la tua musica"]
     };
     if (titles[view]) { byId("barTitle").textContent = titles[view][0]; byId("barSub").textContent = titles[view][1]; }
+    if (view !== "detail") applyTheme();
     window.scrollTo(0, 0);
   }
 
-  function startSession(list, title) { if (PREF.mode === "forza" && window.startTracker) window.startTracker(list, title); else window.startWorkout(list, title); }
+  function startSession(list, title, ctx) { applyTheme(ctx); if (PREF.mode === "forza" && window.startTracker) window.startTracker(list, title); else window.startWorkout(list, title); }
 
   byId("tabbar").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
@@ -125,6 +128,7 @@
   byId("backBtn").addEventListener("click", function () { show(lastListView); });
 
   function renderHome() {
+    applyTheme();
     var hist = loadHistory();
     var h = "";
     h += '<div class="hero"><div class="glow"></div><div class="hero-eye">' + EYE + '</div>' +
@@ -136,6 +140,10 @@
       '<button class="btn secondary" data-act="go-library">Sfoglia la libreria</button>' +
       '</div>';
 
+    var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone;
+    if (!standalone && localStorage.getItem("aureo_a2hs") !== "1") h += '<div class="a2hs"><span class="nx">Aggiungi a Home: dati al sicuro e schermo intero.</span><button class="a2hs-x" data-act="a2hs-dismiss" aria-label="Chiudi">' + IC.close + '</button></div>';
+    var dsl = hist.length ? Math.floor((Date.now() - new Date(hist[0].date).getTime()) / 86400000) : -1;
+    if (dsl >= 3) h += '<div class="nudge"><span class="nx">Non ti alleni da <span class="nd">' + dsl + ' giorni</span>. Riattiva il dominio.</span></div>';
     if (hist.length) {
       var last = hist[0];
       var done = last.items.filter(function (i) { return !i.skipped; }).length;
@@ -148,12 +156,13 @@
         '<div class="chev">&rsaquo;</div></button>';
     }
 
+    if (window.CAVCI) h += window.CAVCI.renderHomeSection();
     h += '<div class="section-title">Come vuoi allenarti?</div>';
     h += '<div class="seg">' +
       '<button class="seg-b' + (PREF.mode !== "forza" ? " on" : "") + '" data-segmode="guided">Guidato</button>' +
       '<button class="seg-b' + (PREF.mode === "forza" ? " on" : "") + '" data-segmode="forza">Forza</button></div>';
     h += '<div class="seg-cap">' + (PREF.mode === "forza" ? "Diario forza: registra serie, ripetizioni e carico con recupero. Tu detti il ritmo." : "Flusso guidato: premi Play, segui timer e illustrazioni. Zero attrito.") + '</div>';
-    h += '<div class="section-title">Sessioni per blocco</div>';
+    h += '<div class="section-title">Manuale Tecnico (17 esercizi)</div>';
     BLOCCHI.forEach(function (b) {
       var list = exByN(b.n);
       var mins = Math.round(list.reduce(function (s, e) { return s + e.work + e.rest; }, 0) / 60);
@@ -170,8 +179,17 @@
       '<div class="toggle-row"><div>Suono ai cambi</div><div class="sw ' + (PREF.sound ? "on" : "") + '" data-toggle="sound"></div></div>' +
       '<div class="toggle-row"><div>Vibrazione</div><div class="sw ' + (PREF.vibrate ? "on" : "") + '" data-toggle="vibrate"></div></div>' +
       '<div class="toggle-row"><div>Intro &laquo;Espansione del Dominio&raquo;</div><div class="sw ' + (PREF.domainIntro ? "on" : "") + '" data-toggle="domainIntro"></div></div>' +
+      '<div class="toggle-row"><div>Promemoria all\'apertura</div><div class="sw ' + (PREF.reminder ? "on" : "") + '" data-toggle="reminder"></div></div>' +
       '</div>';
     h += '<div class="section-title">Tema energia</div><div class="theme-row">' + THEMES.map(function (t) { return '<button class="theme-sw' + (PREF.theme === t.id ? " on" : "") + '" data-theme="' + t.id + '"><span style="background:' + t.c + '"></span>' + t.name + '</button>'; }).join("") + '</div>';
+    h += '<div class="seg-cap">' + (PREF.theme === "auto" ? "Automatico: l'accento segue il blocco che alleni - Riscaldamento blu, Potenza ciano (Six Eyes), Forza rosso, Condizionamento viola. Home e sessione completa restano Six Eyes." : "Tema fisso. Scegli Automatico per far cambiare l'accento in base al blocco.") + '</div>';
+    h += '<div class="section-title">Dati e backup</div>';
+    h += '<div class="card-box"><div class="data-row">' +
+      '<button class="btn mini secondary" data-act="export-json">Backup JSON</button>' +
+      '<button class="btn mini secondary" data-act="export-csv">Esporta CSV</button></div>' +
+      '<button class="btn mini secondary" data-act="import" style="margin-top:8px">Importa backup</button>' +
+      '<input type="file" id="importFile" accept="application/json,.json" style="display:none">' +
+      '<div class="seg-cap">I dati restano sul dispositivo: esporta ogni tanto per non perderli (iOS puo cancellare i dati locali dopo ~7 giorni di inutilizzo).</div></div>';
     h += '<div class="footer-note">Tratto dal "Manuale Tecnico degli Esercizi - L\'Allenamento Aureo".<br>Scala il range alle tue capacita, priorita alla tecnica, fermati in caso di dolore.</div>';
 
     byId("view-home").innerHTML = h;
@@ -187,16 +205,22 @@
       if (act.dataset.act === "start-all") startSession(allEx(), "Allenamento completo");
       if (act.dataset.act === "go-library") { renderLibrary(); show("library"); }
       if (act.dataset.act === "go-history") { renderHistory(); show("history"); }
+      if (act.dataset.act === "export-json" && window.EX) window.EX.exportJSON();
+      if (act.dataset.act === "export-csv" && window.EX) window.EX.exportCSV();
+      if (act.dataset.act === "import") { var fi = byId("importFile"); if (fi) fi.click(); }
+      if (act.dataset.act === "a2hs-dismiss") { try { localStorage.setItem("aureo_a2hs", "1"); } catch (e) {} renderHome(); }
     } else if (blk) {
-      startSession(exByN(+blk.dataset.block), BLOCCHI[+blk.dataset.block - 1].nome);
+      startSession(exByN(+blk.dataset.block), BLOCCHI[+blk.dataset.block - 1].nome, +blk.dataset.block);
     } else if (tg) {
       var k = tg.dataset.toggle; PREF[k] = !PREF[k]; savePref(); tg.classList.toggle("on", PREF[k]);
+      if (k === "reminder" && PREF[k] && window.EX) window.EX.requestReminder(function (ok) { if (!ok) { PREF.reminder = false; savePref(); renderHome(); } });
     } else if (th) {
       PREF.theme = th.dataset.theme; savePref(); applyTheme(); renderHome();
     } else if (sg) {
       PREF.mode = sg.dataset.segmode; savePref(); renderHome();
     }
   });
+  byId("view-home").addEventListener("change", function (e) { var f = e.target.closest("#importFile"); if (f && f.files && f.files[0] && window.EX) window.EX.importJSON(f.files[0]); });
 
   function renderLibrary() {
     var h = "";
@@ -205,7 +229,7 @@
       h += '<div class="section-title">' + esc(b.nome) + '</div>';
       list.forEach(function (e) {
         h += '<button class="ex-row" data-ex="' + e.id + '">' +
-          '<div class="ex-thumb">' + renderIllu(e.illu) + '</div>' +
+          '<div class="ex-thumb">' + renderIllu(e.illu, true) + '</div>' +
           '<div style="flex:1;min-width:0">' +
           '<div class="e-num">Esercizio ' + e.n + '</div>' +
           '<div class="e-name">' + esc(e.nome) + '</div>' +
@@ -223,6 +247,7 @@
 
   function openDetail(id) {
     var e = EXERCISES.filter(function (x) { return x.id === id; })[0]; if (!e) return;
+    applyTheme(e.blocco);
     var h = '<div class="detail">';
     h += '<div class="detail-illu">' + renderIllu(e.illu) + '<div class="cap">' + esc(e.illu.note || "") + '</div></div>';
     h += '<h2>' + esc(e.nome) + '</h2>';
@@ -236,6 +261,8 @@
     if (logs.length) {
       h += '<div class="section-title">I tuoi progressi</div>';
       h += '<div class="card-box">' + renderProgressChart(logs) + '</div>';
+      var nums = logs.filter(function (l) { return !l.skipped && typeof l.value === "number"; }).map(function (l) { return l.value; });
+      if (nums.length) h += '<div class="pr-line">Record personale: <b>' + Math.max.apply(null, nums) + ' ' + esc(logs[0].unit || "") + '</b></div>';
       h += '<div class="card-box">';
       logs.slice(0, 6).forEach(function (l) {
         h += '<div class="log-row"><span>' + dayLabel(l.date) + ' - ' + timeLabel(l.date) + '</span>' +
@@ -263,7 +290,7 @@
   }
   byId("view-detail").addEventListener("click", function (e) {
     var s = e.target.closest("[data-start-one]");
-    if (s) { var ex = EXERCISES.filter(function (x) { return x.id === s.dataset.startOne; })[0]; startSession([ex], ex.nome); }
+    if (s) { var ex = EXERCISES.filter(function (x) { return x.id === s.dataset.startOne; })[0]; startSession([ex], ex.nome, ex.blocco); }
   });
 
   function renderHistory() {
@@ -295,9 +322,10 @@
           '<span class="badge ' + (s.status === "interrotta" ? "media" : "bassa") + '">' + esc(s.status) + '</span>' +
           '<div class="chev">&rsaquo;</div></button>';
         h += '<div class="hist-body hidden" id="sb_' + s.id + '">';
+        if (s.durationSec || s.volume) { h += '<div class="hist-meta">' + (s.durationSec ? '<span>Durata ' + Math.max(1, Math.round(s.durationSec / 60)) + ' min</span>' : '') + (s.volume ? '<span>Volume ' + Math.round(s.volume) + ' kg</span>' : '') + '</div>'; }
         s.items.forEach(function (it) {
           h += '<div class="log-row"><span>' + it.n + '. ' + esc(it.nome) + '</span>' +
-            '<b>' + (it.skipped ? '<span style="color:var(--muted)">saltato</span>' : (it.value + ' ' + it.unit + (it.sets ? ' &middot; ' + it.sets.length + ' serie' : ''))) + '</b></div>';
+            '<b>' + (it.skipped ? '<span style="color:var(--muted)">saltato</span>' : (it.value + ' ' + it.unit + (it.sets ? ' &middot; ' + it.sets.length + ' serie' : '') + (it.rpe ? ' &middot; RPE ' + it.rpe : ''))) + '</b></div>';
         });
         h += '</div></div>';
       });
@@ -321,7 +349,8 @@
   window.AU = {
     byId: byId, esc: esc, fmt: fmt, PREF: PREF, IC: IC,
     addSession: addSession, renderHome: renderHome, renderHistory: renderHistory, show: show,
-    unitFor: unitFor, defaultVal: defaultVal, EYE: EYE, exerciseLogs: exerciseLogs, show: show
+    unitFor: unitFor, defaultVal: defaultVal, EYE: EYE, exerciseLogs: exerciseLogs,
+    loadHistory: loadHistory, saveHistory: saveHistory, savePref: savePref, applyTheme: applyTheme
   };
 
   applyTheme();

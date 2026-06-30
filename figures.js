@@ -23,7 +23,7 @@ function __rrect(r, fill, stroke) {
   return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${fill}"${stroke ? ` stroke="${stroke}" stroke-width="1.5"` : ""}/>`;
 }
 
-function renderIllu(illu) {
+function renderIllu(illu, flat) {
   const uid = "i" + (++__illuSeq);
   const parts = illu.vb.split(" ").map(Number);
   const W = parts[2], H = parts[3];
@@ -48,9 +48,7 @@ function renderIllu(illu) {
     <marker id="ah_${uid}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 z" fill="${ARROW}"/>
     </marker>
-    <filter id="gl_${uid}" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="3.2"/>
-    </filter>
+    ${flat ? "" : `<filter id="gl_${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>`}
   </defs>`;
 
   // sfondo arrotondato
@@ -101,7 +99,7 @@ function renderIllu(illu) {
 
   // --- muscoli evidenziati (sopra il corpo) ---
   (illu.hi || []).forEach(b => {
-    s += `<line x1="${b[0]}" y1="${b[1]}" x2="${b[2]}" y2="${b[3]}" stroke="${HIC}" stroke-width="${b[4]}" stroke-linecap="round" opacity="0.42" filter="url(#gl_${uid})"/>`;
+    s += `<line x1="${b[0]}" y1="${b[1]}" x2="${b[2]}" y2="${b[3]}" stroke="${HIC}" stroke-width="${b[4]}" stroke-linecap="round" opacity="${flat ? "0.3" : "0.42"}"${flat ? "" : ` filter="url(#gl_${uid})"`}/>`;
   });
 
   // --- frecce e archi di movimento ---

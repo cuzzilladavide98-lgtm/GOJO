@@ -89,3 +89,61 @@ Identita visiva fusa nel Material Design 3, pensata per i display OLED dell'iPho
 - **Fluidita spazio-tempo**: transizioni con curva MD3 *emphasized* piu rapida (~220ms) per una reattivita "divina"; comparsa viste con micro-traslazione.
 - **Micro-interazioni atomiche**: bagliore ciano controllato (un solo elemento, GPU-light) su pulsante Play, anello del timer attivo e serie completata - come l'attivazione dell'energia, senza appesantire.
 - Il **tema "Six Eyes" (ciano) e ora il default**; restano selezionabili Lapse (blu), Hollow (viola), Reverse (rosso), Aureo (oro). L'occhio di Gojo (logo e icona app) chiude il cerchio: l'app fa "percepire" il flusso di tempo, menu e movimento.
+
+## Dati, metriche e progressione (v13)
+- **Backup / Export / Import** (Impostazioni > Dati e backup): `Backup JSON` (storico + preferenze), `Esporta CSV` (apribile in Excel), `Importa backup` (ripristina da file JSON). I dati restano in locale: esporta ogni tanto perche iOS puo cancellare i dati di una PWA non usata da ~7 giorni.
+- **Metriche di sessione**: ogni sessione registra la **durata**; in modalita Forza anche il **volume** (kg x reps). Visibili nel dettaglio dello storico e nella schermata finale.
+- **Record & progressione**: nella scheda esercizio compare il **record personale**; in modalita Forza ogni esercizio e **precompilato con i valori dell'ultima volta** (parti da li e progredisci) ed e disponibile un **RPE** opzionale (sforzo 0-10) per serie/esercizio, salvato nello storico.
+- **Promemoria (onesto, senza server)**: toggle "Promemoria all'apertura" — se non ti alleni da qualche giorno, all'apertura dell'app ricevi una notifica (richiede PWA installata su iPhone) e in Home compare un avviso. La vera notifica push schedulata in background richiederebbe un server, quindi resta fuori dalla logica tutto-locale.
+- Nuovo file `extras.js`; service worker a `aureo-v13`.
+
+## Stress test iPhone 13 mini (v14)
+Emulazione del device (375x812, DPR3) e caccia alle "seccature", eliminate o sfruttate:
+- **Scorrimento piu fluido**: le illustrazioni nei thumbnail (Libreria e card Forza) ora sono in versione "flat", senza sfocature SVG (0 filtri blur su 17 figure, prima 17). Nelle schede di dettaglio e in allenamento restano in qualita piena. Meno carico GPU = liste piu scattanti sull'OLED del mini.
+- **Niente perdita dati**: se apri l'app in Safari (non installata), in Home compare un invito ad "Aggiungere a Home" - cosi iOS conserva meglio i dati e parti a schermo intero. (La seccatura della cancellazione dati di iOS diventa una spinta all'installazione; il backup resta la rete di sicurezza.)
+- **Inserimento carico piu veloce in Forza**: ora puoi **toccare il numero di Kg o Reps per digitarlo** (es. 60 in un colpo), oltre ai pulsanti +/- ingranditi. Niente piu decine di tap per i carichi alti.
+- **Splash/installazione in tema**: colori del manifest portati al **Void nero** (#000000) coerenti con la palette Six Eyes; orientamento bloccato in verticale per non rompere il layout del timer.
+- **Limiti noti (onesti)**: lo zoom a pizzico e disattivato per tenere il layout stabile; le notifiche push in background reali richiedono un server (il promemoria resta "all'apertura"); aprire YouTube Music mette in pausa il timer su iOS (per restare nel flusso, usa il player interno che continua mentre cambi scheda).
+
+Service worker a `aureo-v14`.
+
+## Massima resa sul display del 13 mini (v15)
+Estetica e ingegneria spinte sulla tecnologia del telefono:
+- **Colore wide-gamut P3**: dove il display lo supporta (il 13 mini si), l'accento ciano Six Eyes usa il gamut P3 (`color(display-p3 ...)`), piu elettrico di quanto l'sRGB possa mostrare. Fallback automatico all'sRGB altrove.
+- **Nero OLED assoluto** (#000000): sfondo Void che spegne i pixel = contrasto infinito e consumo ridotto. Anche manifest/splash in Void.
+- **HDR/EDR**: nei momenti chiave (Play, anello attivo, serie completata) i bagliori salgono di luminanza sui pannelli ad alta gamma dinamica.
+- **Compositing GPU**: gli elementi animati (anello timer, aloni, Play) sono promossi a layer propri e animati solo con transform/opacity: nessun ridisegno, scorrevolezza massima.
+- **content-visibility** sulle liste lunghe (Libreria, Storico): il rendering fuori schermo viene saltato.
+- **Alone "energia maledetta"** che respira lentamente nella Home (puro transform, leggerissimo).
+
+## Tema automatico (adattivo, non "a sentimento")
+Il tema ora e **Automatico** di default: l'accento dell'app cambia da solo in base al **blocco/menu** che stai usando, non a una scelta manuale d'umore.
+- **Home e Allenamento completo**: Six Eyes (ciano) - l'identita resta sempre li.
+- **Blocco 1 Riscaldamento**: Lapse (blu) - attivazione calma.
+- **Blocco 2 Potenza & Skill**: Six Eyes (ciano) - precisione/skill.
+- **Blocco 3 Forza**: Reverse (rosso) - massimo sforzo.
+- **Blocco 4 Condizionamento**: Hollow (viola) - sforzo prolungato.
+- Aprendo la scheda di un esercizio, l'accento prende il colore del suo blocco; tornando in Home torna Six Eyes.
+
+Resta possibile fissare un tema manuale (Six Eyes/Lapse/Hollow/Reverse/Aureo) dalle impostazioni: in quel caso l'accento non cambia piu da solo. Service worker a `aureo-v15`.
+
+## Sistema CAVCI - Rotazione Intelligente (v16)
+Integrato il tuo metodo reale (manuale CAVCI + routine Hevy). CAVCI e ora l'allenamento principale in Home; i 17 del Manuale Tecnico restano consultabili sotto.
+
+**La sequenza (spina dorsale + jolly):**
+Upper -> Lower -> Sled -> Corsa -> Cyclette -> Kettlebell -> Recupero -> ripeti. Piu il **Protocollo 0 - Reset posturale**, sempre disponibile (ingresso, salvataggio o scarico).
+
+**Rotazione intelligente (il cuore):** l'app non e un calendario. Ricorda l'ultimo blocco completato e propone la **prossima tappa**. Se salti giorni non ricominci:
+- 1-3 giorni: riparti dalla prossima scheda.
+- 7-13 giorni: avviso "volume ridotto" (2 serie, RPE 6-7, niente test).
+- 14+ giorni: avviso "parti da Recupero/Reset, poi riprendi al 60-70%".
+
+**Esercizi con figure nuove:** ogni esercizio CAVCI (Dip, Trazione, RDL, ATG Split Squat, Sled push/drag, Corsa, Cyclette, KB Swing russo, Goblet, One Arm Row, Carry, Turkish Get-Up, Mobility, Child Pose, Dead Hang, 90/90 Breathing, Dead Bug, Ponte Glutei, Hip Flexor, Single Leg Balance, Tibialis...) ha una figura SVG illustrata nuova, con prescrizioni dal manuale (serie/reps/RPE), tecnica, errori e correzioni.
+
+**Storico reale importato:** al primo avvio l'app carica le tue **96 sessioni Hevy** (ago 2025 - giu 2026). Cosi grafici, record personali e il prefill "ultima volta" partono dai tuoi numeri veri (es. RDL 90 kg, Split Squat 50 kg, Dip +22 kg). Avvii in modalita Forza e parti gia dai carichi giusti.
+
+**Temi automatici per blocco:** Upper ciano (Six Eyes), Lower blu, Sled rosso, Corsa ciano, Cyclette/Recupero/Reset viola, Kettlebell rosso. L'accento cambia da solo in base al blocco.
+
+Nuovi file: `cavci.js` (routine + figure + motore rotazione), `seed.js` (import storico), `cavci_seed.json` (i tuoi dati). Service worker a `aureo-v16`.
+
+> Nota dal manuale: priorita alla colonna (hip hinge controllato), stimolo alto/recupero alto, e il sistema CAVCI come "sistema operativo personale" - coerente con i principi ACSM di individualizzazione e aderenza, non un protocollo clinico.
