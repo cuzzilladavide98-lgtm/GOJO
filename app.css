@@ -518,3 +518,23 @@ input{font-size:16px;}            /* niente auto-zoom al focus su iOS */
   *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;
     transition-duration:.001ms !important;scroll-behavior:auto !important;}
 }
+
+/* =====================================================================
+   Allenamento: layout STABILE e ancorato (niente scroll/jump su iPhone)
+   ===================================================================== */
+#view-workout{overflow:hidden;}
+.wo-stage{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;}
+.wo-foot{flex:0 0 auto;width:100%;padding-top:6px;}
+.wo-modewrap{margin-top:4px;}
+.wo-cue{margin-top:8px;min-height:18px;}
+.wo-hint{margin-top:6px;}
+.wo-next{display:none;}
+.wo-controls{margin-top:12px;}
+/* dimensioni che garantiscono il fit (375x812) senza scroll */
+#view-workout[data-mode="work"] .timer-wrap{width:200px;height:200px;margin-top:6px;}
+#view-workout[data-mode="work"] .timer-num .t{font-size:62px;}
+#view-workout[data-mode="work"] .wo-illu{max-width:84px;width:26%;}
+#view-workout[data-mode="rest"] .wo-illu{max-width:138px;width:40%;}
+#view-workout[data-mode="rest"] .timer-wrap{width:150px;height:150px;}
+#view-workout[data-mode="prep"] .wo-illu{max-width:148px;width:42%;}
+#view-workout[data-mode="prep"] .timer-wrap{width:158px;height:158px;}

@@ -251,16 +251,16 @@ EXERCISES.push({
     ["Petto che non scende vicino alla mano", "Aumenta il range e controlla l'eccentrica."]
   ],
   illu: {
-    vb: "0 0 200 200", floor: 178,
-    body: [[100,118,100,82,22],[92,84,76,52,14],[108,84,124,52,14],
-           [78,118,58,142,14],[58,142,40,154,12],
-           [122,118,158,150,14],
-           [100,118,84,118,0]],
-    head: [100,134,10],
-    refs: [[40,118,160,118,"level"]],
-    arrows: [["arrow",118,128,78,140]],
-    hi: [[78,118,58,142,18],[58,142,40,154,16],[100,100,100,118,20]],
-    note: "Vista frontale: peso sul braccio flesso, l'altro teso lateralmente. Le anche restano livellate (linea orizzontale)."
+    vb: "0 0 200 200", floor: 176,
+    body: [[86,120,140,150,24],
+           [140,150,164,162,14],[164,162,184,172,11],[184,172,184,164,9],
+           [96,124,86,150,14],[86,150,92,174,12],
+           [104,122,150,150,14],[150,150,164,150,10]],
+    head: [80,114,11],
+    refs: [[92,150,164,150,"level"]],
+    arrows: [["arrow",114,130,92,150]],
+    hi: [[96,124,86,150,18],[86,150,92,174,16]],
+    note: "Push-up a mani larghe visto da dietro: il petto scende verso una mano (gomito flesso), l'altro braccio resta teso lateralmente. Anche quadrate."
   }
 });
 
@@ -381,16 +381,13 @@ EXERCISES.push({
   ],
   illu: {
     vb: "0 0 220 190", floor: 176,
-    bench: [120,120,186,134],
-    ghost: [[140,118,138,78,22],[138,78,136,50,14],[136,50,135,28,11]],
-    ghostHead: [148,118,9],
-    body: [[140,118,96,116,22],[96,116,68,114,14],[68,114,48,112,11],
-           [140,118,156,112,10]],
-    head: [150,118,9],
-    refs: [[48,112,140,118,"bodyline"]],
-    arcs: [["arc",138,60,96,116,110,90]],
-    hi: [[140,118,98,116,22]],
-    note: "Appoggio solo sulle scapole. Corpo come asse unica spalle-anca-caviglia (verticale → quasi parallelo). Niente inarco lombare."
+    bench: [34,118,118,132],
+    body: [[104,120,178,68,22],[178,68,198,56,11]],
+    head: [96,122,9],
+    refs: [[104,120,198,56,"bodyline"]],
+    arcs: [["arc",150,150,178,68,116,150]],
+    hi: [[104,120,172,72,22]],
+    note: "Sdraiato sulla panca, appoggio solo sulle scapole: corpo rigido in linea che sale e scende come un blocco. Niente inarco lombare."
   }
 });
 
