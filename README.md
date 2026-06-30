@@ -147,3 +147,47 @@ Upper -> Lower -> Sled -> Corsa -> Cyclette -> Kettlebell -> Recupero -> ripeti.
 Nuovi file: `cavci.js` (routine + figure + motore rotazione), `seed.js` (import storico), `cavci_seed.json` (i tuoi dati). Service worker a `aureo-v16`.
 
 > Nota dal manuale: priorita alla colonna (hip hinge controllato), stimolo alto/recupero alto, e il sistema CAVCI come "sistema operativo personale" - coerente con i principi ACSM di individualizzazione e aderenza, non un protocollo clinico.
+
+## v17 - CAVCI al centro (Hollow Purple), Corpo Libero e Player a carte
+**1. CAVCI piu centrale e in Hollow Purple.** La Rotazione CAVCI e ora la prima cosa in Home (sopra tutto), con l'occhio in filigrana e l'accento sempre **Hollow Purple** (viola), la tecnica piu forte di Gojo. Anche la Home e il player seguono il viola. I 17 del Manuale Tecnico restano piu in basso, consultabili.
+
+**2. Traccia "Corpo Libero" (floor-friendly).** L'altra faccia della medaglia: un toggle **Attrezzi / Corpo libero** nella card CAVCI. La versione a corpo libero e una rotazione 7 giorni scientificamente sostitutiva, pensata per ogni eta e per il pavimento (controllo del corpo):
+- Upper: Push-up, Rematore a corpo libero, Pike push-up.
+- Lower: Squat full ROM, Affondo indietro, Stacco a una gamba.
+- Locomozione: Bear Crawl, Crab Walk.
+- Cardio a terra: Mountain Climber, Marcia a ginocchia alte (basso impatto).
+- Recupero attivo: Pedalata a terra, Plank laterale.
+- Controllo & Core: Hollow Body Hold, Bird Dog, Get-Up a corpo libero.
+- Recupero: camminata, mobility, child pose, 90/90 breathing.
+La rotazione (prossima tappa, salti giorni) e condivisa: cambi solo gli esercizi. 14 figure SVG nuove dedicate.
+
+**3. Player musica ridisegnato (smart, a carte).** Schermata unica stile lettore (Spotify/YT Music): in alto la barra con tre sottomenu a portata di tocco - **Player**, **Le tue playlist**, **Aggiungi**. Il player incorporato resta in vita mentre cambi sottomenu e mentre ti alleni (non riparte). Le scorciatoie sono carte in griglia, c'e il pulsante grande "Apri YouTube Music" (Premium) e l'aggiunta brano/preferiti su carte dedicate. Accento Hollow Purple.
+
+Service worker a `aureo-v17`. 40 esercizi totali tra i due binari CAVCI; verifica jsdom: figure tutte ok, toggle traccia, tema viola, player persistente, 0 errori.
+
+## v18 - Player di allenamento "alla lettore" (alleggerito)
+Ripensata la schermata dell'allenamento guidato come un lettore musicale: **una sola pagina, senza scorrere**, con l'essenziale sempre in vista e i dettagli in **sottomenu apribili al tocco**.
+- In vista restano solo: fase, illustrazione (come copertina), nome esercizio, timer e i comandi prev/play/next (come i tasti di un player).
+- Tolti dalla schermata principale il logger sempre aperto e le righe ritmo/respiro che la appesantivano.
+- Tre "chip" sotto al timer aprono dei pannelli a scomparsa (bottom sheet): **Reps** (stepper grande per registrare), **Tecnica** (ritmo, respiro, tensione, movimento, errore), **Salta**.
+- Il pannello si apre dal basso e si chiude toccando fuori o "Fatto". Niente piu schermata affollata durante la sessione.
+Service worker a `aureo-v18`. (La tab Musica resta il player a carte introdotto in v17.)
+
+## v19 - Anatomia e comprensione del movimento (illustrazioni)
+Le figure sono state rese piu chiare sia come anatomia sia come lettura del movimento.
+- **Corpo continuo e articolato**: il renderer ora "salda" le ossa con nodi alle articolazioni (spalle, gomiti, anche, ginocchia). Le figure non sembrano piu stecchini staccati ma corpi muscolati e coerenti. Vale per TUTTE le illustrazioni (CAVCI, corpo libero e i 17 del manuale).
+- **Doppio fotogramma (inizio -> fine)**: sui movimenti composti compare il fotogramma "fantasma" della posizione di partenza dietro a quella finale, con freccia direzionale. Cosi il movimento si capisce a colpo d'occhio: lo stacco rumeno mostra in piedi -> hinge; squat e goblet in piedi -> giu; dip e trazione la spinta/tirata; affondo la discesa.
+- **Frecce piu marcate** e fantasma piu visibile per direzione e ampiezza del ROM.
+Service worker a `aureo-v19`.
+
+## v20 - Movimento su TUTTI gli esercizi
+Esteso il doppio fotogramma / cue di movimento a ogni esercizio CAVCI (40 in totale), non solo ai principali:
+- **Dinamici su/giu o spinta/tirata**: fotogramma "fantasma" della posizione di partenza dietro a quella finale (es. push-up alto->basso, pike, reverse nordic, kettlebell swing, one arm row, get-up, single-leg RDL, tibialis).
+- **Locomozione e movimenti alternati**: fantasma della falcata/arto opposto (corsa, camminata, sled, carry, bear/crab crawl, mountain climber, marcia, pedalata, dead bug, bird dog) per rendere il ciclo del passo o l'alternanza.
+- **Tenute isometriche**: piccola freccia che indica l'azione/intenzione (plank laterale = bacino su, dead hang = decompressione, 90/90 e hollow = lombare a terra, flessori = retroversione). Sono tenute, quindi niente fotogramma ma una direzione chiara.
+Il builder ora supporta `swap` (falcata opposta automatica) e `start` (posa di partenza). Service worker a `aureo-v20`.
+
+## v21 - Figure piu pulite + stabilita/compatibilita
+- **Intensita del fantasma calibrata**: piu marcato sui movimenti composti (squat, stacco, dip, trazione, affondo: contrasto inizio->fine evidente) e piu tenue sulla locomozione (corsa, camminata, sled, crawl: la falcata opposta resta una traccia leggera, niente affollamento). Il builder espone `ghostOp` per regolare caso per caso.
+- **Stress test iPhone 13 mini (jsdom)**: 11 fasi tutte superate, 0 errori - navigazione intensiva, rendering di tutte le figure, player guidato completo coi sottomenu, diario Forza, musica, backup e temi. Dettagli e check di compatibilita iOS 26 in AUDIT.md.
+Service worker a `aureo-v21`.

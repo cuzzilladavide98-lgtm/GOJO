@@ -39,3 +39,25 @@ Data: giugno 2026. Target: iPhone 13 mini (375x812pt, DPR 3, iOS Safari 15+), us
 - **Player musica incorporato**: usa l'embed YouTube standard (music.youtube.com non e iframe-abile) e si ferma a schermo bloccato; per ascolto Premium in background usare il pulsante "Apri YouTube Music".
 - **Storico**: cap automatico a 200 sessioni salvate (evita crescita illimitata di localStorage). Anche con centinaia di voci il rendering resta rapido.
 - **Audit eseguito staticamente + via DOM headless (jsdom)**: per la resa pixel-perfect finale vale sempre una prova reale su iPhone 13 mini installando la PWA.
+
+## v21 - Stabilita e compatibilita (stress test iPhone 13 mini)
+Stress test in emulazione (jsdom, 375x812) - 11 fasi, tutte PASS, 0 errori console:
+- Navigazione intensiva (40 cambi tab), toggle traccia ripetuto, apertura di 10+ schede esercizio.
+- Rendering: 40/40 figure CAVCI + 17 del manuale, nessuna eccezione.
+- Player guidato completo: prep -> work -> rest -> ... -> finish, con sottomenu Reps e Tecnica, registrazione e salto.
+- Diario Forza: modifica carico, serie aggiuntiva, RPE, salvataggio.
+- Musica: sottomenu, caricamento sorgente, aggiunta scorciatoia.
+- Backup (export JSON/CSV) e cambio tema (auto/cyan/purple) senza errori; storico coerente.
+
+### Compatibilita iOS 26 (iPhone 13 mini) - elementi usati e stato
+- PWA standalone, manifest, apple-touch-icon, status bar black-translucent: supportati.
+- Service Worker + Cache API (offline): supportati (su HTTPS/installata).
+- Wide-gamut P3 `color(display-p3 ...)` e `@media (color-gamut: p3)` / `(dynamic-range: high)`: Safari 15+/HDR: supportati.
+- `content-visibility` + `contain-intrinsic-size`: Safari 18+ (iOS 26 ok); su iOS vecchi viene ignorato senza danni.
+- `100dvh`, `@supports`, `env(safe-area-inset-*)`, `position:fixed` (bottom sheet): supportati.
+- WebAudio (sbloccato al primo tocco), `requestAnimationFrame`, `localStorage`, `fetch`, `prompt/confirm`: supportati.
+- `navigator.vibrate`: non supportato su iOS -> chiamate protette (no-op), nessun errore.
+- Notifiche: il web push su iOS richiede la PWA installata; il promemoria resta "all'apertura" (onesto, no server).
+- Download backup via `<a download>`: parte da gesto utente (ok). `maximum-scale=1`: zoom a pizzico disattivato di proposito per layout stabile.
+
+Service worker a `aureo-v21`.

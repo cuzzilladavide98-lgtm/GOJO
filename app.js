@@ -28,7 +28,7 @@
   } catch (e) {}
   function savePref() { try { localStorage.setItem("aureo_pref", JSON.stringify(PREF)); } catch (e) {} }
   var THEME_BY_BLOCK = { 1: "blue", 2: "cyan", 3: "red", 4: "purple" };
-  function resolveTheme(ctx) { if (PREF.theme && PREF.theme !== "auto") return PREF.theme; if (typeof ctx === "string") return ctx; return (ctx && THEME_BY_BLOCK[ctx]) || "cyan"; }
+  function resolveTheme(ctx) { if (PREF.theme && PREF.theme !== "auto") return PREF.theme; if (typeof ctx === "string") return ctx; return (ctx && THEME_BY_BLOCK[ctx]) || "purple"; }
   function applyTheme(ctx) { document.documentElement.setAttribute("data-theme", resolveTheme(ctx)); }
   var THEMES = [{ id: "auto", name: "Automatico", c: "#00E5FF" }, { id: "cyan", name: "Six Eyes", c: "#00E5FF" }, { id: "blue", name: "Lapse", c: "#6FB6FF" }, { id: "purple", name: "Hollow", c: "#C4A0FF" }, { id: "red", name: "Reverse", c: "#FF7A7A" }, { id: "gold", name: "Aureo", c: "#FBD27B" }];
   var GOJO_QUOTES = ["\"Nah, I'd win.\" - Gojo", "Sono semplicemente il piu forte.", "\"Throughout Heaven and Earth, I alone am the honored one.\"", "Fin dove arriva il tuo limite? Oltre.", "Va tutto bene: sono io il piu forte.", "Nessun limite. Solo tecnica."];
@@ -131,6 +131,7 @@
     applyTheme();
     var hist = loadHistory();
     var h = "";
+    if (window.CAVCI) h += window.CAVCI.renderHomeSection();
     h += '<div class="hero"><div class="glow"></div><div class="hero-eye">' + EYE + '</div>' +
       '<div class="hero-over">Dominio &middot; Limitless</div>' +
       '<h2>Pronto ad allenarti?</h2>' +
@@ -156,7 +157,6 @@
         '<div class="chev">&rsaquo;</div></button>';
     }
 
-    if (window.CAVCI) h += window.CAVCI.renderHomeSection();
     h += '<div class="section-title">Come vuoi allenarti?</div>';
     h += '<div class="seg">' +
       '<button class="seg-b' + (PREF.mode !== "forza" ? " on" : "") + '" data-segmode="guided">Guidato</button>' +
@@ -353,6 +353,7 @@
     loadHistory: loadHistory, saveHistory: saveHistory, savePref: savePref, applyTheme: applyTheme
   };
 
+  try { if (!localStorage.getItem("aureo_v17")) { if (!PREF.theme || PREF.theme === "cyan") { PREF.theme = "auto"; savePref(); } localStorage.setItem("aureo_v17", "1"); } } catch (e) {}
   applyTheme();
   renderHome();
   show("home");

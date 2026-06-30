@@ -41,7 +41,7 @@
   function startWorkout(list, title) {
     if (!list || !list.length) return;
     WO.steps = buildSteps(list);
-    WO.idx = 0; WO.title = title; WO.running = true; WO.saved = false;
+    WO.idx = 0; WO.title = title; WO.running = true; WO.saved = false; WO.startedAt = Date.now();
     initAudio();
     byId("view-workout").classList.remove("hidden");
     byId("appbar").classList.add("hidden");
@@ -57,7 +57,7 @@
       return { id: w.ex.id, n: w.ex.n, nome: w.ex.nome, unit: w.rec.unit, value: w.rec.skipped ? null : w.rec.value, skipped: w.rec.skipped };
     });
     if (!items.length) return null;
-    return { id: Date.now(), date: new Date().toISOString(), title: WO.title, status: status, items: items };
+    return { id: Date.now(), date: new Date().toISOString(), title: WO.title, status: status, durationSec: Math.round((Date.now() - (WO.startedAt || Date.now())) / 1000), items: items };
   }
   function persist(status) {
     if (WO.saved) return;
@@ -75,6 +75,7 @@
     byId("view-workout").classList.add("hidden");
     byId("appbar").classList.remove("hidden");
     byId("tabbar").classList.remove("hidden");
+    if (AU.applyTheme) AU.applyTheme();
   }
 
   function renderWorkoutShell() {
@@ -94,35 +95,69 @@
         '<div class="timer-wrap" id="woTimerWrap">' + ring +
           '<div class="timer-num"><div class="t" id="woTime">0</div><div class="lab" id="woLab"></div></div></div>' +
         '<div class="wo-cue" id="woCue"></div>' +
-        '<div class="wo-hint" id="woHint"></div>' +
       '</div>' +
       '<div class="wo-foot">' +
-        '<div class="logger hidden" id="woLogger">' +
-          '<div class="lg-label" id="woLgLabel">Registra</div>' +
-          '<div class="lg-stepper"><button class="lg-btn" id="woMinus" aria-label="Diminuisci">&minus;</button>' +
-          '<div class="lg-val"><span id="woVal">0</span> <small id="woUnit"></small></div>' +
-          '<button class="lg-btn" id="woPlus" aria-label="Aumenta">+</button></div></div>' +
-        '<button class="skip-link" id="woSkip">Salta esercizio</button>' +
+        '<div class="wo-actions">' +
+          '<button class="wo-chip" id="woRepsChip"><span class="wc-k">Reps</span><span class="wc-v"><span id="woChipVal">0</span> <small id="woChipUnit"></small></span></button>' +
+          '<button class="wo-chip" id="woTec"><span class="wc-k">Tecnica</span><span class="wc-v">Ritmo, respiro, errori</span></button>' +
+          '<button class="wo-chip skip" id="woSkip"><span class="wc-k">Salta</span><span class="wc-v">esercizio</span></button>' +
+        '</div>' +
         '<div class="wo-controls">' +
           '<button class="ctrl" id="woPrev" aria-label="Esercizio precedente">' + IC.prev + '</button>' +
           '<button class="ctrl play" id="woPlay" aria-label="Avvia o metti in pausa">' + IC.pause + '</button>' +
           '<button class="ctrl" id="woNextBtn" aria-label="Avanti">' + IC.next + '</button></div>' +
-      '</div>';
+      '</div>' +
+      '<div class="wo-sheet" id="woSheet"></div>';
 
     byId("woClose").onclick = endWorkout;
     byId("woPlay").onclick = togglePlay;
     byId("woNextBtn").onclick = function () { gotoStep(WO.idx + 1); };
     byId("woPrev").onclick = function () { gotoStep(WO.idx <= 0 ? 0 : WO.idx - 1); };
     byId("woSkip").onclick = skipExercise;
-    byId("woMinus").onclick = function () { stepVal(-1); };
-    byId("woPlus").onclick = function () { stepVal(1); };
+    byId("woRepsChip").onclick = openReps;
+    byId("woTec").onclick = openTec;
+    byId("woSheet").addEventListener("click", sheetClick);
+  }
+
+  function openSheet(html) { var sh = byId("woSheet"); sh.innerHTML = '<div class="ws-card">' + html + '</div>'; sh.classList.add("open"); }
+  function closeSheet() { var sh = byId("woSheet"); if (sh) { sh.classList.remove("open"); sh.innerHTML = ""; } }
+  function sheetClick(e) {
+    if (e.target === byId("woSheet")) { closeSheet(); return; }
+    var c = e.target.closest("[data-ws]"); if (c) { if (c.dataset.ws === "close") closeSheet(); return; }
+    var st = e.target.closest("[data-ws-step]"); if (st) stepVal(+st.dataset.wsStep);
+  }
+  function openReps() {
+    if (!WO.curWork) return;
+    var ex = WO.curWork.ex, rec = WO.curWork.rec;
+    openSheet('<div class="ws-head"><div><div class="ws-title">Ripetizioni svolte</div><div class="ws-sub">' + esc(ex.nome) + '</div></div><button class="ws-x" data-ws="close" aria-label="Chiudi">' + IC.close + '</button></div>' +
+      '<div class="lg-stepper big"><button class="lg-btn" data-ws-step="-1" aria-label="Diminuisci">&minus;</button>' +
+      '<div class="lg-val"><span id="woSheetVal">' + rec.value + '</span> <small>' + esc(rec.unit) + '</small></div>' +
+      '<button class="lg-btn" data-ws-step="1" aria-label="Aumenta">+</button></div>' +
+      '<button class="btn" data-ws="close">Fatto</button>');
+  }
+  function openTec() {
+    var st = WO.steps[WO.idx]; if (!st) return; var ex = st.ex;
+    var h = '<div class="ws-head"><div><div class="ws-title">' + esc(ex.nome) + '</div><div class="ws-sub">' + esc(ex.categoria) + '</div></div><button class="ws-x" data-ws="close" aria-label="Chiudi">' + IC.close + '</button></div>';
+    h += '<div class="rrt">' +
+      '<div class="item"><div class="k">Ritmo</div><div class="v">' + esc(ex.ritmo || "-") + '</div></div>' +
+      '<div class="item"><div class="k">Respiro</div><div class="v">' + esc(ex.respiro || "-") + '</div></div>' +
+      '<div class="item"><div class="k">Tensione</div><div class="v">' + esc(ex.tensione || "-") + '</div></div></div>';
+    if (ex.fasi && ex.fasi.length) { h += '<div class="section-title">Movimento</div>'; ex.fasi.forEach(function (f) { h += '<div class="phase"><div class="ph-dot"></div><div><div class="ph-label">' + esc(f[0]) + '</div><div class="ph-text">' + esc(f[1]) + '</div></div></div>'; }); }
+    if (ex.errori && ex.errori.length) { var er = ex.errori[0]; h += '<div class="err"><div class="bad">' + esc(er[0]) + '</div><div class="fix">' + esc(er[1]) + '</div></div>'; }
+    openSheet(h);
+  }
+  function refreshReps() {
+    var v = WO.curWork ? WO.curWork.rec.value : 0, u = WO.curWork ? WO.curWork.rec.unit : "";
+    var c = byId("woChipVal"); if (c) c.textContent = v;
+    var cu = byId("woChipUnit"); if (cu) cu.textContent = u;
+    var sv = byId("woSheetVal"); if (sv) sv.textContent = v;
   }
 
   function stepVal(d) {
     if (!WO.curWork) return;
     WO.curWork.rec.value = Math.max(0, (WO.curWork.rec.value || 0) + d);
     WO.curWork.rec.skipped = false;
-    byId("woVal").textContent = WO.curWork.rec.value;
+    refreshReps();
   }
 
   function pop(el) { if (!el) return; el.classList.remove("anim"); void el.offsetWidth; el.classList.add("anim"); }
@@ -149,29 +184,12 @@
     byId("woName").textContent = st.ex.nome;
     byId("woCat").textContent = st.ex.categoria;
 
-    if (st.mode === "work") {
-      byId("woCue").textContent = "";
-      byId("woHint").innerHTML = '<span>Ritmo: <b>' + esc(short(st.ex.ritmo)) + '</b></span><span>Respiro: <b>' + esc(short(st.ex.respiro)) + '</b></span>';
-      byId("woLab").textContent = st.ex.tipo === "hold" ? "tieni" : st.ex.tipo === "carry" ? "cammina" : "secondi";
-    } else if (st.mode === "rest") {
-      byId("woCue").textContent = "Prossimo: " + st.ex.nome;
-      byId("woHint").innerHTML = '<span>Controlla le ripetizioni svolte, poi preparati</span>';
-      byId("woLab").textContent = "recupero";
-    } else {
-      byId("woCue").textContent = "Mettiti in posizione";
-      byId("woHint").innerHTML = "";
-      byId("woLab").textContent = "secondi";
-    }
-
-    var lg = byId("woLogger");
-    if (WO.curWork) {
-      lg.classList.remove("hidden");
-      byId("woLgLabel").textContent = st.mode === "rest" ? ("Quante ne hai fatte? (" + WO.curWork.ex.nome + ")") : "Registra le tue ripetizioni";
-      byId("woVal").textContent = WO.curWork.rec.value;
-      byId("woUnit").textContent = WO.curWork.rec.unit;
-    } else lg.classList.add("hidden");
-
-    byId("woSkip").style.display = (st.mode === "prep") ? "none" : "block";
+    byId("woLab").textContent = st.mode === "work" ? (st.ex.tipo === "hold" ? "tieni" : st.ex.tipo === "carry" ? "cammina" : "secondi") : st.mode === "rest" ? "recupero" : "secondi";
+    byId("woCue").textContent = st.mode === "rest" ? ("Prossimo: " + st.ex.nome) : st.mode === "prep" ? "Mettiti in posizione" : "";
+    var rc = byId("woRepsChip");
+    if (WO.curWork) { rc.classList.remove("hidden"); refreshReps(); } else rc.classList.add("hidden");
+    byId("woSkip").classList.toggle("hidden", st.mode === "prep");
+    closeSheet();
 
 
     pop(byId("woTimerWrap")); pop(byId("woName")); pop(byId("woIllu"));

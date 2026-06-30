@@ -8,19 +8,27 @@
   function J(a, b, w) { return [a[0], a[1], b[0], b[1], w]; }
   function P(o) {
     var t = o.torsoW || 22, ua = 12, fa = 10, th = 14, sh = 11;
-    var body = [];
-    if (o.neck && o.hip) body.push(J(o.neck, o.hip, t));
-    if (o.armL) { body.push(J(o.armL[0], o.armL[1], ua)); body.push(J(o.armL[1], o.armL[2], fa)); }
-    if (o.armR) { body.push(J(o.armR[0], o.armR[1], ua)); body.push(J(o.armR[1], o.armR[2], fa)); }
-    if (o.legL) { body.push(J(o.legL[0], o.legL[1], th)); body.push(J(o.legL[1], o.legL[2], sh)); }
-    if (o.legR) { body.push(J(o.legR[0], o.legR[1], th)); body.push(J(o.legR[1], o.legR[2], sh)); }
+    function bonesFrom(j) {
+      var b = [];
+      if (j.neck && j.hip) b.push(J(j.neck, j.hip, t));
+      if (j.armL) { b.push(J(j.armL[0], j.armL[1], ua)); b.push(J(j.armL[1], j.armL[2], fa)); }
+      if (j.armR) { b.push(J(j.armR[0], j.armR[1], ua)); b.push(J(j.armR[1], j.armR[2], fa)); }
+      if (j.legL) { b.push(J(j.legL[0], j.legL[1], th)); b.push(J(j.legL[1], j.legL[2], sh)); }
+      if (j.legR) { b.push(J(j.legR[0], j.legR[1], th)); b.push(J(j.legR[1], j.legR[2], sh)); }
+      return b;
+    }
+    var body = bonesFrom(o);
     if (o.extra) body = body.concat(o.extra);
     var il = { vb: o.vb || "0 0 200 200", body: body };
     if (o.head) il.head = o.head;
     ["floor", "wall", "bar", "bench", "anchor", "weight", "refs", "arrows", "arcs", "hi",
-     "ghost", "ghostHead", "wrong", "wrongHead", "heads", "labels", "note"].forEach(function (k) {
+     "ghost", "ghostHead", "ghostOp", "wrong", "wrongHead", "heads", "labels", "note"].forEach(function (k) {
       if (o[k] !== undefined) il[k] = o[k];
     });
+    if (il.ghost === undefined) {
+      var gj = o.start || (o.swap ? { neck: o.neck, hip: o.hip, head: o.head, armL: o.armR, armR: o.armL, legL: o.legR, legR: o.legL } : null);
+      if (gj) { il.ghost = bonesFrom(gj); if (gj.head) il.ghostHead = gj.head; if (il.ghostOp === undefined) il.ghostOp = o.swap ? 0.18 : 0.42; }
+    } else if (il.ghostOp === undefined) { il.ghostOp = 0.42; }
     return il;
   }
   window.CAVCI_P = P;
@@ -41,7 +49,7 @@
         bar: [56, 116, 92, 116], refs: [[108, 116, 144, 116, "press"]],
         hi: [[86, 56, 82, 86, 16], [114, 56, 118, 86, 16], [90, 60, 110, 60, 13]],
         arrows: [["a", 152, 126, 152, 100]],
-        note: "Dip zavorrato: spinta di petto e tricipiti, scapole basse." })
+        ghost: [[100,44,100,104,22],[86,48,87,82,12],[87,82,88,114,10],[114,48,113,82,12],[113,82,112,114,10],[100,104,112,128,14],[112,128,104,142,11],[100,104,88,128,14],[88,128,96,142,11]], ghostHead: [100,30,11], note: "Dip zavorrato: spinta di petto e tricipiti, scapole basse." })
     },
     chinup: {
       nome: "Trazione / Chin-Up (zavorrato)", categoria: "Forza Upper", tipo: "dynamic", work: 35, rest: 150,
@@ -59,7 +67,7 @@
         bar: [40, 28, 160, 28],
         hi: [[90, 62, 86, 98, 15], [110, 62, 114, 98, 15], [90, 60, 89, 46, 12], [110, 60, 111, 46, 12]],
         arrows: [["a", 150, 56, 150, 32]],
-        note: "Trazione da dead hang: dorsali e bicipiti, gomiti verso le tasche." })
+        ghost: [[100,48,100,104,21],[90,52,86,40,12],[86,40,90,30,10],[110,52,114,40,12],[114,40,110,30,10],[100,104,96,138,14],[96,138,98,162,11],[100,104,104,138,14],[104,138,102,162,11]], ghostHead: [100,36,10], note: "Trazione da dead hang: dorsali e bicipiti, gomiti verso le tasche." })
     },
     facepull: {
       nome: "Face Pull / Extra-rotazioni", categoria: "Forza Upper", tipo: "dynamic", work: 35, rest: 75, opt: true,
@@ -76,7 +84,7 @@
         floor: 184, refs: [[64, 50, 136, 50, "track"]],
         hi: [[86, 58, 66, 56, 14], [114, 58, 134, 56, 14]],
         arrows: [["a", 70, 64, 80, 48], ["a", 130, 64, 120, 48]],
-        note: "Face pull: deltoide posteriore e cuffia, gomiti alti." })
+        start: { head: [100,40,11], neck: [100,54], hip: [100,120], armL: [[86,58],[72,60],[58,62]], armR: [[114,58],[128,60],[142,62]], legL: [[100,120],[96,152],[96,184]], legR: [[100,120],[104,152],[104,184]] }, note: "Face pull: deltoide posteriore e cuffia, gomiti alti." })
     },
     rdl: {
       nome: "Stacco Rumeno (RDL)", categoria: "Forza Lower", tipo: "dynamic", work: 35, rest: 165,
@@ -95,7 +103,7 @@
         refs: [[58, 66, 158, 110, "bodyline"]],
         hi: [[150, 104, 150, 150, 17], [150, 104, 156, 150, 17], [78, 80, 150, 104, 14]],
         arcs: [["arc", 150, 104, 120, 86, 168, 92]],
-        note: "Hip hinge: il movimento parte dall'anca, schiena neutra, bilanciere vicino." })
+        ghost: [[150,44,150,110,21],[140,48,142,92,12],[142,92,146,150,10],[160,48,158,92,12],[158,92,154,150,10],[150,110,150,150,14],[150,150,148,184,11],[150,110,156,150,14],[156,150,160,184,11]], ghostHead: [150,30,10], note: "Hip hinge: il movimento parte dall'anca, schiena neutra, bilanciere vicino." })
     },
     splitsquat: {
       nome: "ATG Split Squat", categoria: "Forza Lower", tipo: "dynamic", work: 40, rest: 105,
@@ -112,7 +120,7 @@
         legL: [[100, 110], [134, 150], [142, 184]], legR: [[100, 110], [78, 162], [64, 184]],
         weight: [80, 114, 92, 126], floor: 184, refs: [[100, 30, 100, 110, "plumb"]],
         hi: [[100, 110, 134, 150, 17], [78, 162, 64, 184, 13]],
-        note: "Split squat profondo: ginocchio avanti, busto alto, controllo unilaterale." })
+        ghost: [[100,40,100,96,22],[88,44,86,76,12],[86,76,86,106,10],[112,44,114,76,12],[114,76,114,106,10],[100,96,128,140,14],[128,140,140,184,11],[100,96,84,150,14],[84,150,64,184,11]], ghostHead: [100,26,11], arrows: [["a",150,110,150,150]], note: "Split squat profondo: ginocchio avanti, busto alto, controllo unilaterale." })
     },
     revnordic: {
       nome: "Reverse Nordic", categoria: "Forza Lower", tipo: "dynamic", work: 30, rest: 90, opt: true,
@@ -128,7 +136,7 @@
         legL: [[104, 132], [100, 158], [120, 168]], legR: [[104, 132], [104, 158], [124, 168]],
         floor: 168, refs: [[134, 60, 104, 132, "bodyline"]],
         hi: [[104, 132, 100, 158, 16]],
-        note: "Reverse nordic: anca e busto in linea, discesa dai quadricipiti." })
+        start: { head: [104,58,10], neck: [104,72], hip: [104,132], armL: [[98,76],[96,104],[96,126]], armR: [[110,76],[112,104],[112,126]], legL: [[104,132],[100,158],[120,168]], legR: [[104,132],[104,158],[124,168]] }, note: "Reverse nordic: anca e busto in linea, discesa dai quadricipiti." })
     },
     sledpush: {
       nome: "Sled Push (25 m)", categoria: "Sled - Locomozione", tipo: "carry", work: 40, rest: 90,
@@ -145,7 +153,7 @@
         floor: 184, bench: [16, 150, 42, 178], extra: [[42, 92, 42, 178, 6]],
         hi: [[120, 108, 128, 150, 17], [120, 108, 156, 150, 17]],
         arrows: [["a", 150, 120, 184, 120]],
-        note: "Sled push: busto solido, passi corti, pressione continua." })
+        swap: true, note: "Sled push: busto solido, passi corti, pressione continua." })
     },
     sleddrag: {
       nome: "Backward Sled Drag (25 m)", categoria: "Sled - Locomozione", tipo: "carry", work: 40, rest: 90,
@@ -162,7 +170,7 @@
         floor: 184, bench: [158, 150, 184, 178], extra: [[100, 116, 158, 164, 5]],
         hi: [[100, 112, 88, 150, 16], [88, 150, 78, 184, 13]],
         arrows: [["a", 60, 120, 30, 120]],
-        note: "Backward drag con catena al bacino: ginocchio e VMO, busto alto." })
+        swap: true, note: "Backward drag con catena al bacino: ginocchio e VMO, busto alto." })
     },
     corsa: {
       nome: "Corsa Zona 2", categoria: "Condizionamento", tipo: "hold", work: 1500, rest: 0,
@@ -179,7 +187,7 @@
         legL: [[100, 108], [124, 138], [136, 150]], legR: [[100, 108], [80, 150], [62, 176]],
         floor: 184, hi: [[100, 108, 124, 138, 16]],
         arrows: [["a", 150, 110, 180, 110]],
-        note: "Corsa facile in Zona 2: ritmo conversazione, passo morbido." })
+        swap: true, note: "Corsa facile in Zona 2: ritmo conversazione, passo morbido." })
     },
     camminata: {
       nome: "Camminata", categoria: "Aerobico base", tipo: "hold", work: 600, rest: 0,
@@ -193,7 +201,7 @@
         armL: [[88, 56], [82, 84], [86, 112]], armR: [[112, 56], [118, 84], [114, 112]],
         legL: [[100, 110], [90, 150], [82, 184]], legR: [[100, 110], [112, 150], [122, 184]],
         floor: 184, arrows: [["a", 150, 120, 174, 120]],
-        note: "Camminata: recupero attivo, postura alta, passo sciolto." })
+        swap: true, note: "Camminata: recupero attivo, postura alta, passo sciolto." })
     },
     cyclette: {
       nome: "Cyclette Zona 2", categoria: "Cardio basso impatto", tipo: "hold", work: 1800, rest: 0,
@@ -211,7 +219,7 @@
         floor: 184, bench: [92, 116, 112, 126], extra: [[52, 84, 52, 150, 5], [112, 162, 112, 184, 6]],
         hi: [[104, 118, 124, 138, 16]],
         arcs: [["arc", 96, 150, 128, 150, 112, 168]],
-        note: "Cyclette a basso impatto: pedalata fluida, recupero attivo." })
+        swap: true, note: "Cyclette a basso impatto: pedalata fluida, recupero attivo." })
     },
     sideplank: {
       nome: "Plank Laterale", categoria: "Core / stabilita", tipo: "hold", work: 30, rest: 45,
@@ -225,7 +233,7 @@
         armL: [[70, 82], [62, 110], [60, 128]], legL: [[128, 104], [156, 120], [176, 128]],
         floor: 130, refs: [[44, 70, 176, 124, "bodyline"]],
         hi: [[64, 80, 128, 104, 14]],
-        note: "Plank laterale: corpo in linea, bacino alto, respiro regolare." })
+        arrows: [["a",150,118,150,92]], note: "Plank laterale: corpo in linea, bacino alto, respiro regolare." })
     },
     kbswing: {
       nome: "Kettlebell Swing (Russian)", categoria: "Kettlebell", tipo: "dynamic", work: 35, rest: 75,
@@ -243,7 +251,7 @@
         weight: [148, 76, 164, 92], floor: 184, refs: [[74, 56, 122, 108, "bodyline"]],
         hi: [[122, 108, 118, 150, 17], [78, 60, 122, 108, 14]],
         arcs: [["arc", 150, 150, 152, 84, 182, 120]],
-        note: "Swing russo: hip hinge esplosivo, bell fino al petto, schiena neutra." })
+        start: { head: [70,72,10], neck: [80,82], hip: [126,108], armL: [[92,86],[110,120],[120,150]], armR: [[96,84],[114,118],[124,150]], legL: [[126,108],[120,150],[112,184]], legR: [[126,108],[136,150],[144,184]] }, note: "Swing russo: hip hinge esplosivo, bell fino al petto, schiena neutra." })
     },
     goblet: {
       nome: "Goblet Squat", categoria: "Kettlebell", tipo: "dynamic", work: 35, rest: 90,
@@ -260,7 +268,7 @@
         legL: [[100, 128], [76, 150], [72, 184]], legR: [[100, 128], [124, 150], [128, 184]],
         weight: [92, 84, 108, 104], floor: 184, refs: [[100, 34, 100, 128, "plumb"]],
         hi: [[100, 128, 76, 150, 16], [100, 128, 124, 150, 16]],
-        note: "Goblet squat: bell al petto, busto alto, profondita controllata." })
+        ghost: [[100,44,100,112,22],[88,48,86,72,12],[86,72,98,88,10],[112,48,114,72,12],[114,72,102,88,10],[100,112,98,150,14],[98,150,96,184,11],[100,112,102,150,14],[102,150,104,184,11]], ghostHead: [100,30,11], arrows: [["a",152,118,152,152]], note: "Goblet squat: bell al petto, busto alto, profondita controllata." })
     },
     row: {
       nome: "One Arm Row", categoria: "Kettlebell", tipo: "dynamic", work: 35, rest: 75,
@@ -277,7 +285,7 @@
         weight: [120, 124, 132, 140], bench: [40, 142, 96, 152], floor: 184,
         refs: [[60, 90, 150, 96, "bodyline"]], hi: [[70, 92, 150, 96, 14]],
         arrows: [["a", 126, 128, 126, 104]],
-        note: "One arm row: schiena neutra, gomito al fianco, niente torsione." })
+        start: { head: [58,86,9], neck: [70,90], hip: [150,96], armL: [[80,94],[84,120],[88,142]], armR: [[120,92],[122,116],[124,140]], legL: [[150,96],[150,140],[150,176]], legR: [[150,96],[160,140],[162,176]] }, note: "One arm row: schiena neutra, gomito al fianco, niente torsione." })
     },
     carry: {
       nome: "Suitcase / Farmer Carry", categoria: "Kettlebell", tipo: "carry", work: 45, rest: 75,
@@ -294,7 +302,7 @@
         weight: [80, 118, 92, 140], floor: 184, refs: [[100, 30, 100, 184, "plumb"]],
         hi: [[86, 56, 86, 118, 13], [100, 60, 100, 110, 12]],
         arrows: [["a", 150, 122, 172, 122]],
-        note: "Carry: busto alto, anti-inclinazione, presa salda." })
+        swap: true, note: "Carry: busto alto, anti-inclinazione, presa salda." })
     },
     tgu: {
       nome: "Turkish Get-Up", categoria: "Kettlebell", tipo: "dynamic", work: 40, rest: 90, opt: true,
@@ -310,7 +318,7 @@
         legL: [[110, 120], [140, 142], [150, 176]], legR: [[110, 120], [96, 158], [80, 176]],
         weight: [108, 22, 122, 36], floor: 176, refs: [[114, 32, 114, 84, "press"]],
         hi: [[104, 84, 114, 32, 13]],
-        note: "Get-up: braccio overhead bloccato, occhi al peso, controllo totale." })
+        start: { head: [78,118,10], neck: [86,124], hip: [112,150], armR: [[100,126],[108,96],[114,66]], armL: [[80,130],[66,148],[56,162]], legL: [[112,150],[138,158],[150,176]], legR: [[112,150],[96,166],[80,176]] }, note: "Get-up: braccio overhead bloccato, occhi al peso, controllo totale." })
     },
     mobility: {
       nome: "Mobility Flow", categoria: "Recupero", tipo: "hold", work: 360, rest: 0,
@@ -326,7 +334,7 @@
         legL: [[120, 112], [120, 150], [126, 176]], legR: [[120, 112], [150, 150], [176, 170]],
         floor: 176, arcs: [["arc", 96, 72, 120, 32, 132, 46]],
         hi: [[96, 72, 120, 32, 13]],
-        note: "Mobility: affondo con apertura toracica, flusso senza forzare." })
+        swap: true, note: "Mobility: affondo con apertura toracica, flusso senza forzare." })
     },
     childpose: {
       nome: "Child Pose + Respiro", categoria: "Recupero", tipo: "hold", work: 150, rest: 0,
@@ -355,7 +363,7 @@
         armL: [[92, 62], [91, 46], [90, 30]], armR: [[108, 62], [109, 46], [110, 30]],
         legL: [[100, 118], [98, 150], [98, 182]], legR: [[100, 118], [102, 150], [102, 182]],
         bar: [40, 28, 160, 28], hi: [[92, 62, 91, 30, 12], [108, 62, 109, 30, 12]],
-        note: "Dead hang: corpo lungo, decompressione, presa rilassata." })
+        arrows: [["a",132,150,132,182]], note: "Dead hang: corpo lungo, decompressione, presa rilassata." })
     },
     breath90: {
       nome: "90/90 Breathing", categoria: "Reset posturale", tipo: "hold", work: 120, rest: 0,
@@ -371,7 +379,7 @@
         legL: [[120, 96], [120, 70], [150, 70]], legR: [[120, 96], [126, 70], [156, 70]],
         floor: 116, bench: [144, 64, 178, 112],
         hi: [[80, 96, 120, 96, 13]],
-        note: "90/90 breathing: lombare a terra, espiro lungo, costato giu." })
+        arrows: [["a",96,76,96,94]], note: "90/90 breathing: lombare a terra, espiro lungo, costato giu." })
     },
     deadbug: {
       nome: "Dead Bug", categoria: "Reset posturale", tipo: "dynamic", work: 30, rest: 30,
@@ -386,7 +394,7 @@
         armL: [[70, 102], [74, 120], [78, 134]], armR: [[70, 94], [92, 86], [112, 80]],
         legL: [[120, 98], [150, 98], [176, 96]], legR: [[120, 98], [120, 72], [142, 70]],
         floor: 116, hi: [[58, 98, 120, 98, 13]],
-        note: "Dead bug: lombare a terra, arto opposto, controllo crociato." })
+        swap: true, note: "Dead bug: lombare a terra, arto opposto, controllo crociato." })
     },
     glutebridge: {
       nome: "Ponte Glutei", categoria: "Reset posturale", tipo: "dynamic", work: 30, rest: 30,
@@ -403,7 +411,7 @@
         floor: 118, refs: [[40, 108, 108, 84, "bodyline"]],
         hi: [[54, 106, 108, 84, 15]],
         arrows: [["a", 108, 100, 108, 80]],
-        note: "Ponte glutei: spingi dai talloni, squeeze in alto, lombare protetta." })
+        ghost: [[54,110,108,110,20],[68,110,88,112,12],[88,112,108,112,10],[108,110,140,110,14],[140,110,148,116,11],[108,110,136,112,14],[136,112,144,116,11]], ghostHead: [40,110,10], note: "Ponte glutei: spingi dai talloni, squeeze in alto, lombare protetta." })
     },
     hipflexor: {
       nome: "Hip Flexor Stretch", categoria: "Reset posturale", tipo: "hold", work: 30, rest: 0,
@@ -419,7 +427,7 @@
         legL: [[100, 116], [128, 150], [136, 184]], legR: [[100, 116], [80, 160], [62, 184]],
         floor: 184, refs: [[100, 30, 100, 116, "plumb"]],
         hi: [[100, 116, 80, 160, 14]],
-        note: "Flessori: half-kneeling, bacino in retroversione, busto alto." })
+        arrows: [["a",92,120,108,128]], note: "Flessori: half-kneeling, bacino in retroversione, busto alto." })
     },
     slbalance: {
       nome: "Single Leg Balance", categoria: "Reset posturale", tipo: "hold", work: 30, rest: 0,
@@ -451,27 +459,230 @@
         legL: [[100, 114], [96, 150], [84, 166]], legR: [[100, 114], [104, 150], [116, 166]],
         floor: 184, hi: [[96, 150, 84, 166, 12], [104, 150, 116, 166, 12]],
         arrows: [["a", 100, 178, 100, 162]],
-        note: "Tibialis raise: punte su verso lo stinco, controllo della caviglia." })
+        start: { head: [100,40,11], neck: [100,54], hip: [100,114], armL: [[88,58],[86,88],[86,118]], armR: [[112,58],[114,88],[114,118]], legL: [[100,114],[96,150],[90,182]], legR: [[100,114],[104,150],[110,182]] }, note: "Tibialis raise: punte su verso lo stinco, controllo della caviglia." })
     }
   };
+
+  var EXBW = {
+    pushup: { nome: "Piegamenti (Push-Up)", categoria: "Upper - Corpo libero", tipo: "dynamic", work: 35, rest: 90,
+      presc: "3-5 x 6-15 - progressione: inclinato -> piano -> declinato (RPE 7-8)",
+      muscoli: "Petto, tricipiti, deltoide anteriore, core anti-estensione",
+      ritmo: "Discesa 2-3s, spinta controllata", respiro: "Inspira giu, espira su", tensione: "Corpo in linea, scapole controllate",
+      fasi: [["Setup", "Mani sotto le spalle, corpo in linea testa-bacino-talloni, core attivo."],
+             ["Discesa", "Scendi col petto verso terra, gomiti a ~45 gradi, niente bacino che cede."]],
+      errori: [["Bacino che crolla", "Stringi glutei e addome: una linea sola."],
+               ["Gomiti larghissimi", "Tienili a circa 45 gradi per proteggere le spalle."]],
+      illu: P({ head: [44, 96, 10], neck: [58, 98], hip: [128, 118], torsoW: 20,
+        armL: [[70, 102], [70, 138], [70, 160]], armR: [[74, 100], [74, 136], [74, 158]],
+        legL: [[128, 118], [158, 140], [182, 158]], legR: [[128, 118], [162, 142], [186, 160]],
+        floor: 168, refs: [[40, 94, 184, 160, "bodyline"]],
+        hi: [[58, 98, 70, 138, 14], [58, 98, 128, 118, 12]], arrows: [["a", 150, 150, 150, 126]],
+        start: { head: [40,108,10], neck: [56,108], hip: [126,124], armL: [[70,110],[66,126],[70,150]], armR: [[74,108],[70,124],[74,148]], legL: [[126,124],[156,144],[182,160]], legR: [[126,124],[160,146],[186,162]] }, note: "Push-up: corpo in linea, scapole controllate, gomiti a 45 gradi." }) },
+    bwrow: { nome: "Rematore a Corpo Libero", categoria: "Upper - Corpo libero", tipo: "dynamic", work: 35, rest: 90,
+      presc: "3-4 x 8-12 - sotto un tavolo robusto o una sbarra bassa",
+      muscoli: "Dorsali, romboidi, bicipiti, presa, controllo scapolare",
+      ritmo: "Tirata decisa, discesa controllata", respiro: "Espira tirando", tensione: "Corpo teso, niente bacino molle",
+      fasi: [["Setup", "Appeso sotto la sbarra bassa, corpo teso, talloni a terra."],
+             ["Tirata", "Porta il petto verso la sbarra, gomiti indietro, scapole che si stringono."]],
+      errori: [["Bacino che si abbassa", "Tieni glutei e addome attivi: corpo rigido."],
+               ["Mezze ripetizioni", "Distendi in basso e tocca quasi la sbarra."]],
+      illu: P({ head: [78, 84, 9], neck: [86, 88], hip: [120, 110], torsoW: 20,
+        armL: [[92, 90], [94, 64], [96, 42]], armR: [[96, 92], [98, 66], [100, 42]],
+        legL: [[120, 110], [144, 130], [166, 150]], legR: [[120, 110], [148, 132], [170, 150]],
+        bar: [56, 40, 140, 40], floor: 156, refs: [[80, 86, 166, 150, "bodyline"]],
+        hi: [[86, 88, 96, 42, 13]], arrows: [["a", 104, 88, 104, 58]],
+        start: { head: [78,84,9], neck: [86,92], hip: [120,116], armL: [[92,94],[94,68],[96,44]], armR: [[96,96],[98,70],[100,44]], legL: [[120,116],[144,134],[166,152]], legR: [[120,116],[148,136],[170,152]] }, note: "Rematore a corpo libero: petto alla sbarra, corpo teso, scapole indietro." }) },
+    pikepush: { nome: "Pike Push-Up", categoria: "Upper - Corpo libero", tipo: "dynamic", work: 30, rest: 90, opt: true,
+      presc: "2-3 x 5-10 (facoltativo) - spinta verticale sulle spalle",
+      muscoli: "Deltoidi, tricipiti, trapezio, stabilita scapolare",
+      ritmo: "Lento e controllato", respiro: "Inspira giu, espira su", tensione: "Bacino alto, testa tra le mani",
+      fasi: [["Setup", "A V rovesciata, bacino alto, mani a terra, sguardo verso i piedi."],
+             ["Spinta", "Piega i gomiti portando la testa verso terra tra le mani, poi spingi su."]],
+      errori: [["Bacino che si abbassa", "Mantieni la V: il lavoro deve restare sulle spalle."],
+               ["Collo schiacciato", "Controlla la discesa, niente impatti con la testa."]],
+      illu: P({ head: [64, 122, 9], neck: [70, 116], hip: [100, 68], torsoW: 20,
+        armL: [[70, 118], [64, 138], [58, 158]], armR: [[74, 116], [68, 136], [62, 156]],
+        legL: [[100, 68], [124, 116], [148, 160]], legR: [[100, 68], [128, 118], [152, 162]],
+        floor: 168, hi: [[70, 116, 64, 138, 13]], arrows: [["a", 66, 110, 66, 138]],
+        start: { head: [64,116,9], neck: [70,112], hip: [100,64], armL: [[70,114],[64,134],[58,158]], armR: [[74,112],[68,132],[62,156]], legL: [[100,64],[124,114],[148,160]], legR: [[100,64],[128,116],[152,162]] }, note: "Pike push-up: V rovesciata, spinta verticale sulle spalle." }) },
+    bwsquat: { nome: "Squat a Corpo Libero", categoria: "Lower - Corpo libero", tipo: "dynamic", work: 35, rest: 75,
+      presc: "3-4 x 10-20 - full ROM, talloni a terra",
+      muscoli: "Quadricipiti, glutei, mobilita anca/caviglia, core",
+      ritmo: "Discesa controllata, risalita decisa", respiro: "Inspira giu, espira su", tensione: "Busto su, ginocchia in linea",
+      fasi: [["Discesa", "Scendi tra le gambe a piena escursione, busto alto, talloni a terra."],
+             ["Risalita", "Spingi dai talloni mantenendo le ginocchia in linea coi piedi."]],
+      errori: [["Talloni che si alzano", "Lavora la mobilita di caviglia, scendi quanto controlli."],
+               ["Ginocchia che collassano dentro", "Spingi le ginocchia verso l'esterno."]],
+      illu: P({ head: [100, 42, 11], neck: [100, 56], hip: [100, 128], torsoW: 22,
+        armL: [[88, 60], [96, 72], [120, 76]], armR: [[112, 60], [108, 72], [120, 74]],
+        legL: [[100, 128], [76, 150], [72, 184]], legR: [[100, 128], [124, 150], [128, 184]],
+        floor: 184, refs: [[100, 34, 100, 128, "plumb"]],
+        hi: [[100, 128, 76, 150, 16], [100, 128, 124, 150, 16]],
+        ghost: [[100,44,100,112,22],[88,48,96,62,12],[96,62,118,66,10],[112,48,108,62,12],[108,62,118,64,10],[100,112,98,150,14],[98,150,96,184,11],[100,112,102,150,14],[102,150,104,184,11]], ghostHead: [100,30,11], arrows: [["a",152,118,152,152]], note: "Squat a corpo libero: profondo, talloni a terra, busto alto." }) },
+    bwlunge: { nome: "Affondo Indietro", categoria: "Lower - Corpo libero", tipo: "dynamic", work: 35, rest: 75,
+      presc: "3 x 8-12 per lato - controllo e profondita",
+      muscoli: "Quadricipiti, glutei, controllo unilaterale, equilibrio",
+      ritmo: "Controllo, niente rimbalzo", respiro: "Espira in risalita", tensione: "Busto alto, ginocchio stabile",
+      fasi: [["Affondo", "Porta una gamba indietro, scendi col ginocchio verso terra, busto alto."],
+             ["Risalita", "Spingi dal piede avanti tornando in piedi con controllo."]],
+      errori: [["Ginocchio avanti instabile", "Ginocchio in linea col piede, niente cedimenti."],
+               ["Busto in avanti", "Resta verticale, core attivo."]],
+      illu: P({ head: [100, 38, 11], neck: [100, 52], hip: [100, 110], torsoW: 22,
+        armL: [[88, 56], [82, 84], [92, 108]], armR: [[112, 56], [118, 84], [108, 108]],
+        legL: [[100, 110], [130, 150], [138, 184]], legR: [[100, 110], [80, 160], [66, 184]],
+        floor: 184, refs: [[100, 30, 100, 110, "plumb"]],
+        hi: [[100, 110, 130, 150, 16]],
+        arrows: [["a",150,108,150,150]], start: { head: [100,38,11], neck: [100,52], hip: [100,98], armL: [[88,56],[82,80],[92,100]], armR: [[112,56],[118,80],[108,100]], legL: [[100,98],[100,140],[100,184]], legR: [[100,98],[100,140],[100,184]] }, note: "Affondo indietro: ginocchio avanti stabile, busto alto, controllo." }) },
+    slrdl: { nome: "Stacco a Una Gamba", categoria: "Lower - Corpo libero", tipo: "dynamic", work: 35, rest: 75,
+      presc: "3 x 8-10 per lato - hinge ed equilibrio (T)",
+      muscoli: "Femorali, glutei, stabilizzatori anca/caviglia, equilibrio",
+      ritmo: "Lento e controllato", respiro: "Espira in risalita", tensione: "Bacino quadrato, schiena neutra",
+      fasi: [["Hinge", "In equilibrio su una gamba, porta il busto avanti e la gamba libera indietro."],
+             ["Risalita", "Risali stringendo il gluteo, mantenendo il bacino quadrato."]],
+      errori: [["Bacino che ruota", "Tieni i fianchi paralleli al suolo (bacino quadrato)."],
+               ["Schiena curva", "Mantieni la colonna neutra, hinge dall'anca."]],
+      illu: P({ head: [60, 80, 10], neck: [70, 86], hip: [120, 96], torsoW: 20,
+        armL: [[78, 90], [74, 114], [70, 136]], armR: [[82, 88], [78, 112], [74, 134]],
+        legL: [[120, 96], [122, 140], [124, 176]], legR: [[120, 96], [150, 90], [178, 84]],
+        floor: 176, refs: [[56, 78, 178, 84, "bodyline"]],
+        hi: [[120, 96, 122, 140, 15]],
+        start: { head: [120,40,10], neck: [120,52], hip: [120,108], armL: [[110,56],[108,84],[106,110]], armR: [[130,56],[132,84],[134,110]], legL: [[120,108],[122,148],[124,184]], legR: [[120,108],[118,148],[116,184]] }, note: "Stacco a una gamba: T di equilibrio, bacino quadrato, schiena neutra." }) },
+    bearcrawl: { nome: "Bear Crawl", categoria: "Sled BW - Locomozione", tipo: "carry", work: 40, rest: 75,
+      presc: "Avanti e indietro - 4-8 tratti, ginocchia basse",
+      muscoli: "Spalle, core, quadricipiti, coordinazione crociata",
+      ritmo: "Passo lento e controllato", respiro: "Regolare", tensione: "Schiena piatta, ginocchia basse",
+      fasi: [["Setup", "Quadrupedia su mani e piedi, ginocchia 2-3 cm da terra, schiena piatta."],
+             ["Cammino", "Avanza mano e piede opposti, bacino stabile, niente oscillazioni."]],
+      errori: [["Bacino che oscilla", "Muoviti lento, core attivo: la schiena resta piatta."],
+               ["Ginocchia troppo alte", "Tienile basse e vicine al suolo."]],
+      illu: P({ head: [52, 96, 9], neck: [64, 98], hip: [128, 98], torsoW: 20,
+        armL: [[78, 100], [78, 128], [78, 150]], armR: [[82, 98], [82, 126], [82, 148]],
+        legL: [[128, 98], [140, 126], [150, 150]], legR: [[128, 98], [150, 124], [160, 148]],
+        floor: 152, refs: [[48, 94, 132, 98, "bodyline"]], arrows: [["a", 150, 110, 182, 110]],
+        swap: true, note: "Bear crawl: schiena piatta, ginocchia basse, passo crociato controllato." }) },
+    crabwalk: { nome: "Crab Walk", categoria: "Sled BW - Locomozione", tipo: "carry", work: 40, rest: 75,
+      presc: "Avanti e indietro - 4-8 tratti, bacino su",
+      muscoli: "Tricipiti, glutei, spalle posteriori, core",
+      ritmo: "Passo controllato", respiro: "Regolare", tensione: "Bacino sollevato, spalle stabili",
+      fasi: [["Setup", "Seduto, mani dietro e piedi avanti, solleva il bacino (tavolo rovescio)."],
+             ["Cammino", "Avanza con mani e piedi mantenendo il bacino alto."]],
+      errori: [["Bacino che scende", "Spingi i fianchi in alto per tutto il tragitto."],
+               ["Spalle sovraccariche", "Mani ben piantate, gomiti morbidi."]],
+      illu: P({ head: [60, 96, 9], neck: [72, 98], hip: [128, 90], torsoW: 20,
+        armL: [[80, 98], [74, 120], [70, 142]], armR: [[84, 100], [78, 122], [74, 144]],
+        legL: [[128, 90], [150, 110], [158, 142]], legR: [[128, 90], [154, 112], [162, 144]],
+        floor: 146, hi: [[80, 98, 74, 120, 13]], arrows: [["a", 58, 118, 32, 118]],
+        swap: true, note: "Crab walk: bacino alto, spinta di tricipiti e glutei." }) },
+    mtnclimber: { nome: "Mountain Climber", categoria: "Corsa BW - Cardio", tipo: "hold", work: 40, rest: 30,
+      presc: "Cardio a terra: 3-5 x 30-45s, ritmo gestibile",
+      muscoli: "Core, flessori dell'anca, spalle, motore cardio",
+      ritmo: "Ritmo costante, non caotico", respiro: "Regolare", tensione: "Plank stabile, bacino basso",
+      fasi: [["Plank", "Posizione di plank alto, mani sotto le spalle, corpo in linea."],
+             ["Ginocchia", "Porta alternato un ginocchio al petto, bacino stabile, ritmo costante."]],
+      errori: [["Bacino che sale", "Tieni il plank: niente sedere all'aria."],
+               ["Ritmo caotico", "Controlla il passo, e cardio non gara."]],
+      illu: P({ head: [44, 98, 10], neck: [58, 100], hip: [128, 116], torsoW: 20,
+        armL: [[70, 104], [70, 138], [70, 160]], armR: [[74, 102], [74, 136], [74, 158]],
+        legL: [[128, 116], [158, 138], [182, 158]], legR: [[128, 116], [110, 138], [98, 150]],
+        floor: 168, hi: [[58, 100, 128, 116, 13]], arrows: [["a", 112, 150, 104, 132]],
+        swap: true, note: "Mountain climber: plank stabile, ginocchia che entrano, ritmo costante." }) },
+    highknees: { nome: "Marcia / Ginocchia Alte", categoria: "Corsa BW - Cardio", tipo: "hold", work: 60, rest: 30,
+      presc: "Cardio a basso impatto: 3-5 x 45-60s, sul posto",
+      muscoli: "Flessori anca, polpacci, core, motore cardio dolce",
+      ritmo: "Costante, atterraggio morbido", respiro: "Ritmico", tensione: "Core attivo, busto alto",
+      fasi: [["Marcia", "Sul posto, alza un ginocchio per volta all'altezza dell'anca."],
+             ["Ritmo", "Braccia che accompagnano, atterraggio morbido, basso impatto."]],
+      errori: [["Atterraggio pesante", "Appoggia morbido sull'avampiede, basso impatto."],
+               ["Busto che crolla", "Resta alto e composto, core attivo."]],
+      illu: P({ head: [100, 38, 11], neck: [100, 52], hip: [100, 110], torsoW: 22,
+        armL: [[88, 56], [78, 72], [72, 86]], armR: [[112, 56], [118, 84], [114, 110]],
+        legL: [[100, 110], [100, 150], [100, 184]], legR: [[100, 110], [120, 124], [134, 136]],
+        floor: 184, hi: [[100, 110, 120, 124, 14]], arrows: [["a", 134, 150, 134, 130]],
+        swap: true, note: "Marcia a ginocchia alte: basso impatto, core attivo, atterraggio morbido." }) },
+    supinecycle: { nome: "Pedalata a Terra", categoria: "Cyclette BW - Recupero", tipo: "hold", work: 120, rest: 0,
+      presc: "Cardio dolce supino: 2-4 min, lombare a terra",
+      muscoli: "Core, flessori anca, circolazione, basso impatto",
+      ritmo: "Pedalata fluida e lenta", respiro: "Calmo", tensione: "Lombare a terra, niente strappi",
+      fasi: [["Setup", "Supino, mani dietro la testa, gambe sollevate."],
+             ["Pedalata", "Simula la pedalata in aria, lenta e fluida, lombare incollata a terra."]],
+      errori: [["Lombare che si stacca", "Rallenta e tieni la zona lombare a terra."],
+               ["Tirare il collo", "Le mani sostengono, non tirano la testa."]],
+      illu: P({ vb: "0 0 200 150", head: [44, 100, 10], neck: [58, 100], hip: [120, 98], torsoW: 20,
+        armL: [[64, 96], [56, 84], [46, 88]], armR: [[64, 104], [56, 92], [46, 96]],
+        legL: [[120, 98], [150, 80], [170, 90]], legR: [[120, 98], [140, 112], [166, 118]],
+        floor: 122, arcs: [["arc", 150, 80, 166, 118, 176, 100]], hi: [[58, 100, 120, 98, 13]],
+        swap: true, note: "Pedalata a terra: basso impatto, lombare a terra, ritmo lento." }) },
+    hollowhold: { nome: "Hollow Body Hold", categoria: "Kettlebell BW - Core", tipo: "hold", work: 30, rest: 45,
+      presc: "3-4 x 20-40s - banana tesa, lombare a terra",
+      muscoli: "Core profondo, anti-estensione, controllo del corpo",
+      ritmo: "Tenuta ferma", respiro: "Lento e regolare", tensione: "Lombare a terra, corpo a banana",
+      fasi: [["Setup", "Supino, braccia oltre la testa e gambe tese sollevate."],
+             ["Tenuta", "Schiaccia la lombare a terra formando una banana tesa, respiro regolare."]],
+      errori: [["Lombare che si inarca", "Abbassa le gambe finche la lombare resta a terra."],
+               ["Trattenere il fiato", "Respira lento durante la tenuta."]],
+      illu: P({ vb: "0 0 200 150", head: [58, 96, 10], neck: [70, 94], hip: [120, 98], torsoW: 20,
+        armL: [[78, 92], [58, 86], [40, 82]], armR: [[78, 96], [58, 90], [40, 86]],
+        legL: [[120, 98], [150, 90], [176, 84]], legR: [[120, 98], [150, 94], [176, 88]],
+        floor: 116, refs: [[40, 82, 176, 84, "bodyline"]], hi: [[70, 94, 120, 98, 16]],
+        arrows: [["a",96,84,96,102]], note: "Hollow hold: lombare a terra, banana tesa, core di ferro." }) },
+    birddog: { nome: "Bird Dog", categoria: "Kettlebell BW - Core", tipo: "dynamic", work: 35, rest: 30,
+      presc: "3 x 8-10 per lato - arto opposto, bacino fermo",
+      muscoli: "Core anti-rotazione, glutei, erettori, coordinazione",
+      ritmo: "Lento e controllato", respiro: "Espira estendendo", tensione: "Schiena neutra, bacino quadrato",
+      fasi: [["Quadrupedia", "Mani sotto le spalle, ginocchia sotto le anche, schiena neutra."],
+             ["Estensione", "Estendi braccio e gamba opposti senza ruotare il bacino, poi alterna."]],
+      errori: [["Bacino che ruota", "Anti-rotazione: i fianchi restano fermi e paralleli."],
+               ["Schiena inarcata", "Mantieni la colonna lunga e neutra."]],
+      illu: P({ head: [58, 92, 9], neck: [70, 94], hip: [126, 98], torsoW: 20,
+        armL: [[80, 98], [80, 124], [80, 144]], armR: [[76, 92], [54, 84], [34, 78]],
+        legL: [[126, 98], [140, 124], [150, 144]], legR: [[126, 98], [152, 92], [178, 86]],
+        floor: 148, refs: [[34, 78, 178, 86, "bodyline"]], hi: [[70, 94, 126, 98, 13]],
+        swap: true, note: "Bird dog: schiena neutra, arto opposto, niente rotazioni del bacino." }) },
+    bwgetup: { nome: "Get-Up a Corpo Libero", categoria: "Kettlebell BW - Coord.", tipo: "dynamic", work: 40, rest: 60,
+      presc: "2-4 per lato - alzati e scendi controllato",
+      muscoli: "Coordinazione globale, core, spalle, mobilita",
+      ritmo: "Lento, una tappa per volta", respiro: "Regolare", tensione: "Controllo totale, niente fretta",
+      fasi: [["Salita", "Dal suolo allo stand passando per le tappe (gomito, mano, ginocchio)."],
+             ["Discesa", "Torna a terra invertendo le tappe con lo stesso controllo."]],
+      errori: [["Andare di fretta", "E' coordinazione: ogni posizione deve essere stabile."],
+               ["Saltare le tappe", "Passa per ogni posizione, lento e pulito."]],
+      illu: P({ head: [96, 72, 10], neck: [98, 82], hip: [110, 120], torsoW: 21,
+        armL: [[92, 84], [78, 104], [70, 122]], armR: [[104, 84], [110, 58], [114, 36]],
+        legL: [[110, 120], [140, 142], [150, 176]], legR: [[110, 120], [96, 158], [80, 176]],
+        floor: 176, refs: [[114, 36, 114, 84, "press"]], hi: [[104, 84, 114, 36, 12]],
+        start: { head: [78,118,10], neck: [86,124], hip: [112,150], armR: [[100,126],[108,96],[114,66]], armL: [[80,130],[66,148],[56,162]], legL: [[112,150],[138,158],[150,176]], legR: [[112,150],[96,166],[80,176]] }, note: "Get-up a corpo libero: tappe controllate, coordinazione e core." }) }
+  };
+  for (var __k in EXBW) EX[__k] = EXBW[__k];
 
   /* ===================== ROTAZIONE + UI ===================== */
   var AU = window.AU;
   var esc = AU ? AU.esc : function (x) { return x; };
   var BLOCKS = [
-    { n: 1, key: "upper", nome: "Forza Upper", sub: "Spinta + Trazione", kind: "struttura", theme: "cyan", ex: ["dip", "chinup", "facepull"] },
-    { n: 2, key: "lower", nome: "Forza Lower", sub: "Hinge + Ginocchio", kind: "struttura", theme: "blue", ex: ["rdl", "splitsquat", "revnordic"] },
-    { n: 3, key: "sled", nome: "Sled Motore", sub: "Locomozione caricata", kind: "struttura", theme: "red", ex: ["sledpush", "sleddrag"] },
-    { n: 4, key: "corsa", nome: "Corsa Zona 2", sub: "Condizionamento", kind: "jolly", theme: "cyan", ex: ["camminata", "corsa"] },
+    { n: 1, key: "upper", nome: "Forza Upper", sub: "Spinta + Trazione", kind: "struttura", theme: "purple", ex: ["dip", "chinup", "facepull"] },
+    { n: 2, key: "lower", nome: "Forza Lower", sub: "Hinge + Ginocchio", kind: "struttura", theme: "purple", ex: ["rdl", "splitsquat", "revnordic"] },
+    { n: 3, key: "sled", nome: "Sled Motore", sub: "Locomozione caricata", kind: "struttura", theme: "purple", ex: ["sledpush", "sleddrag"] },
+    { n: 4, key: "corsa", nome: "Corsa Zona 2", sub: "Condizionamento", kind: "jolly", theme: "purple", ex: ["camminata", "corsa"] },
     { n: 5, key: "cyclette", nome: "Cyclette", sub: "Cardio basso impatto", kind: "jolly", theme: "purple", ex: ["cyclette", "sideplank"] },
-    { n: 6, key: "kettlebell", nome: "Kettlebell", sub: "Coordinazione balistica", kind: "jolly", theme: "red", ex: ["kbswing", "goblet", "row", "carry", "tgu"] },
+    { n: 6, key: "kettlebell", nome: "Kettlebell", sub: "Coordinazione balistica", kind: "jolly", theme: "purple", ex: ["kbswing", "goblet", "row", "carry", "tgu"] },
     { n: 7, key: "recupero", nome: "Recupero", sub: "Rigenerazione", kind: "jolly", theme: "purple", ex: ["camminata", "mobility", "childpose", "deadhang"] }
+  ];
+  var BLOCKS_BW = [
+    { n: 1, key: "upper", nome: "Upper a Corpo Libero", sub: "Spinta + Trazione (floor)", kind: "struttura", theme: "purple", ex: ["pushup", "bwrow", "pikepush"] },
+    { n: 2, key: "lower", nome: "Lower a Corpo Libero", sub: "Squat + Hinge unilaterale", kind: "struttura", theme: "purple", ex: ["bwsquat", "bwlunge", "slrdl"] },
+    { n: 3, key: "sled", nome: "Locomozione a Terra", sub: "Bear & Crab crawl", kind: "struttura", theme: "purple", ex: ["bearcrawl", "crabwalk"] },
+    { n: 4, key: "corsa", nome: "Cardio a Terra", sub: "Basso impatto", kind: "jolly", theme: "purple", ex: ["mtnclimber", "highknees"] },
+    { n: 5, key: "cyclette", nome: "Recupero Attivo", sub: "Cardio dolce a terra", kind: "jolly", theme: "purple", ex: ["supinecycle", "sideplank"] },
+    { n: 6, key: "kettlebell", nome: "Controllo & Core", sub: "Coordinazione a corpo libero", kind: "jolly", theme: "purple", ex: ["hollowhold", "birddog", "bwgetup"] },
+    { n: 7, key: "recupero", nome: "Recupero", sub: "Rigenerazione", kind: "jolly", theme: "purple", ex: ["camminata", "mobility", "childpose", "breath90"] }
   ];
   var RESET = { n: 0, key: "reset", nome: "Protocollo 0 - Reset", sub: "Postura / Equilibrio", theme: "purple", ex: ["breath90", "deadbug", "glutebridge", "hipflexor", "slbalance", "tibialis"] };
 
-  function blockByN(n) { return BLOCKS[((n - 1) % 7 + 7) % 7]; }
-  function blockByKey(k) { if (k === "reset") return RESET; return BLOCKS.filter(function (b) { return b.key === k; })[0]; }
-  function blockOf(id) { for (var i = 0; i < BLOCKS.length; i++) if (BLOCKS[i].ex.indexOf(id) >= 0) return BLOCKS[i]; if (RESET.ex.indexOf(id) >= 0) return RESET; return null; }
+  function getTrack() { try { return localStorage.getItem("aureo_cavci_track") || "standard"; } catch (e) { return "standard"; } }
+  function setTrack(t) { try { localStorage.setItem("aureo_cavci_track", t); } catch (e) {} }
+  function curBlocks() { return getTrack() === "corpo" ? BLOCKS_BW : BLOCKS; }
+  function blockByN(n) { var bs = curBlocks(); return bs[((n - 1) % 7 + 7) % 7]; }
+  function blockByKey(k) { if (k === "reset") return RESET; return curBlocks().filter(function (b) { return b.key === k; })[0]; }
+  function blockOf(id) { var all = BLOCKS.concat(BLOCKS_BW); for (var i = 0; i < all.length; i++) if (all[i].ex.indexOf(id) >= 0) return all[i]; if (RESET.ex.indexOf(id) >= 0) return RESET; return null; }
   function lastCavci() { if (!AU) return null; var h = AU.loadHistory(); for (var i = 0; i < h.length; i++) if (h[i].cavci) return { block: h[i].cavci, date: h[i].date }; return null; }
   function nextN() { var l = lastCavci(); return l ? (l.block % 7) + 1 : 1; }
   function daysSince() { var l = lastCavci(); if (!l) return -1; return Math.floor((Date.now() - new Date(l.date).getTime()) / 86400000); }
@@ -509,11 +720,12 @@
     var b = blockOf(id);
     h += '<button class="btn" data-cavci-start="' + (b ? b.key : "reset") + '">' + (AU.IC.play || "") + ' Avvia ' + esc(b ? b.nome : "Reset") + '</button></div>';
     AU.byId("view-detail").innerHTML = h;
-    AU.applyTheme(b ? b.theme : "cyan");
+    AU.applyTheme(b ? b.theme : "purple");
     AU.show("detail");
   }
 
   function renderHomeSection() {
+    var tr = getTrack();
     var nb = blockByN(nextN()), l = lastCavci(), ds = daysSince();
     var chips = nb.ex.map(function (id) { var e = EX[id]; return '<button class="cv-chip" data-cavci-ex="' + id + '">' + esc(e.nome) + (e.opt ? ' <i>opz</i>' : '') + '</button>'; }).join("");
     var hint;
@@ -521,9 +733,11 @@
     else if (ds >= 7) hint = '<div class="cv-hint">Stop di ' + ds + 'g: riparti con volume ridotto (2 serie, RPE 6-7, niente test).</div>';
     else if (l) hint = '<div class="cv-hint">Ultimo: ' + esc(blockByN(l.block).nome) + (ds >= 0 ? ' &middot; ' + (ds === 0 ? 'oggi' : ds + 'g fa') : '') + '. Non ricominciare: continua.</div>';
     else hint = '<div class="cv-hint">Inizia la rotazione dal primo blocco. Non e un calendario: e una sequenza.</div>';
-    var strip = BLOCKS.map(function (b) { return '<button class="cv-step' + (b.n === nb.n ? ' on' : '') + '" data-cavci-start="' + b.key + '"><span class="cv-sn">' + b.n + '</span><span class="cv-snm">' + esc(b.nome.replace('Forza ', '')) + '</span></button>'; }).join("");
-    return '<div class="section-title">Rotazione CAVCI</div>' +
-      '<div class="cv-next" data-th="' + nb.theme + '"><div class="cv-next-top"><span class="cv-badge">Prossima tappa</span><span class="cv-n">' + nb.n + '/7</span></div>' +
+    var strip = curBlocks().map(function (b) { return '<button class="cv-step' + (b.n === nb.n ? ' on' : '') + '" data-cavci-start="' + b.key + '"><span class="cv-sn">' + b.n + '</span><span class="cv-snm">' + esc(b.nome.replace('Forza ', '').replace(' a Corpo Libero', '')) + '</span></button>'; }).join("");
+    var toggle = '<div class="cv-track"><button class="cv-tb' + (tr !== "corpo" ? " on" : "") + '" data-cavci-track="standard">Attrezzi</button><button class="cv-tb' + (tr === "corpo" ? " on" : "") + '" data-cavci-track="corpo">Corpo libero</button></div>';
+    return '<div class="section-title">Rotazione CAVCI</div>' + toggle +
+      '<div class="cv-next" data-th="' + nb.theme + '"><div class="cv-eye">' + (AU.EYE || "") + '</div>' +
+      '<div class="cv-next-top"><span class="cv-badge">Prossima tappa' + (tr === "corpo" ? ' &middot; Corpo libero' : '') + '</span><span class="cv-n">' + nb.n + '/7</span></div>' +
       '<h3>' + esc(nb.nome) + '</h3><p>' + esc(nb.sub) + '</p>' +
       '<div class="cv-chips">' + chips + '</div>' +
       '<button class="btn" data-cavci-start="' + nb.key + '">' + (AU.IC.play || "") + ' Avvia ' + esc(nb.nome) + '</button>' +
@@ -534,8 +748,9 @@
 
   if (AU) {
     AU.byId("view-home").addEventListener("click", function (e) {
-      var st = e.target.closest("[data-cavci-start]"), rs = e.target.closest("[data-cavci-reset]"), ex = e.target.closest("[data-cavci-ex]");
-      if (st) start(blockByKey(st.dataset.cavciStart));
+      var st = e.target.closest("[data-cavci-start]"), rs = e.target.closest("[data-cavci-reset]"), ex = e.target.closest("[data-cavci-ex]"), tk = e.target.closest("[data-cavci-track]");
+      if (tk) { setTrack(tk.dataset.cavciTrack); if (AU.renderHome) AU.renderHome(); }
+      else if (st) start(blockByKey(st.dataset.cavciStart));
       else if (rs) start(RESET);
       else if (ex) openEx(ex.dataset.cavciEx);
     });

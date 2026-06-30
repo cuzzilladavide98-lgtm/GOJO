@@ -10,12 +10,17 @@
   var byId = AU.byId, esc = AU.esc, fmt = AU.fmt, PREF = AU.PREF, IC = AU.IC;
   var TR = { items: [], title: "", restRem: 0, restTot: 0, timer: null, saved: false };
 
-  function newSet(ex) { return { w: 0, r: AU.defaultVal(ex) || 10, done: false }; }
-  function buildItems(list) { return list.map(function (ex) { return { ex: ex, sets: [newSet(ex)] }; }); }
+  function lastItem(id) { var h = AU.loadHistory ? AU.loadHistory() : []; for (var i = 0; i < h.length; i++) { var it = (h[i].items || []).filter(function (x) { return x.id === id && x.sets && x.sets.length; })[0]; if (it) return it; } return null; }
+  function newSet(ex) {
+    var li = lastItem(ex.id);
+    if (li) { var s = li.sets[li.sets.length - 1]; return { w: s.w || 0, r: s.r || (AU.defaultVal(ex) || 10), done: false }; }
+    return { w: 0, r: AU.defaultVal(ex) || 10, done: false };
+  }
+  function buildItems(list) { return list.map(function (ex) { return { ex: ex, sets: [newSet(ex)], rpe: 0 }; }); }
 
   function startTracker(list, title) {
     if (!list || !list.length) return;
-    TR.items = buildItems(list); TR.title = title; TR.saved = false;
+    TR.items = buildItems(list); TR.title = title; TR.saved = false; TR.startedAt = Date.now();
     initAudio();
     byId("view-workout").classList.remove("hidden");
     byId("appbar").classList.add("hidden");
@@ -34,7 +39,7 @@
   function stepper(kind, i, j, val) {
     return '<div class="set-step">' +
       '<button class="ss-btn" data-step="' + kind + "_" + i + "_" + j + '_-1" aria-label="Meno">&minus;</button>' +
-      '<span class="ss-val">' + (kind === "w" ? (val ? val : "-") : val) + '</span>' +
+      '<span class="ss-val" data-edit="' + kind + "_" + i + "_" + j + '">' + (kind === "w" ? (val ? val : "-") : val) + '</span>' +
       '<button class="ss-btn" data-step="' + kind + "_" + i + "_" + j + '_1" aria-label="Piu">+</button></div>';
   }
 
@@ -47,7 +52,7 @@
     TR.items.forEach(function (it, i) {
       var doneSets = it.sets.filter(function (s) { return s.done; }).length;
       h += '<div class="trk-card">' +
-        '<div class="trk-head"><div class="trk-thumb">' + renderIllu(it.ex.illu) + '</div>' +
+        '<div class="trk-head"><div class="trk-thumb">' + renderIllu(it.ex.illu, true) + '</div>' +
         '<div class="trk-h-txt"><div class="trk-name">' + it.ex.n + ". " + esc(it.ex.nome) + '</div>' +
         '<div class="trk-cat">' + esc(it.ex.categoria) + '</div>' +
         '<div class="trk-last">' + esc(lastHint(it.ex.id)) + '</div></div>' +
@@ -59,7 +64,11 @@
           stepper("w", i, j, s.w) + stepper("r", i, j, s.r) +
           '<button class="set-done" data-done="' + i + "_" + j + '" aria-label="Serie completata">' + IC.check + '</button></div>';
       });
-      h += '<button class="add-set" data-add="' + i + '">+ Serie</button></div>';
+      h += '<button class="add-set" data-add="' + i + '">+ Serie</button>' +
+        '<div class="rpe-row"><span class="rpe-lab">RPE (sforzo)</span><div class="rpe-step">' +
+        '<button class="ss-btn" data-rpe="' + i + '_-1" aria-label="Meno">&minus;</button>' +
+        '<span class="rpe-val">' + (it.rpe ? it.rpe : "-") + '</span>' +
+        '<button class="ss-btn" data-rpe="' + i + '_1" aria-label="Piu">+</button></div></div></div>';
     });
     h += '<button class="btn" id="trkFinish">Termina e salva</button><div style="height:96px"></div></div>';
     h += '<div class="rest-bar hidden" id="restBar"><div class="rb-fill" id="rbFill"></div>' +
@@ -76,8 +85,12 @@
   byId("view-workout").addEventListener("click", function (e) {
     if (byId("view-workout").getAttribute("data-mode") !== "tracker") return;
     var st = e.target.closest("[data-step]"), dn = e.target.closest("[data-done]"),
-      ad = e.target.closest("[data-add]"), rb = e.target.closest("[data-rest]");
-    if (st) {
+      ad = e.target.closest("[data-add]"), rb = e.target.closest("[data-rest]"), rp = e.target.closest("[data-rpe]"), ed = e.target.closest("[data-edit]");
+    if (ed) {
+      var pe = ed.dataset.edit.split("_"); var se = TR.items[+pe[1]].sets[+pe[2]]; var cur = pe[0] === "w" ? se.w : se.r;
+      var inp = window.prompt(pe[0] === "w" ? "Carico (kg)" : "Ripetizioni", String(cur || 0));
+      if (inp !== null) { var nv = parseFloat(String(inp).replace(",", ".")); if (!isNaN(nv) && nv >= 0) { if (pe[0] === "w") se.w = Math.round(nv * 10) / 10; else se.r = Math.round(nv); render(); } }
+    } else if (st) {
       var p = st.dataset.step.split("_"); var s = TR.items[+p[1]].sets[+p[2]]; var d = +p[3];
       if (p[0] === "w") s.w = Math.max(0, Math.round((s.w + d * 2.5) * 10) / 10);
       else s.r = Math.max(0, s.r + d);
@@ -91,6 +104,8 @@
       var it = TR.items[+ad.dataset.add]; var pv = it.sets[it.sets.length - 1];
       it.sets.push({ w: pv ? pv.w : 0, r: pv ? pv.r : 10, done: false });
       render();
+    } else if (rp) {
+      var pr = rp.dataset.rpe.split("_"); var iR = +pr[0]; var dR = +pr[1]; TR.items[iR].rpe = Math.max(0, Math.min(10, (TR.items[iR].rpe || 0) + dR)); render();
     } else if (rb) {
       var a = rb.dataset.rest;
       if (a === "skip") stopRest();
@@ -110,14 +125,17 @@
     return { unit: "rip.", value: sets.reduce(function (a, s) { return a + (s.r || 0); }, 0), sets: sets };
   }
   function collect(status) {
-    var items = [];
+    var items = [], volume = 0;
     TR.items.forEach(function (it) {
       var sm = summarize(it); if (!sm.sets.length) return;
-      items.push({ id: it.ex.id, n: it.ex.n, nome: it.ex.nome, unit: sm.unit, value: sm.value,
+      var vol = sm.sets.reduce(function (a, s) { return a + (s.w || 0) * (s.r || 0); }, 0);
+      volume += vol;
+      items.push({ id: it.ex.id, n: it.ex.n, nome: it.ex.nome, unit: sm.unit, value: sm.value, rpe: it.rpe || 0,
         sets: sm.sets.map(function (s) { return { w: s.w, r: s.r }; }) });
     });
     if (!items.length) return null;
-    return { id: Date.now(), date: new Date().toISOString(), title: TR.title, kind: "forza", status: status, items: items };
+    return { id: Date.now(), date: new Date().toISOString(), title: TR.title, kind: "forza", status: status,
+      durationSec: Math.round((Date.now() - (TR.startedAt || Date.now())) / 1000), volume: Math.round(volume), items: items };
   }
   function persist(status) { if (TR.saved) return; var s = collect(status); if (s) { AU.addSession(s); TR.saved = true; AU.renderHome(); } }
 
@@ -128,11 +146,14 @@
     byId("view-workout").removeAttribute("data-mode");
     byId("appbar").classList.remove("hidden");
     byId("tabbar").classList.remove("hidden");
+    if (AU.applyTheme) AU.applyTheme();
   }
   function showDone() {
     var n = TR.items.reduce(function (a, it) { return a + it.sets.filter(function (s) { return s.done; }).length; }, 0);
+    var dur = Math.max(1, Math.round((Date.now() - (TR.startedAt || Date.now())) / 60000));
+    var vol = TR.items.reduce(function (a, it) { return a + it.sets.filter(function (s) { return s.done || s.r > 0; }).reduce(function (b, s) { return b + (s.w || 0) * (s.r || 0); }, 0); }, 0);
     byId("view-workout").innerHTML = '<div class="wo-top"><button class="close" id="trkClose2" aria-label="Chiudi">' + IC.close + '</button><div></div><div style="width:48px"></div></div>' +
-      '<div class="wo-finish"><div class="domain-burst"></div><div class="big">' + IC.trophy + '</div><div class="dx-over">Sessione Forza</div><h2>Salvata!</h2><p>' + esc(TR.title) + ' &middot; ' + n + ' serie completate</p></div>' +
+      '<div class="wo-finish"><div class="domain-burst"></div><div class="big">' + IC.trophy + '</div><div class="dx-over">Sessione Forza</div><h2>Salvata!</h2><p>' + esc(TR.title) + ' &middot; ' + n + ' serie &middot; ' + dur + ' min' + (vol ? ' &middot; ' + Math.round(vol) + ' kg' : '') + '</p></div>' +
       '<div style="padding:0 16px"><button class="btn" id="trkHist">Vedi lo storico</button><button class="btn secondary" id="trkHome">Torna alla home</button></div>';
     byId("trkClose2").onclick = close;
     byId("trkHome").onclick = close;

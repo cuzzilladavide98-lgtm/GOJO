@@ -45,7 +45,7 @@ function renderIllu(illu, flat) {
       <stop offset="0.55" stop-color="var(--fig-mid,#e6ac4c)"/>
       <stop offset="1" stop-color="var(--fig-lo,#b9802c)"/>
     </linearGradient>
-    <marker id="ah_${uid}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse">
+    <marker id="ah_${uid}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
       <path d="M0 0 L10 5 L0 10 z" fill="${ARROW}"/>
     </marker>
     ${flat ? "" : `<filter id="gl_${uid}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2"/></filter>`}
@@ -86,11 +86,26 @@ function renderIllu(illu, flat) {
   s += __head(illu.wrongHead, WRONG, 0.4);
 
   // --- figura fantasma (altro fotogramma) ---
-  (illu.ghost || []).forEach(b => { s += __bone(b, GHOST, 0.22); });
-  s += __head(illu.ghostHead, GHOST, 0.22);
+  const GOP = (illu.ghostOp !== undefined) ? illu.ghostOp : 0.32;
+  (illu.ghost || []).forEach(b => { s += __bone(b, GHOST, GOP); });
+  s += __head(illu.ghostHead, GHOST, GOP);
 
   // --- corpo principale ---
   (illu.body || []).forEach(b => { s += __bone(b, BODY, 1); });
+  // giunture: nodi articolari che saldano le ossa (resa anatomica continua)
+  const __deg = {}, __rad = {}, __pt = {};
+  (illu.body || []).forEach(b => {
+    if (!b || b[4] === undefined || b[4] <= 0) return;
+    [[b[0], b[1]], [b[2], b[3]]].forEach(p => {
+      const k = p[0] + "_" + p[1];
+      __deg[k] = (__deg[k] || 0) + 1;
+      __rad[k] = Math.max(__rad[k] || 0, b[4] / 2);
+      __pt[k] = p;
+    });
+  });
+  Object.keys(__deg).forEach(k => {
+    if (__deg[k] >= 2) s += `<circle cx="${__pt[k][0]}" cy="${__pt[k][1]}" r="${(__rad[k]).toFixed(1)}" fill="${BODY}"/>`;
+  });
   if (illu.heads) illu.heads.forEach(h => { s += __head(h, BODY, 1); });
   s += __head(illu.head, BODY, 1);
 
@@ -105,9 +120,9 @@ function renderIllu(illu, flat) {
   // --- frecce e archi di movimento ---
   (illu.arrows || []).concat(illu.arcs || []).forEach(a => {
     if (a[0] === "arc") {
-      s += `<path d="M ${a[1]} ${a[2]} Q ${a[5]} ${a[6]} ${a[3]} ${a[4]}" fill="none" stroke="${ARROW}" stroke-width="2.6" marker-end="url(#ah_${uid})"/>`;
+      s += `<path d="M ${a[1]} ${a[2]} Q ${a[5]} ${a[6]} ${a[3]} ${a[4]}" fill="none" stroke="${ARROW}" stroke-width="3.4" marker-end="url(#ah_${uid})"/>`;
     } else {
-      s += `<line x1="${a[1]}" y1="${a[2]}" x2="${a[3]}" y2="${a[4]}" stroke="${ARROW}" stroke-width="2.8" marker-end="url(#ah_${uid})"/>`;
+      s += `<line x1="${a[1]}" y1="${a[2]}" x2="${a[3]}" y2="${a[4]}" stroke="${ARROW}" stroke-width="3.4" marker-end="url(#ah_${uid})"/>`;
     }
   });
 
