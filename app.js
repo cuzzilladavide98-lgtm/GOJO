@@ -97,7 +97,9 @@
   function defaultVal(e) { return e.tipo === "hold" ? e.work : e.tipo === "carry" ? 40 : (e.tipo === "dynamic" ? 12 : 10); }
 
   var lastListView = "home";
+  var currentView = "home";
   function show(view) {
+    currentView = view;
     ["home", "library", "detail", "history", "block", "settings"].forEach(function (v) {
       byId("view-" + v).classList.toggle("hidden", v !== view);
     });
@@ -119,12 +121,36 @@
 
   function startSession(list, title, ctx) { applyTheme(ctx); if (PREF.mode === "forza" && window.startTracker) window.startTracker(list, title); else window.startWorkout(list, title); }
 
+  function numpad(opts) {
+    var ctx = { str: String(opts.value === 0 || !opts.value ? "" : opts.value), fresh: true, dec: !!opts.decimals };
+    var sheet = byId("npSheet");
+    if (!sheet) { sheet = document.createElement("div"); sheet.id = "npSheet"; sheet.className = "kp"; document.body.appendChild(sheet); }
+    function draw() {
+      var keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", (ctx.dec ? "." : ""), "0", "del"];
+      var grid = keys.map(function (k) { if (k === "") return '<span class="kp-k empty"></span>'; if (k === "del") return '<button class="kp-k" data-np="del" aria-label="Cancella">&#9003;</button>'; return '<button class="kp-k" data-np="' + k + '">' + k + '</button>'; }).join("");
+      sheet.innerHTML = '<div class="kp-card"><div class="kp-head"><span class="kp-lab">' + esc(opts.label || "") + '</span><span class="kp-val" id="npVal">' + (ctx.str || "0") + '</span></div><div class="kp-grid">' + grid + '</div><div class="kp-row"><button class="kp-cancel" data-np="cancel">Annulla</button><button class="btn kp-ok" data-np="ok">Fatto</button></div></div>';
+      sheet.classList.add("open");
+    }
+    function close() { sheet.classList.remove("open"); sheet.innerHTML = ""; sheet.onclick = null; }
+    sheet.onclick = function (e) {
+      var b = e.target.closest("[data-np]"); if (!b) { if (e.target === sheet) close(); return; } var k = b.dataset.np;
+      if (k === "cancel") { close(); return; }
+      if (k === "ok") { var nv = parseFloat((ctx.str || "0").replace(",", ".")); if (isNaN(nv) || nv < 0) nv = 0; nv = ctx.dec ? Math.round(nv * 10) / 10 : Math.round(nv); close(); if (opts.onDone) opts.onDone(nv); return; }
+      if (k === "del") { ctx.fresh = false; ctx.str = ctx.str.slice(0, -1); }
+      else if (k === ".") { if (ctx.fresh) { ctx.str = "0."; ctx.fresh = false; } else if (ctx.str.indexOf(".") < 0) ctx.str = (ctx.str || "0") + "."; }
+      else { if (ctx.fresh) { ctx.str = k; ctx.fresh = false; } else if (ctx.str.replace(".", "").length < 5) ctx.str += k; }
+      var v = byId("npVal"); if (v) v.textContent = ctx.str || "0";
+    };
+    draw();
+  }
+
   var pendingStart = null;
   function openSummary(opts) {
     applyTheme(opts.theme);
     pendingStart = opts.start || null;
+    if (window.CAVCI) window.CAVCI._mode = "summary";
     var rows = (opts.rows || []).map(function (r) {
-      return '<button class="bk-row" ' + (r.attr || "") + '><span class="bk-rn">' + esc(r.name) + (r.opt ? ' <i>opz</i>' : '') + '</span><span class="bk-rm">' + esc(r.meta || "") + '</span></button>';
+      return '<button class="bk-row" ' + (r.attr || "") + '><div class="bk-rtx"><span class="bk-rn">' + esc(r.name) + (r.opt ? ' <i>opz</i>' : '') + '</span>' + (r.sub ? '<span class="bk-rsub">' + esc(r.sub) + '</span>' : '') + '</div><span class="bk-rm">' + esc(r.meta || "") + '</span></button>';
     }).join("");
     var h = '<div class="bk"><div class="bk-hero"><div class="bk-eye">' + EYE + '</div>' +
       '<div class="bk-badge">' + esc(opts.badge || "") + '</div>' +
@@ -154,7 +180,10 @@
     if (b.dataset.tab === "settings") renderSettings();
     show(b.dataset.tab);
   });
-  byId("backBtn").addEventListener("click", function () { show(lastListView); });
+  byId("backBtn").addEventListener("click", function () {
+    if (currentView === "block" && window.CAVCI && typeof window.CAVCI.back === "function" && window.CAVCI.back()) return;
+    show(lastListView);
+  });
 
   var openAcc = {};
   function acc(key, title, sub, body) {
@@ -165,12 +194,11 @@
     applyTheme();
     var hist = loadHistory();
     var h = "";
-    if (window.CAVCI) h += window.CAVCI.renderHomeSection();
-
     var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone;
     if (!standalone && localStorage.getItem("aureo_a2hs") !== "1") h += '<div class="a2hs"><span class="nx">Aggiungi a Home: dati al sicuro e schermo intero.</span><button class="a2hs-x" data-act="a2hs-dismiss" aria-label="Chiudi">' + IC.close + '</button></div>';
     var dsl = hist.length ? Math.floor((Date.now() - new Date(hist[0].date).getTime()) / 86400000) : -1;
     if (dsl >= 3) h += '<div class="nudge"><span class="nx">Non ti alleni da <span class="nd">' + dsl + ' giorni</span>. Riattiva il dominio.</span></div>';
+    if (window.CAVCI) h += window.CAVCI.renderHomeSection();
     byId("view-home").innerHTML = h;
   }
 
@@ -293,6 +321,7 @@
     h += '<button class="btn" data-start-one="' + e.id + '">' + IC.play + ' Avvia questo esercizio</button></div>';
     byId("view-detail").innerHTML = h;
     show("detail");
+    byId("barTitle").textContent = e.nome; byId("barSub").textContent = e.categoria;
   }
   byId("view-block").addEventListener("click", function (e) {
     var go = e.target.closest("[data-go]"); if (go) { if (typeof pendingStart === "function") pendingStart(); return; }
@@ -367,7 +396,7 @@
     byId: byId, esc: esc, fmt: fmt, PREF: PREF, IC: IC,
     addSession: addSession, renderHome: renderHome, renderHistory: renderHistory, show: show,
     unitFor: unitFor, defaultVal: defaultVal, EYE: EYE, exerciseLogs: exerciseLogs,
-    loadHistory: loadHistory, saveHistory: saveHistory, savePref: savePref, applyTheme: applyTheme, openSummary: openSummary
+    loadHistory: loadHistory, saveHistory: saveHistory, savePref: savePref, applyTheme: applyTheme, openSummary: openSummary, numpad: numpad
   };
 
   try { if (!localStorage.getItem("aureo_v17")) { if (!PREF.theme || PREF.theme === "cyan") { PREF.theme = "auto"; savePref(); } localStorage.setItem("aureo_v17", "1"); } } catch (e) {}

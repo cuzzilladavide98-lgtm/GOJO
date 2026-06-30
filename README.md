@@ -219,3 +219,27 @@ Le sezioni aperte restano aperte tra un aggiornamento e l'altro della Home. Veri
 - **Libreria a strati**: ora mostra i 4 blocchi; toccando un blocco si apre la pagina di anteprima (esercizi + Avvia) e da li si entra nel dettaglio. Niente piu muro di 17 voci.
 - **Storico** piu arioso (spaziatura, font display sui titoli), sessioni espandibili al tocco come prima.
 Service worker a `aureo-v26`. (Font e gradient-text si vedono al meglio sul telefono; offline c'e il fallback di sistema.)
+
+## v27 - Elimina la singola sessione
+Nello Storico, espandendo una sessione, c'e ora il pulsante **Elimina sessione** (utile per quelle avviate per sbaglio). La conferma e a **doppio tocco** (il pulsante diventa "Tocca ancora per eliminare") invece della finestrella `confirm()`, che iOS blocca nelle PWA installate - stessa logica applicata anche a "Cancella tutto lo storico". Service worker a `aureo-v27`.
+
+## v28-29 - CAVCI consultabile/modificabile + modello "a orologio" (no-scroll)
+- **CAVCI ora si consulta e si modifica** (non solo eseguibile): da Home tocca **Apri** (o una tappa nella striscia) per vedere gli esercizi del blocco con i target; tocca un esercizio per la scheda completa (illustrazione, tecnica, progressi). Con **Modifica routine** puoi **aggiungere, togliere, riordinare** gli esercizi e **cambiare i target** (campi digitabili); tutto si salva da solo. "Ripristina predefinito" riporta il blocco com'era. Vale per entrambe le tracce (Attrezzi/Corpo libero).
+- **Modello "a orologio" - niente scroll di pagina**: lo shell e fisso (la pagina non rimbalza ne scrolla). La **Home e un quadrante**: solo la Rotazione CAVCI (prossima tappa + Avvia/Apri + striscia + Reset). Tolti dalla Home gli accordion, l'ultimo allenamento e il footer.
+- **Profilo (4a scheda)**: modalita, preferenze, tema e backup hanno ora una loro scheda dedicata, raggiungibile dalla tab "Profilo". La Home resta pulita.
+- **Libreria**: 4 blocchi + "Allenamento completo" in cima.
+Service worker a `aureo-v29`.
+
+## v30 - Piu semplice e comodo (no laboriosita)
+- **Peso e ripetizioni col tastierino**: niente piu scrittura in campini. Ogni valore ha **stepper grandi -/+** (Kg a 2,5, reps a 1) e, toccando il numero, si apre un **tastierino numerico grande in stile iOS** (la prima cifra sovrascrive). Comodo durante l'allenamento, senza tastiera di sistema.
+- **Prima pagina essenziale**: una sola card - "Prossima tappa", nome del blocco, e un grande **Inizia**. Sotto, un piccolo "Vedi esercizi e modifica", la striscia per saltare a un altro blocco e, in fondo, il selettore Attrezzi/Corpo libero e il Reset. Tolto tutto il superfluo.
+- **Editor senza scrittura**: in "Modifica routine" aggiungi/togli/riordina con i tasti; i target restano in chiaro (non si digitano), il carico vero lo metti nel diario col tastierino.
+Service worker a `aureo-v30`.
+
+## v31 - Modifica vera (Kg/Reps/Note) + back corretto + spazi sfruttati
+Dopo gli screenshot reali, sistemati i quattro problemi:
+- **Indietro dall'editor**: il tasto back ora riporta all'anteprima del blocco (dove c'e Avvia), non piu di colpo alla Home.
+- **Si imposta tutto, pre-allenamento**: in "Modifica routine" ogni esercizio ha le tessere **Kg** e **Reps** (tocchi -> tastierino grande) e un campo **Nota**. I target e le note compaiono nell'anteprima e **precompilano il diario** (es. RDL parte da 60 kg x 8) con la nota visibile durante l'allenamento. Niente piu "cambia i target" che non si poteva fare.
+- **Niente piu scheda di sola lettura per sbaglio**: nell'editor il nome non apre piu il dettaglio; la consultazione e dall'anteprima (tocchi l'esercizio). E il titolo in alto e quello giusto (nome esercizio, non "Modifica").
+- **Spazi sfruttati, niente bandoni**: i pulsanti d'azione (Avvia/Modifica, Fatto/Aggiungi) sono spinti in basso a riempire lo spazio e restare comodi al pollice; la Home tiene il footer in fondo. Il tastierino numerico e ora condiviso (diario + editor).
+Service worker a `aureo-v31`.

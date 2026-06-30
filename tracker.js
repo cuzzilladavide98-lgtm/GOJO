@@ -12,6 +12,10 @@
 
   function lastItem(id) { var h = AU.loadHistory ? AU.loadHistory() : []; for (var i = 0; i < h.length; i++) { var it = (h[i].items || []).filter(function (x) { return x.id === id && x.sets && x.sets.length; })[0]; if (it) return it; } return null; }
   function newSet(ex) {
+    var t = ex.target || {};
+    if ((t.kg != null && t.kg !== "") || (t.reps != null && t.reps !== "")) {
+      return { w: +t.kg || 0, r: +t.reps || (AU.defaultVal(ex) || 10), done: false };
+    }
     var li = lastItem(ex.id);
     if (li) { var s = li.sets[li.sets.length - 1]; return { w: s.w || 0, r: s.r || (AU.defaultVal(ex) || 10), done: false }; }
     return { w: 0, r: AU.defaultVal(ex) || 10, done: false };
@@ -37,20 +41,16 @@
   }
 
   function stepper(kind, i, j, val) {
-    var shown = kind === "w" ? (val ? val : "") : (val || val === 0 ? val : "");
+    var shown = kind === "w" ? (val ? val : "\u2014") : (val || val === 0 ? val : 0);
     return '<div class="set-step">' +
       '<button class="ss-btn" data-step="' + kind + "_" + i + "_" + j + '_-1" aria-label="Meno">&minus;</button>' +
-      '<input class="ss-in" type="text" inputmode="' + (kind === "w" ? "decimal" : "numeric") + '" data-in="' + kind + "_" + i + "_" + j + '" value="' + shown + '" placeholder="' + (kind === "w" ? "kg" : "rep") + '" aria-label="' + (kind === "w" ? "Carico in kg" : "Ripetizioni") + '">' +
+      '<button class="ss-num" data-num="' + kind + "_" + i + "_" + j + '">' + shown + '</button>' +
       '<button class="ss-btn" data-step="' + kind + "_" + i + "_" + j + '_1" aria-label="Piu">+</button></div>';
   }
-  function flushInputs() {
-    var ins = byId("view-workout").querySelectorAll("[data-in]");
-    for (var k = 0; k < ins.length; k++) {
-      var inp = ins[k], p = inp.dataset.in.split("_");
-      var item = TR.items[+p[1]]; if (!item) continue; var set = item.sets[+p[2]]; if (!set) continue;
-      var nv = parseFloat(String(inp.value).replace(",", ".")); if (isNaN(nv) || nv < 0) nv = 0;
-      if (p[0] === "w") set.w = Math.round(nv * 10) / 10; else set.r = Math.round(nv);
-    }
+  function openKeypad(kind, i, j) {
+    var item = TR.items[i]; if (!item || !item.sets[j] || !AU.numpad) return;
+    var set = item.sets[j];
+    AU.numpad({ label: kind === "w" ? "Carico (kg)" : "Ripetizioni", value: kind === "w" ? set.w : set.r, decimals: kind === "w", onDone: function (nv) { if (kind === "w") set.w = nv; else set.r = nv; render(); } });
   }
 
   function render() {
@@ -65,7 +65,7 @@
         '<div class="trk-head"><div class="trk-thumb">' + renderIllu(it.ex.illu, true) + '</div>' +
         '<div class="trk-h-txt"><div class="trk-name">' + it.ex.n + ". " + esc(it.ex.nome) + '</div>' +
         '<div class="trk-cat">' + esc(it.ex.categoria) + '</div>' +
-        '<div class="trk-last">' + esc(lastHint(it.ex.id)) + '</div></div>' +
+        '<div class="trk-last">' + esc(lastHint(it.ex.id)) + '</div>' + ((it.ex.target && it.ex.target.note) ? '<div class="trk-note">' + esc(it.ex.target.note) + '</div>' : '') + '</div>' +
         '<div class="trk-count">' + doneSets + "/" + it.sets.length + '</div></div>' +
         '<div class="set-row set-head"><span>Serie</span><span>Kg</span><span>Reps</span><span></span></div>';
       it.sets.forEach(function (s, j) {
@@ -94,10 +94,9 @@
 
   byId("view-workout").addEventListener("click", function (e) {
     if (byId("view-workout").getAttribute("data-mode") !== "tracker") return;
+    var num = e.target.closest("[data-num]"); if (num) { var pn = num.dataset.num.split("_"); openKeypad(pn[0], +pn[1], +pn[2]); return; }
     var st = e.target.closest("[data-step]"), dn = e.target.closest("[data-done]"),
       ad = e.target.closest("[data-add]"), rb = e.target.closest("[data-rest]"), rp = e.target.closest("[data-rpe]");
-    if (e.target.closest("[data-in]")) return;
-    flushInputs();
     if (st) {
       var p = st.dataset.step.split("_"); var s = TR.items[+p[1]].sets[+p[2]]; var d = +p[3];
       if (p[0] === "w") s.w = Math.max(0, Math.round((s.w + d * 2.5) * 10) / 10);
@@ -119,11 +118,6 @@
       if (a === "skip") stopRest();
       else { TR.restRem = Math.max(0, TR.restRem + (a === "+15" ? 15 : -15)); updateRest(); }
     }
-  });
-
-  byId("view-workout").addEventListener("change", function (e) {
-    if (byId("view-workout").getAttribute("data-mode") !== "tracker") return;
-    if (e.target.closest("[data-in]")) flushInputs();
   });
 
   function startRest(sec) { TR.restRem = sec; TR.restTot = sec; if (TR.timer) clearInterval(TR.timer); TR.timer = setInterval(tick, 250); var b = byId("restBar"); if (b) b.classList.remove("hidden"); updateRest(); }

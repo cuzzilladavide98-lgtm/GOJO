@@ -686,7 +686,17 @@
   function ckey(b) { return getTrack() + "|" + b.key; }
   function isCustom(b) { return !!loadCustom()[ckey(b)]; }
   function exIdsFor(b) { var c = loadCustom()[ckey(b)]; return (c && c.ex && c.ex.length) ? c.ex.filter(function (id) { return EX[id]; }) : b.ex; }
-  function targetFor(b, id) { var c = loadCustom()[ckey(b)]; if (c && c.targets && c.targets[id] != null) return c.targets[id]; return (EX[id] && EX[id].presc) || ""; }
+  function tObj(b, id) { var c = loadCustom()[ckey(b)]; var t = c && c.targets ? c.targets[id] : null; return (t && typeof t === "object") ? t : {}; }
+  function ensureT(c, id) { if (!c.targets[id] || typeof c.targets[id] !== "object") c.targets[id] = {}; return c.targets[id]; }
+  function noteFor(b, id) { return tObj(b, id).note || ""; }
+  function targetFor(b, id) {
+    var t = tObj(b, id), s = "";
+    if (t.kg != null && t.kg !== "") s += t.kg + " kg";
+    if (t.reps != null && t.reps !== "") s += (s ? " x " : "") + t.reps + " reps";
+    if (s) return s;
+    var c = loadCustom()[ckey(b)]; if (c && c.targets && typeof c.targets[id] === "string") return c.targets[id];
+    return (EX[id] && EX[id].presc) || "";
+  }
   function setCustom(b, fn) { var o = loadCustom(), k = ckey(b); if (!o[k]) o[k] = { ex: b.ex.slice(), targets: {} }; if (!o[k].ex) o[k].ex = b.ex.slice(); if (!o[k].targets) o[k].targets = {}; fn(o[k]); saveCustom(o); }
   function resetCustom(b) { var o = loadCustom(); delete o[ckey(b)]; saveCustom(o); }
   function blockByN(n) { var bs = curBlocks(); return bs[((n - 1) % 7 + 7) % 7]; }
@@ -695,7 +705,7 @@
   function lastCavci() { if (!AU) return null; var h = AU.loadHistory(); for (var i = 0; i < h.length; i++) if (h[i].cavci) return { block: h[i].cavci, date: h[i].date }; return null; }
   function nextN() { var l = lastCavci(); return l ? (l.block % 7) + 1 : 1; }
   function daysSince() { var l = lastCavci(); if (!l) return -1; return Math.floor((Date.now() - new Date(l.date).getTime()) / 86400000); }
-  function listOf(b) { return exIdsFor(b).map(function (id, i) { var e = EX[id]; var o = { id: id, n: i + 1 }; for (var k in e) o[k] = e[k]; o.presc = targetFor(b, id); return o; }); }
+  function listOf(b) { return exIdsFor(b).map(function (id, i) { var e = EX[id]; var o = { id: id, n: i + 1 }; for (var k in e) o[k] = e[k]; o.presc = targetFor(b, id); var t = tObj(b, id); o.target = { kg: t.kg, reps: t.reps, note: t.note }; return o; }); }
 
   function start(b) {
     if (!b || !AU) return;
@@ -715,7 +725,7 @@
       theme: b.theme, bar: "Rotazione CAVCI",
       badge: b.key === "reset" ? "Protocollo 0" : ("Tappa " + b.n + " / 7"),
       title: b.nome, sub: b.sub,
-      rows: exIdsFor(b).map(function (id) { var e = EX[id]; return { name: e.nome, meta: targetFor(b, id), opt: e.opt, attr: 'data-cavci-ex="' + id + '"' }; }),
+      rows: exIdsFor(b).map(function (id) { var e = EX[id]; return { name: e.nome, meta: targetFor(b, id), sub: noteFor(b, id), opt: e.opt, attr: 'data-cavci-ex="' + id + '"' }; }),
       startLabel: "Avvia " + (mode === "forza" ? "(Forza)" : "(Guidato)"),
       note: mode === "forza" ? "Diario Forza: carico, ripetizioni e RPE." : "Guidato: timer e illustrazioni.",
       extra: '<button class="btn secondary" data-edit-open="1">Modifica routine</button>',
@@ -725,27 +735,34 @@
 
   function renderEditor() {
     var b = curBlk; if (!b || !AU) return;
+    window.CAVCI._mode = "editor";
     var ids = exIdsFor(b);
     var rows = ids.map(function (id) {
-      var e = EX[id];
-      return '<div class="ed-row"><div class="ed-top"><button class="ed-rn" data-cavci-ex="' + id + '">' + esc(e.nome) + '</button>' +
-        '<div class="ed-ctrl">' +
-        '<button class="ed-b" data-edit-up="' + id + '" aria-label="Su">&#8593;</button>' +
+      var e = EX[id]; var t = tObj(b, id);
+      var body = (e.tipo === "dynamic")
+        ? '<div class="ed-tiles"><button class="ed-tile" data-tkg="' + id + '"><span class="ed-tk">Kg</span><span class="ed-tv">' + (t.kg != null && t.kg !== "" ? t.kg : "\u2014") + '</span></button>' +
+          '<button class="ed-tile" data-treps="' + id + '"><span class="ed-tk">Reps</span><span class="ed-tv">' + (t.reps != null && t.reps !== "" ? t.reps : "\u2014") + '</span></button></div>'
+        : '<div class="ed-tgt-ro">' + esc(targetFor(b, id)) + '</div>';
+      return '<div class="ed-row"><div class="ed-top"><div class="ed-rn">' + esc(e.nome) + '</div>' +
+        '<div class="ed-ctrl"><button class="ed-b" data-edit-up="' + id + '" aria-label="Su">&#8593;</button>' +
         '<button class="ed-b" data-edit-dn="' + id + '" aria-label="Giu">&#8595;</button>' +
         '<button class="ed-b rm" data-edit-rm="' + id + '" aria-label="Rimuovi">&#10005;</button></div></div>' +
-        '<div class="ed-tgt-ro">' + esc(targetFor(b, id)) + '</div></div>';
+        body +
+        '<input class="ed-note" data-tnote="' + id + '" value="' + esc(t.note || "") + '" placeholder="Nota (facoltativa)">' +
+        '</div>';
     }).join("");
-    var h = '<div class="bk"><div class="bk-hero"><div class="bk-badge">Modifica</div><h2>' + esc(b.nome) + '</h2><p>Aggiungi, togli, riordina o cambia i target. Si salva da solo.</p></div>' +
+    var h = '<div class="bk ed"><div class="bk-hero"><div class="bk-badge">Modifica</div><h2>' + esc(b.nome) + '</h2><p>Imposta Kg, ripetizioni e note. Aggiungi, togli o riordina. Si salva da solo.</p></div>' +
       '<div class="bk-list ed-list">' + rows + '</div>' +
-      '<button class="btn secondary" data-edit-add="1">+ Aggiungi esercizio</button>' +
+      '<div class="bk-actions"><button class="btn secondary" data-edit-add="1">+ Aggiungi esercizio</button>' +
       (isCustom(b) ? '<button class="btn secondary danger-soft" data-edit-reset="1">Ripristina predefinito</button>' : '') +
-      '<button class="btn" data-edit-done="1">Fatto</button></div>';
+      '<button class="btn" data-edit-done="1">Fatto</button></div></div>';
     AU.byId("view-block").innerHTML = h;
     AU.byId("barTitle").textContent = "Modifica"; AU.byId("barSub").textContent = b.nome;
     AU.show("block");
   }
   function renderPicker() {
     var b = curBlk; if (!b || !AU) return;
+    window.CAVCI._mode = "picker";
     var have = exIdsFor(b);
     var pool = Object.keys(EX).filter(function (id) { return have.indexOf(id) < 0; });
     var rows = pool.map(function (id) { var e = EX[id]; return '<button class="bk-row" data-edit-pick="' + id + '"><span class="bk-rn">' + esc(e.nome) + '</span><span class="bk-rm">' + esc(e.categoria) + '</span></button>'; }).join("");
@@ -779,6 +796,7 @@
     AU.byId("view-detail").innerHTML = h;
     AU.applyTheme(b ? b.theme : "purple");
     AU.show("detail");
+    AU.byId("barTitle").textContent = e.nome; AU.byId("barSub").textContent = e.categoria;
   }
 
   function renderHomeSection() {
@@ -819,6 +837,8 @@
       if ((t = e.target.closest("[data-edit-back]"))) { renderEditor(); return; }
       if ((t = e.target.closest("[data-edit-done]"))) { if (b) openBlock(b); return; }
       if (!b) return;
+      if ((t = e.target.closest("[data-tkg]"))) { var idk = t.dataset.tkg; AU.numpad({ label: "Carico (kg)", value: tObj(b, idk).kg, decimals: true, onDone: function (nv) { setCustom(b, function (c) { ensureT(c, idk).kg = nv; }); renderEditor(); } }); return; }
+      if ((t = e.target.closest("[data-treps]"))) { var idr = t.dataset.treps; AU.numpad({ label: "Ripetizioni", value: tObj(b, idr).reps, decimals: false, onDone: function (nv) { setCustom(b, function (c) { ensureT(c, idr).reps = nv; }); renderEditor(); } }); return; }
       if ((t = e.target.closest("[data-edit-pick]"))) { setCustom(b, function (c) { if (c.ex.indexOf(t.dataset.editPick) < 0) c.ex.push(t.dataset.editPick); }); renderEditor(); return; }
       if ((t = e.target.closest("[data-edit-rm]"))) { setCustom(b, function (c) { var i = c.ex.indexOf(t.dataset.editRm); if (i >= 0 && c.ex.length > 1) c.ex.splice(i, 1); }); renderEditor(); return; }
       if ((t = e.target.closest("[data-edit-up]"))) { setCustom(b, function (c) { var i = c.ex.indexOf(t.dataset.editUp); if (i > 0) { var x = c.ex.splice(i, 1)[0]; c.ex.splice(i - 1, 0, x); } }); renderEditor(); return; }
@@ -827,12 +847,18 @@
     });
     AU.byId("view-block").addEventListener("change", function (e) {
       var b = curBlk; if (!b) return;
-      var t = e.target.closest("[data-edit-target]");
-      if (t) { var id = t.dataset.editTarget, val = t.value; setCustom(b, function (c) { c.targets[id] = val; }); }
+      var tn = e.target.closest("[data-tnote]");
+      if (tn) { var idn = tn.dataset.tnote, val = tn.value; setCustom(b, function (c) { ensureT(c, idn).note = val; }); }
     });
   }
   function openEditor(b) { curBlk = b; renderEditor(); }
 
-  window.CAVCI = { EX: EX, BLOCKS: BLOCKS, RESET: RESET, renderHomeSection: renderHomeSection, start: start, openEx: openEx, openBlock: openBlock, nextN: nextN, _pending: null };
+  function back() {
+    var m = window.CAVCI._mode;
+    if (m === "picker") { renderEditor(); return true; }
+    if (m === "editor") { openBlock(curBlk); return true; }
+    return false;
+  }
+  window.CAVCI = { EX: EX, BLOCKS: BLOCKS, RESET: RESET, renderHomeSection: renderHomeSection, start: start, openEx: openEx, openBlock: openBlock, back: back, nextN: nextN, _pending: null, _mode: "summary" };
   if (AU && AU.renderHome) AU.renderHome();
 })();
