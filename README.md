@@ -72,3 +72,20 @@ Base scura con oro "Aureo" come colore primario, piu accenti ispirati a **Jujuts
 - **Illustrazioni tinte dal tema**: le figure degli esercizi assumono il colore dell'energia scelta (blu/rosso/viola/oro).
 - **Suono "Dominio"**: all'intro parte una breve sigla sintetizzata (sweep + shimmer + impatto), legata al toggle del suono.
 - **Onboarding al primo avvio**: 3 schermate di benvenuto con scelta immediata del tema; non ricompare alle aperture successive.
+
+## Doppia anima: Guidato (NTC) + Forza (Strong) - filosofia Strava
+Dalla Home, selettore **Guidato | Forza** (la scelta resta salvata):
+- **Guidato (alla Nike Training Club)**: premi Play e segui il flusso. Layout ancorato, timer esegui/recupero automatici, illustrazione chiara, conto alla rovescia. Zero attrito: in questa modalita NON si inseriscono dati iper-analitici durante la sessione (solo, volendo, le ripetizioni con un tap).
+- **Forza (alla Strong)**: diario snello, quasi un foglio di calcolo. Una card per esercizio con righe-serie (Kg x Reps a stepper), check per completare la serie e **timer di recupero** in basso (-15/+15/salta). Nessun avanzamento automatico: il ritmo lo detti tu. "+ Serie" per aggiungere set.
+- **Filosofia Strava** (cosa NON facciamo): niente GPS/mappe/tracciamento outdoor. Il focus resta sui dati della sessione indoor - esercizi, tempo, costanza, progressione - gia presenti in Storico e nei grafici.
+
+Struttura dati sessione estesa per gestire entrambe: ogni sessione ha `kind` ("guidato"/"forza"); gli esercizi della modalita Forza salvano l'array `sets` [{kg, reps}] piu un valore di sintesi (carico max o ripetizioni totali) cosi Storico e grafici restano compatibili tra le due modalita.
+
+## Direzione artistica "Six Eyes" (Satoru Gojo)
+Identita visiva fusa nel Material Design 3, pensata per i display OLED dell'iPhone:
+- **Palette Infinity & Six Eyes**: sfondo **Void nero assoluto** (#000000), accento **ciano elettrico** (#00E5FF) per timer attivi/progressi/elementi vivi, **bianco ottico** (#FFFFFF) per il testo critico, grigi-ghiaccio geometrici per card e separatori. Contrasto testo **WCAG AAA** (bianco 21:1, ciano 13.7:1, bottoni 12:1).
+- **Geometria a raggi X**: niente sfocature superflue; card con bordo hairline ice, griglie pulite e leggibilita tagliente.
+- **Icone a tratto singolo** minimali e geometriche, in target di tocco spaziosi (>=56px).
+- **Fluidita spazio-tempo**: transizioni con curva MD3 *emphasized* piu rapida (~220ms) per una reattivita "divina"; comparsa viste con micro-traslazione.
+- **Micro-interazioni atomiche**: bagliore ciano controllato (un solo elemento, GPU-light) su pulsante Play, anello del timer attivo e serie completata - come l'attivazione dell'energia, senza appesantire.
+- Il **tema "Six Eyes" (ciano) e ora il default**; restano selezionabili Lapse (blu), Hollow (viola), Reverse (rosso), Aureo (oro). L'occhio di Gojo (logo e icona app) chiude il cerchio: l'app fa "percepire" il flusso di tempo, menu e movimento.

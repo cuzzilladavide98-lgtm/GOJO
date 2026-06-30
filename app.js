@@ -7,27 +7,28 @@
 
   var byId = function (id) { return document.getElementById(id); };
   var IC = {
-    play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
-    pause: '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
-    prev: '<svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>',
-    next: '<svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6h2v12h-2z"/></svg>',
-    skip: '<svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6z"/></svg>',
-    close: '<svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
-    trophy: '<svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0 0 11 16.9V19H7v2h10v-2h-4v-2.1a5.01 5.01 0 0 0 3.61-3.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>',
-    calendar: '<svg viewBox="0 0 24 24"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 1.99-.9 1.99-2L22 5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>',
-    music: '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>'
+    play: '<svg viewBox="0 0 24 24"><path d="M8 5 19 12 8 19 Z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>',
+    prev: '<svg viewBox="0 0 24 24"><path d="M7 5v14M19 6 10 12 19 18 Z"/></svg>',
+    next: '<svg viewBox="0 0 24 24"><path d="M17 5v14M5 6 14 12 5 18 Z"/></svg>',
+    skip: '<svg viewBox="0 0 24 24"><path d="M5 6 12 12 5 18 ZM13 6 20 12 13 18 Z"/></svg>',
+    close: '<svg viewBox="0 0 24 24"><path d="M6 6 18 18M18 6 6 18"/></svg>',
+    trophy: '<svg viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3M9 20h6M12 14v6"/></svg>',
+    calendar: '<svg viewBox="0 0 24 24"><path d="M5 6h14v13H5zM5 10h14M9 4v3M15 4v3"/></svg>',
+    music: '<svg viewBox="0 0 24 24"><path d="M9 17V5l10-2v12"/><circle cx="6.5" cy="17" r="2.6"/><circle cx="16.5" cy="15" r="2.6"/></svg>',
+    check: '<svg viewBox="0 0 24 24"><path d="M5 12 10 17 20 6"/></svg>'
   };
 
   var EYE = '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="heI" cx="42%" cy="38%" r="62%"><stop offset="0" stop-color="#EAF4FF"/><stop offset="34%" stop-color="#93CBFF"/><stop offset="70%" stop-color="#3D8BFF"/><stop offset="100%" stop-color="#1E57B4"/></radialGradient></defs><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="#0a0a12"/><circle cx="24" cy="24" r="11.5" fill="url(#heI)"/><circle cx="24" cy="24" r="4.8" fill="#0a0c18"/><circle cx="20.5" cy="20.5" r="2.2" fill="#fff"/><path d="M4 24C13 11 35 11 44 24C35 37 13 37 4 24Z" fill="none" stroke="#BBD8FF" stroke-width="1.8"/></svg>';
 
-  var PREF = { sound: true, vibrate: true, theme: "blue", domainIntro: true, onboarded: false };
+  var PREF = { sound: true, vibrate: true, theme: "cyan", domainIntro: true, onboarded: false, mode: "guided" };
   try {
     var saved = localStorage.getItem("aureo_pref");
     if (saved) PREF = Object.assign(PREF, JSON.parse(saved));
   } catch (e) {}
   function savePref() { try { localStorage.setItem("aureo_pref", JSON.stringify(PREF)); } catch (e) {} }
-  function applyTheme() { document.documentElement.setAttribute("data-theme", PREF.theme || "gold"); }
-  var THEMES = [{ id: "gold", name: "Aureo", c: "#FBD27B" }, { id: "blue", name: "Lapse", c: "#6FB6FF" }, { id: "red", name: "Reverse", c: "#FF7A7A" }, { id: "purple", name: "Hollow", c: "#C4A0FF" }];
+  function applyTheme() { document.documentElement.setAttribute("data-theme", PREF.theme || "cyan"); }
+  var THEMES = [{ id: "cyan", name: "Six Eyes", c: "#00E5FF" }, { id: "blue", name: "Lapse", c: "#6FB6FF" }, { id: "purple", name: "Hollow", c: "#C4A0FF" }, { id: "red", name: "Reverse", c: "#FF7A7A" }, { id: "gold", name: "Aureo", c: "#FBD27B" }];
   var GOJO_QUOTES = ["\"Nah, I'd win.\" - Gojo", "Sono semplicemente il piu forte.", "\"Throughout Heaven and Earth, I alone am the honored one.\"", "Fin dove arriva il tuo limite? Oltre.", "Va tutto bene: sono io il piu forte.", "Nessun limite. Solo tecnica."];
   var qi = Math.floor(Math.random() * 6);
   var SLIDES = [
@@ -112,6 +113,8 @@
     window.scrollTo(0, 0);
   }
 
+  function startSession(list, title) { if (PREF.mode === "forza" && window.startTracker) window.startTracker(list, title); else window.startWorkout(list, title); }
+
   byId("tabbar").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.tab === "library") renderLibrary();
@@ -145,6 +148,11 @@
         '<div class="chev">&rsaquo;</div></button>';
     }
 
+    h += '<div class="section-title">Come vuoi allenarti?</div>';
+    h += '<div class="seg">' +
+      '<button class="seg-b' + (PREF.mode !== "forza" ? " on" : "") + '" data-segmode="guided">Guidato</button>' +
+      '<button class="seg-b' + (PREF.mode === "forza" ? " on" : "") + '" data-segmode="forza">Forza</button></div>';
+    h += '<div class="seg-cap">' + (PREF.mode === "forza" ? "Diario forza: registra serie, ripetizioni e carico con recupero. Tu detti il ritmo." : "Flusso guidato: premi Play, segui timer e illustrazioni. Zero attrito.") + '</div>';
     h += '<div class="section-title">Sessioni per blocco</div>';
     BLOCCHI.forEach(function (b) {
       var list = exByN(b.n);
@@ -173,17 +181,20 @@
     var act = e.target.closest("[data-act]");
     var blk = e.target.closest("[data-block]");
     var tg = e.target.closest("[data-toggle]");
-    var th = e.target.closest("[data-theme]");
+    var th = e.target.closest(".theme-sw");
+    var sg = e.target.closest("[data-segmode]");
     if (act) {
-      if (act.dataset.act === "start-all") window.startWorkout(allEx(), "Allenamento completo");
+      if (act.dataset.act === "start-all") startSession(allEx(), "Allenamento completo");
       if (act.dataset.act === "go-library") { renderLibrary(); show("library"); }
       if (act.dataset.act === "go-history") { renderHistory(); show("history"); }
     } else if (blk) {
-      window.startWorkout(exByN(+blk.dataset.block), BLOCCHI[+blk.dataset.block - 1].nome);
+      startSession(exByN(+blk.dataset.block), BLOCCHI[+blk.dataset.block - 1].nome);
     } else if (tg) {
       var k = tg.dataset.toggle; PREF[k] = !PREF[k]; savePref(); tg.classList.toggle("on", PREF[k]);
     } else if (th) {
       PREF.theme = th.dataset.theme; savePref(); applyTheme(); renderHome();
+    } else if (sg) {
+      PREF.mode = sg.dataset.segmode; savePref(); renderHome();
     }
   });
 
@@ -252,7 +263,7 @@
   }
   byId("view-detail").addEventListener("click", function (e) {
     var s = e.target.closest("[data-start-one]");
-    if (s) { var ex = EXERCISES.filter(function (x) { return x.id === s.dataset.startOne; })[0]; window.startWorkout([ex], ex.nome); }
+    if (s) { var ex = EXERCISES.filter(function (x) { return x.id === s.dataset.startOne; })[0]; startSession([ex], ex.nome); }
   });
 
   function renderHistory() {
@@ -280,13 +291,13 @@
         h += '<div class="hist-card">' +
           '<button class="hist-head" data-toggle-sess="' + s.id + '">' +
           '<div style="flex:1"><div class="b-name">' + esc(s.title) + '</div>' +
-          '<div class="b-desc">' + timeLabel(s.date) + ' - ' + done + ' svolti' + (sk ? ' - ' + sk + ' saltati' : '') + '</div></div>' +
+          '<div class="b-desc">' + (s.kind === "forza" ? "Forza" : "Guidato") + ' &middot; ' + timeLabel(s.date) + ' - ' + done + ' svolti' + (sk ? ' - ' + sk + ' saltati' : '') + '</div></div>' +
           '<span class="badge ' + (s.status === "interrotta" ? "media" : "bassa") + '">' + esc(s.status) + '</span>' +
           '<div class="chev">&rsaquo;</div></button>';
         h += '<div class="hist-body hidden" id="sb_' + s.id + '">';
         s.items.forEach(function (it) {
           h += '<div class="log-row"><span>' + it.n + '. ' + esc(it.nome) + '</span>' +
-            '<b>' + (it.skipped ? '<span style="color:var(--muted)">saltato</span>' : (it.value + ' ' + it.unit)) + '</b></div>';
+            '<b>' + (it.skipped ? '<span style="color:var(--muted)">saltato</span>' : (it.value + ' ' + it.unit + (it.sets ? ' &middot; ' + it.sets.length + ' serie' : ''))) + '</b></div>';
         });
         h += '</div></div>';
       });
@@ -300,7 +311,7 @@
     var act = e.target.closest("[data-act]");
     if (t) { var b = byId("sb_" + t.dataset.toggleSess); if (b) b.classList.toggle("hidden"); }
     else if (act) {
-      if (act.dataset.act === "hist-start") window.startWorkout(allEx(), "Allenamento completo");
+      if (act.dataset.act === "hist-start") startSession(allEx(), "Allenamento completo");
       if (act.dataset.act === "clear-hist") {
         if (confirm("Cancellare tutto lo storico degli allenamenti?")) { clearHistory(); renderHistory(); renderHome(); }
       }
@@ -310,7 +321,7 @@
   window.AU = {
     byId: byId, esc: esc, fmt: fmt, PREF: PREF, IC: IC,
     addSession: addSession, renderHome: renderHome, renderHistory: renderHistory, show: show,
-    unitFor: unitFor, defaultVal: defaultVal, EYE: EYE
+    unitFor: unitFor, defaultVal: defaultVal, EYE: EYE, exerciseLogs: exerciseLogs, show: show
   };
 
   applyTheme();

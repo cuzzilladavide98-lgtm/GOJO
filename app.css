@@ -2,37 +2,37 @@
    L'Allenamento Aureo - Material Design 3 (tema scuro, primary ambra)
    ===================================================================== */
 :root{
-  --md-primary:#FBD27B;
-  --md-on-primary:#3D2E04;
-  --md-primary-container:#574419;
-  --md-on-primary-container:#FFDEA0;
-  --md-secondary-container:#4E4632;
-  --md-on-secondary-container:#F2E0BB;
-  --md-tertiary:#7FD8C9;
+  --md-primary:#00E5FF;
+  --md-on-primary:#00141A;
+  --md-primary-container:#063C45;
+  --md-on-primary-container:#9BF1FF;
+  --md-secondary-container:#10202B;
+  --md-on-secondary-container:#CDE9F0;
+  --md-tertiary:#80DEEA;
 
-  --md-surface:#15130C;
-  --md-sc-lowest:#100E08;
-  --md-sc-low:#1D1B13;
-  --md-sc:#221F17;
-  --md-sc-high:#2C291F;
-  --md-sc-highest:#37342A;
+  --md-surface:#000000;
+  --md-sc-lowest:#000000;
+  --md-sc-low:#080C12;
+  --md-sc:#0E141C;
+  --md-sc-high:#161E28;
+  --md-sc-highest:#1F2A36;
 
-  --md-on-surface:#ECE3D2;
-  --md-on-surface-variant:#CFC6B0;
-  --md-outline:#988F75;
-  --md-outline-variant:#4C4736;
-  --md-error:#FFB4AB;
-  --md-success:#7FD8C9;
+  --md-on-surface:#FFFFFF;
+  --md-on-surface-variant:#C2CDD6;
+  --md-outline:#3A4654;
+  --md-outline-variant:#1E2832;
+  --md-error:#FF6B6B;
+  --md-success:#80DEEA;
 
   --bg:var(--md-surface);
   --txt:var(--md-on-surface);
   --muted:var(--md-on-surface-variant);
-  --muted2:#8C846F;
+  --muted2:#8A97A3;
   --line:var(--md-outline-variant);
   --gold:var(--md-primary);
   --gold-bright:var(--md-primary);
 
-  --alta:#FFB4AB;
+  --alta:#FF6B6B;
   --media:var(--md-primary);
   --bassa:var(--md-tertiary);
 
@@ -538,3 +538,107 @@ input{font-size:16px;}            /* niente auto-zoom al focus su iOS */
 #view-workout[data-mode="rest"] .timer-wrap{width:150px;height:150px;}
 #view-workout[data-mode="prep"] .wo-illu{max-width:148px;width:42%;}
 #view-workout[data-mode="prep"] .timer-wrap{width:158px;height:158px;}
+
+/* =====================================================================
+   Doppia anima: selettore Guidato/Forza + Diario Forza (alla Strong)
+   ===================================================================== */
+.seg{display:flex;gap:4px;background:var(--md-sc-low);border-radius:var(--r-full);padding:4px;}
+.seg-b{flex:1;height:40px;border-radius:var(--r-full);font-size:14px;font-weight:600;
+  color:var(--md-on-surface-variant);position:relative;overflow:hidden;}
+.seg-b.on{background:var(--md-primary);color:var(--md-on-primary);}
+.seg-cap{font-size:12px;color:var(--md-on-surface-variant);margin:8px 4px 0;line-height:1.45;}
+
+#view-workout[data-mode="tracker"]{overflow-y:auto;-webkit-overflow-scrolling:touch;display:block;padding-top:calc(var(--safe-t) + 8px);}
+.trk{padding:6px 0 0;}
+.trk-card{background:var(--md-sc-low);border-radius:var(--r-m);padding:12px;margin-bottom:12px;}
+.trk-head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+.trk-thumb{width:48px;height:48px;flex:0 0 auto;border-radius:var(--r-s);overflow:hidden;background:var(--md-sc-lowest);}
+.trk-thumb svg{width:100%;height:100%;display:block;}
+.trk-h-txt{flex:1;min-width:0;}
+.trk-name{font-size:15px;font-weight:600;line-height:1.2;}
+.trk-cat{font-size:12px;color:var(--md-on-surface-variant);}
+.trk-last{font-size:11px;color:var(--md-primary);margin-top:1px;}
+.trk-count{font-size:14px;font-weight:600;color:var(--md-on-surface-variant);font-variant-numeric:tabular-nums;}
+.set-row{display:grid;grid-template-columns:28px 1fr 1fr 42px;align-items:center;gap:6px;
+  padding:6px 0;border-top:1px solid var(--md-outline-variant);}
+.set-row.set-head{border-top:none;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;padding:2px 0;}
+.set-row.set-head span{text-align:center;}
+.set-row.set-head span:first-child{text-align:left;}
+.set-n{font-size:14px;color:var(--md-on-surface-variant);font-weight:600;}
+.set-step{display:flex;align-items:center;justify-content:center;gap:4px;}
+.ss-btn{width:32px;height:32px;flex:0 0 auto;border-radius:var(--r-full);background:var(--md-sc-high);
+  color:var(--md-on-surface);font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;touch-action:manipulation;}
+.ss-val{min-width:32px;text-align:center;font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;}
+.set-done{width:42px;height:38px;border-radius:var(--r-s);background:var(--md-sc-high);color:var(--md-on-surface-variant);
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;touch-action:manipulation;}
+.set-done svg{width:22px;height:22px;fill:currentColor;}
+.set-row.done .set-done{background:var(--md-primary);color:var(--md-on-primary);}
+.set-row.done .ss-val{color:var(--md-primary);}
+.add-set{margin-top:8px;width:100%;font-size:13px;font-weight:600;color:var(--md-primary);
+  padding:9px 12px;border-radius:var(--r-s);border:1px dashed var(--md-outline);background:transparent;
+  position:relative;overflow:hidden;touch-action:manipulation;}
+.rest-bar{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;z-index:40;
+  background:var(--md-sc-high);padding:12px 14px calc(12px + var(--safe-b));border-top:1px solid var(--md-outline-variant);}
+.rest-bar.hidden{display:none;}
+.rb-fill{height:4px;background:var(--md-primary);border-radius:2px;margin:-12px -14px 10px;width:0;transition:width .25s linear;}
+.rb-row{display:flex;align-items:center;gap:10px;}
+.rb-mid{flex:1;display:flex;flex-direction:column;align-items:center;}
+.rb-lab{font-size:10px;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:1px;}
+.rb-time{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--md-primary);}
+.rb-btn{height:42px;padding:0 16px;border-radius:var(--r-full);background:var(--md-sc-highest);
+  color:var(--md-on-surface);font-size:14px;font-weight:600;position:relative;overflow:hidden;touch-action:manipulation;}
+.rb-skip{background:var(--md-primary);color:var(--md-on-primary);}
+
+/* =====================================================================
+   SIX EYES - direzione artistica (Void + ciano + bianco, geometrico)
+   ===================================================================== */
+:root{
+  --ease:cubic-bezier(.2,0,0,1);                 /* MD3 emphasized */
+  --fig-hi:#CFF7FF;--fig-mid:#37E0F5;--fig-lo:#0892A8;--fig-arrow:#00E5FF;
+}
+:root[data-theme="cyan"]{--fig-hi:#CFF7FF;--fig-mid:#37E0F5;--fig-lo:#0892A8;--fig-arrow:#00E5FF;}
+
+/* superfici geometriche: hairline ice, niente sfocature superflue */
+.block-card,.ex-row,.hist-card,.trk-card,.card-box,.rrt .item,.err,.stat,
+.music-hero,.detail-illu,.logger,.hero,.finish-list,.set-done,.ss-btn,.lg-btn{
+  border:1px solid var(--md-outline-variant);}
+.appbar,.tabbar,.rest-bar{backdrop-filter:none;-webkit-backdrop-filter:none;}
+
+/* accenti ciano (dove c'era l'oro) */
+.hero .glow{background:radial-gradient(circle,rgba(0,229,255,.18),transparent 70%);}
+.hero::after{background:radial-gradient(circle,rgba(0,229,255,.14),transparent 70%);}
+.appbar .logo{border-color:rgba(0,229,255,.6);box-shadow:0 0 0 1px rgba(0,229,255,.15),0 0 14px rgba(0,229,255,.25);}
+.badge.media{background:rgba(0,229,255,.14);color:var(--md-primary);border-color:rgba(0,229,255,.4);}
+.wo-mode.work{background:rgba(0,229,255,.16);color:var(--md-primary);}
+
+/* icone a tratto singolo geometrico */
+.tabbar .ic svg,.wo-controls .ctrl svg,.wo-top .close svg,.wo-music svg,.set-done svg,
+.btn svg,.ql-open svg,.ql-del svg,.wo-finish .big svg,.empty .big svg{
+  fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.wo-finish .big svg{stroke:var(--md-primary);width:74px;height:74px;}
+.empty .big svg{width:60px;height:60px;}
+
+/* menu: target di tocco spaziosi (56px) */
+.tabbar button{min-height:56px;}
+.tabbar .ic{width:56px;height:36px;}
+
+/* fluidita spazio-tempo: emphasized + piu rapida (200-250ms) */
+.timer-wrap.anim{animation:timerIn .24s var(--ease);}
+.wo-name.anim{animation:fadeUp .24s var(--ease) both;}
+.wo-illu.anim{animation:fadeUp .28s var(--ease) both;}
+.view{animation:viewIn .22s var(--ease);}
+@keyframes viewIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.ripple{background:rgba(0,229,255,.55);opacity:.3;animation:rip .45s var(--ease) forwards;}
+.btn,.block-card,.ex-row,.hist-head,.seg-b,.ctrl{transition:background .2s var(--ease),filter .15s var(--ease),box-shadow .2s var(--ease),transform .15s var(--ease);}
+
+/* micro-interazioni atomiche: glow ciano controllato (1 elemento, GPU-light) */
+.wo-controls .play{box-shadow:0 0 0 1px rgba(0,229,255,.25),0 0 20px rgba(0,229,255,.22);}
+.wo-controls .play:active{box-shadow:0 0 0 2px rgba(0,229,255,.55),0 0 34px rgba(0,229,255,.5);transform:scale(.97);}
+#view-workout[data-mode="work"] .ring-fg{filter:drop-shadow(0 0 5px rgba(0,229,255,.55));}
+.set-row.done .set-done{box-shadow:0 0 0 1px rgba(0,229,255,.45),0 0 14px rgba(0,229,255,.45);}
+.btn:active{box-shadow:0 0 22px rgba(0,229,255,.4);}
+.seg-b.on{box-shadow:0 0 16px rgba(0,229,255,.3);}
+
+/* testo critico in bianco ottico */
+.wo-name,.hero h2,.detail h2,.timer-num .t,.appbar h1{color:#fff;}

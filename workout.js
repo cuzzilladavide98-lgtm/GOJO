@@ -86,25 +86,28 @@
         '<div class="wo-progress" id="woProg"></div>' +
         '<a class="wo-music" href="https://music.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube Music">' + IC.music + '</a></div>' +
       '<div class="wo-bar"><div id="woBarFill"></div></div>' +
-      '<div class="wo-modewrap"><span class="wo-mode" id="woMode"></span></div>' +
-      '<div class="wo-illu" id="woIllu"></div>' +
-      '<div class="wo-name" id="woName"></div>' +
-      '<div class="wo-cat" id="woCat"></div>' +
-      '<div class="timer-wrap" id="woTimerWrap">' + ring +
-        '<div class="timer-num"><div class="t" id="woTime">0</div><div class="lab" id="woLab"></div></div></div>' +
-      '<div class="logger hidden" id="woLogger">' +
-        '<div class="lg-label" id="woLgLabel">Registra</div>' +
-        '<div class="lg-stepper"><button class="lg-btn" id="woMinus" aria-label="Diminuisci">&minus;</button>' +
-        '<div class="lg-val"><span id="woVal">0</span> <small id="woUnit"></small></div>' +
-        '<button class="lg-btn" id="woPlus" aria-label="Aumenta">+</button></div></div>' +
-      '<div class="wo-cue" id="woCue"></div>' +
-      '<div class="wo-hint" id="woHint"></div>' +
-      '<button class="skip-link" id="woSkip">Salta esercizio</button>' +
-      '<div class="wo-next" id="woNext"></div>' +
-      '<div class="wo-controls">' +
-        '<button class="ctrl" id="woPrev" aria-label="Esercizio precedente">' + IC.prev + '</button>' +
-        '<button class="ctrl play" id="woPlay" aria-label="Avvia o metti in pausa">' + IC.pause + '</button>' +
-        '<button class="ctrl" id="woNextBtn" aria-label="Avanti">' + IC.next + '</button></div>';
+      '<div class="wo-stage">' +
+        '<div class="wo-modewrap"><span class="wo-mode" id="woMode"></span></div>' +
+        '<div class="wo-illu" id="woIllu"></div>' +
+        '<div class="wo-name" id="woName"></div>' +
+        '<div class="wo-cat" id="woCat"></div>' +
+        '<div class="timer-wrap" id="woTimerWrap">' + ring +
+          '<div class="timer-num"><div class="t" id="woTime">0</div><div class="lab" id="woLab"></div></div></div>' +
+        '<div class="wo-cue" id="woCue"></div>' +
+        '<div class="wo-hint" id="woHint"></div>' +
+      '</div>' +
+      '<div class="wo-foot">' +
+        '<div class="logger hidden" id="woLogger">' +
+          '<div class="lg-label" id="woLgLabel">Registra</div>' +
+          '<div class="lg-stepper"><button class="lg-btn" id="woMinus" aria-label="Diminuisci">&minus;</button>' +
+          '<div class="lg-val"><span id="woVal">0</span> <small id="woUnit"></small></div>' +
+          '<button class="lg-btn" id="woPlus" aria-label="Aumenta">+</button></div></div>' +
+        '<button class="skip-link" id="woSkip">Salta esercizio</button>' +
+        '<div class="wo-controls">' +
+          '<button class="ctrl" id="woPrev" aria-label="Esercizio precedente">' + IC.prev + '</button>' +
+          '<button class="ctrl play" id="woPlay" aria-label="Avvia o metti in pausa">' + IC.pause + '</button>' +
+          '<button class="ctrl" id="woNextBtn" aria-label="Avanti">' + IC.next + '</button></div>' +
+      '</div>';
 
     byId("woClose").onclick = endWorkout;
     byId("woPlay").onclick = togglePlay;
@@ -170,8 +173,6 @@
 
     byId("woSkip").style.display = (st.mode === "prep") ? "none" : "block";
 
-    var nx = WO.steps[WO.idx + 1];
-    byId("woNext").innerHTML = (st.mode === "prep") ? "" : (nx ? ("Poi: <b>" + esc(nx.mode === "rest" ? "recupero" : nx.ex.nome) + "</b>") : "Ultimo esercizio");
 
     pop(byId("woTimerWrap")); pop(byId("woName")); pop(byId("woIllu"));
     updateTimerUI(st);

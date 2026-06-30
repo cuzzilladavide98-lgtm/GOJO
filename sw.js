@@ -1,7 +1,7 @@
 /* Service worker - cache offline per L'Allenamento Aureo */
-var CACHE = "aureo-v9";
+var CACHE = "aureo-v12";
 var ASSETS = [
-  "./","./index.html","./app.css","./data.js","./figures.js","./chart.js","./app.js","./workout.js","./music.js",
+  "./","./index.html","./app.css","./data.js","./figures.js","./chart.js","./app.js","./workout.js","./tracker.js","./music.js",
   "./manifest.webmanifest","./icons/icon-180.png","./icons/icon-192.png","./icons/icon-512.png","./icons/icon-512-maskable.png"
 ];
 self.addEventListener("install", function (e) {
