@@ -803,19 +803,27 @@
     var tr = getTrack();
     var nb = blockByN(nextN()), ds = daysSince();
     var nEx = exIdsFor(nb).length;
+    var PLAY = (AU.IC.play || "");
     var warn = "";
     if (ds >= 14) warn = '<div class="cv-hint warn">Pausa lunga: meglio Recupero o Reset, poi riprendi piano.</div>';
     else if (ds >= 7) warn = '<div class="cv-hint">Qualche giorno di stop: riparti con calma, niente test.</div>';
-    var strip = curBlocks().map(function (b) { return '<button class="cv-step' + (b.n === nb.n ? ' on' : '') + '" data-cavci-open="' + b.key + '"><span class="cv-sn">' + b.n + '</span><span class="cv-snm">' + esc(b.nome.replace('Forza ', '').replace(' a Corpo Libero', '')) + '</span></button>'; }).join("");
-    var toggle = '<div class="cv-track"><button class="cv-tb' + (tr !== "corpo" ? " on" : "") + '" data-cavci-track="standard">Attrezzi</button><button class="cv-tb' + (tr === "corpo" ? " on" : "") + '" data-cavci-track="corpo">Corpo libero</button></div>';
-    return '<div class="cv-next" data-th="' + nb.theme + '"><div class="cv-eye">' + (AU.EYE || "") + '</div>' +
-      '<div class="cv-badge">Prossima &middot; ' + nb.n + '/7</div>' +
+    var cards = curBlocks().map(function (b) {
+      var n = exIdsFor(b).length;
+      return '<button class="al-card' + (b.n === nb.n ? ' on' : '') + '" data-cavci-open="' + b.key + '">' +
+        '<span class="al-top"><span class="al-n">' + b.n + '</span><span class="al-play">' + PLAY + '</span></span>' +
+        '<span class="al-cn">' + esc(b.nome) + '</span>' +
+        '<span class="al-cs">' + esc(b.sub) + ' &middot; ' + n + ' es.</span></button>';
+    }).join("");
+    var toggle = '<div class="al-track"><button class="al-tb' + (tr !== "corpo" ? " on" : "") + '" data-cavci-track="standard">Attrezzi</button><button class="al-tb' + (tr === "corpo" ? " on" : "") + '" data-cavci-track="corpo">Corpo libero</button></div>';
+    return '<div class="al">' +
+      '<div class="al-hero" data-th="' + nb.theme + '"><div class="al-hero-head"><span class="al-badge">Prossima &middot; ' + nb.n + '/7</span><span class="al-eye">' + (AU.EYE || "") + '</span></div>' +
       '<h3>' + esc(nb.nome) + '</h3><p>' + esc(nb.sub) + ' &middot; ' + nEx + ' esercizi</p>' +
-      '<button class="btn cv-go" data-cavci-start="' + nb.key + '">' + (AU.IC.play || "") + ' Inizia</button>' +
-      '<button class="cv-open-link" data-cavci-open="' + nb.key + '">Vedi esercizi e modifica</button>' +
-      warn + '</div>' +
-      '<div class="cv-stripwrap"><div class="cv-strip-lab">Vai a un altro blocco</div><div class="cv-strip">' + strip + '</div></div>' +
-      '<div class="cv-foot">' + toggle + '<button class="cv-reset-mini" data-cavci-reset>Reset posturale</button></div>';
+      '<div class="al-hero-row"><button class="al-hero-play" data-cavci-start="' + nb.key + '">' + PLAY + '<span>Inizia</span></button>' +
+      '<button class="al-hero-open" data-cavci-open="' + nb.key + '">Vedi e modifica</button></div>' + warn + '</div>' +
+      toggle +
+      '<div class="al-lab">Le 7 tappe</div><div class="al-list">' + cards + '</div>' +
+      '<button class="al-reset" data-cavci-reset><span class="al-n mini">0</span><span class="al-rtx">Protocollo Reset &middot; postura ed equilibrio</span><span class="al-play sm">' + PLAY + '</span></button>' +
+      '</div>';
   }
 
   if (AU) {

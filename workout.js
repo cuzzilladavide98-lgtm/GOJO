@@ -8,7 +8,7 @@
   "use strict";
   var AU = window.AU;
   var byId = AU.byId, esc = AU.esc, fmt = AU.fmt, PREF = AU.PREF, IC = AU.IC;
-  var WO = { steps: [], idx: 0, remaining: 0, running: false, raf: null, last: 0, title: "", saved: false, startedAt: 0, logs: {}, order: [], clock: null };
+  var WO = { steps: [], idx: 0, remaining: 0, running: false, raf: null, last: 0, title: "", saved: false, savedId: 0, startedAt: 0, logs: {}, order: [], clock: null };
   var RING = 2 * Math.PI * 88;
   var cur = { w: 0, r: 0 };
 
@@ -72,7 +72,18 @@
   function persist(status) {
     if (WO.saved) return;
     var s = collect(status);
-    if (s) { AU.addSession(s); WO.saved = true; AU.renderHome(); }
+    if (s) { AU.addSession(s); WO.saved = true; WO.savedId = s.id; AU.renderHome(); }
+  }
+  function setFeel(feel) {
+    if (!WO.savedId) return;
+    var h = AU.loadHistory();
+    for (var i = 0; i < h.length; i++) { if (h[i].id === WO.savedId) { h[i].feel = feel; break; } }
+    AU.saveHistory(h);
+    beep(720, 0.1); vibrate([30]);
+    var wrap = byId("woFeel"); if (!wrap) return;
+    var bs = wrap.querySelectorAll(".feel-chip");
+    for (var j = 0; j < bs.length; j++) bs[j].classList.toggle("on", bs[j].dataset.feel === feel);
+    var msg = byId("woFeelMsg"); if (msg) msg.textContent = "Segnato. Lo ritrovi nello storico.";
   }
   function collect(status) {
     var items = [], volume = 0, anyStrength = false;
@@ -292,6 +303,11 @@
     var h = '<div class="wo-top"><button class="close" id="woClose2">' + IC.close + '</button><div></div><div style="width:40px"></div></div>';
     h += '<div class="wo-finish"><div class="domain-burst"></div><div class="big">' + IC.trophy + '</div><div class="dx-over">Sessione completata</div><h2>Salvata!</h2>' +
       '<p>' + esc(WO.title) + ' &middot; ' + done.length + '/' + items.length + ' &middot; ' + dur + ' min' + (vol ? ' &middot; ' + Math.round(vol) + ' kg' : '') + '</p></div>';
+    h += '<div class="wo-feel" id="woFeel"><div class="feel-q">Com\'&egrave; andata?</div><div class="feel-row">' +
+      '<button class="feel-chip" data-feel="facile"><span class="fc-t">Facile</span><span class="fc-s">avevo di piu\'</span></button>' +
+      '<button class="feel-chip" data-feel="giusto"><span class="fc-t">Giusto</span><span class="fc-s">al punto</span></button>' +
+      '<button class="feel-chip" data-feel="dura"><span class="fc-t">Dura</span><span class="fc-s">al limite</span></button>' +
+      '</div><div class="feel-msg" id="woFeelMsg"></div></div>';
     h += '<div class="finish-list">';
     items.forEach(function (l) {
       var v = l.skipped ? '<span style="color:var(--muted)">saltato</span>' : (l.sets && l.sets.length ? (l.sets.length + (l.sets.length === 1 ? ' serie' : ' serie') + (l.sets.some(function (s) { return s.w > 0; }) ? ' &middot; ' + Math.max.apply(null, l.sets.map(function (s) { return s.w; })) + ' kg' : '')) : (l.reached ? (l.value + ' ' + l.unit) : '-'));
@@ -302,6 +318,7 @@
     byId("woClose2").onclick = closeWorkout;
     byId("woHome").onclick = closeWorkout;
     byId("woHist").onclick = function () { closeWorkout(); AU.renderHistory(); AU.show("history"); };
+    var fw = byId("woFeel"); if (fw) fw.addEventListener("click", function (e) { var c = e.target.closest("[data-feel]"); if (c) setFeel(c.dataset.feel); });
   }
 
   // ---- audio / haptics ----
@@ -318,7 +335,6 @@
       var t = actx.currentTime;
       var o = actx.createOscillator(), g = actx.createGain(), f = actx.createBiquadFilter();
       o.type = "sawtooth"; o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(300, t + 0.7);
-      f.type = "lowpass"; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(1800, t + 0.7);
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.15, t + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.95);
       o.connect(f); f.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + 1.0);
       [521, 523.5, 784].forEach(function (fr) { var oo = actx.createOscillator(), gg = actx.createGain(); oo.type = "sine"; oo.frequency.value = fr; gg.gain.setValueAtTime(0.0001, t + 0.25); gg.gain.exponentialRampToValueAtTime(0.045, t + 0.5); gg.gain.exponentialRampToValueAtTime(0.0001, t + 1.3); oo.connect(gg); gg.connect(actx.destination); oo.start(t + 0.25); oo.stop(t + 1.35); });

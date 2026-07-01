@@ -250,3 +250,17 @@ Dopo aver fissato i carichi, l'allenamento ORA PARTE davvero (non piu "compila e
 - Alla fine: riepilogo (serie/durata/volume) e **salvataggio**. Niente piu sessioni "0 serie".
 - Eliminato il vecchio diario statico (tracker.js): un solo flusso consequenziale, nessun vicolo cieco.
 Verifica jsdom: sessione forza completa (prep -> serie -> recupero -> ... -> salva con le serie registrate, prefill 90 kg dallo storico) e sessione cardio (countdown), 0 errori. Service worker a `aureo-v32`.
+
+## v33 - Fix layout (niente tagli) + Libreria completa CAVCI
+- **Contenuti mai piu tagliati dalla tabbar**: rimossa l'impaginazione "fissa" fragile che nascondeva i pulsanti in fondo (Avvia, Attrezzi/Reset). Ora ogni schermata scorre in modo naturale con spazio sufficiente sopra la barra: tutto sempre leggibile e raggiungibile.
+- **Libreria completa**: non piu solo i 17 del manuale. Ora elenca TUTTI gli esercizi - CAVCI Attrezzi, CAVCI Corpo libero, Protocollo 0 e Manuale - con miniatura, raggruppati per blocco; tocchi per la scheda completa (illustrazione, tecnica, progressi, record).
+Service worker a `aureo-v33`.
+
+## v34 - Percorso lineare + feedback di fine sessione
+Il cuore dell'app segue ora un percorso unico e senza scroll: entri, scegli o personalizzi la routine, esegui la sessione guidata, registri le serie e **dai un feedback** ("Com'e andata? Facile / Giusto / Dura"), poi ricevi l'output (riepilogo + storico). Il feedback e a un tocco (niente digitazione) e resta salvato nella sessione, visibile nello storico. Service worker a `aureo-v34`.
+
+## v35 - Riepilogo (dashboard stile Apple Fitness)
+Nuova prima schermata "Riepilogo" a colpo d'occhio, con i TUOI dati (nessun collegamento a Apple Salute, non possibile per una web-app): anello sessioni della settimana + costanza, carta Volume 7 giorni con mini-grafico, ultima sessione (con la sensazione), record di carico. Da qui parti in un tocco sulla prossima tappa CAVCI. No-scroll. Service worker `aureo-v35`.
+
+## v36 - Allena a carte con Play (stile Apple 'Allenamento')
+La schermata Allena e' ora una lista di carte: in alto la carta grande della prossima tappa con Play e "Vedi e modifica"; sotto la griglia delle 7 tappe CAVCI come carte con numero, nome e Play; toggle Attrezzi/Corpo libero e la carta Reset (Protocollo 0). Tocchi una tappa per il riepilogo (dove personalizzi e avvii), o il Play grande per partire subito con la prossima. Service worker `aureo-v36`.

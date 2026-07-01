@@ -707,6 +707,31 @@ html{color-scheme:dark;}
   transform:translateZ(0);backface-visibility:hidden;}
 .timer-wrap{will-change:transform;}
 
+/* =====================================================================
+   v34 - FEEDBACK di fine sessione (com'e andata). Chiude il percorso:
+   eseguo -> registro + do feedback -> ricevo output. Tutto a tocco.
+   ===================================================================== */
+.wo-feel{margin:2px 4px 18px;padding:16px 14px;border-radius:20px;
+  background:var(--md-sc-low,#0a0f16);border:1px solid rgba(255,255,255,.07);}
+.feel-q{font-family:var(--font-display,inherit);font-size:16px;font-weight:600;
+  text-align:center;margin-bottom:12px;color:var(--md-on-surface,#fff);}
+.feel-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.feel-chip{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;padding:14px 6px;min-height:64px;border-radius:16px;cursor:pointer;
+  background:var(--md-surface,#000);border:1.5px solid rgba(255,255,255,.12);
+  color:var(--md-on-surface-variant,#c8d2da);-webkit-tap-highlight-color:transparent;
+  transition:transform .12s ease,border-color .15s ease,background .15s ease;}
+.feel-chip:active{transform:scale(.96);}
+.feel-chip .fc-t{font-size:15px;font-weight:600;color:var(--md-on-surface,#fff);}
+.feel-chip .fc-s{font-size:11px;opacity:.7;}
+.feel-chip.on{border-color:var(--md-primary);background:var(--md-primary-container,#123);
+  box-shadow:0 0 0 1px var(--md-primary),0 0 18px rgba(0,229,255,.28);}
+.feel-chip.on .fc-t{color:var(--md-primary);}
+.feel-msg{text-align:center;font-size:12px;color:var(--md-primary);min-height:16px;margin-top:10px;}
+.hist-feel{font-size:12px;color:var(--md-on-surface-variant);margin:2px 0 6px;}
+.hist-feel b{color:var(--md-on-surface,#fff);}
+.hist-feel.feel-dura b{color:var(--md-primary);}
+
 /* LISTE LUNGHE: il rendering fuori schermo viene saltato (scroll piu leggero) */
 .ex-row{content-visibility:auto;contain-intrinsic-size:auto 82px;}
 .hist-card{content-visibility:auto;contain-intrinsic-size:auto 120px;}
@@ -1060,34 +1085,106 @@ html,body{overflow:hidden;overscroll-behavior:none;}
 .ed-note:focus{outline:none;border-color:var(--md-primary);box-shadow:0 0 0 2px rgba(196,160,255,.25);}
 .ed-note::placeholder{color:var(--muted2);}
 /* nota nel diario forza */
-.trk-note{font-size:11px;color:var(--md-primary);margin-top:2px;line-height:1.2;}
+.trk-note{font-size:11px;color:var(--md-primary);margin-top:2px;}
 
+/* =====================================================================
+   v35 - RIEPILOGO (dashboard stile Apple Fitness, dati propri)
+   ===================================================================== */
+.rp{display:block;}
+.rp-hero{display:flex;align-items:center;gap:14px;padding:16px;border-radius:26px;
+  background:var(--md-sc-low,#0a0f16);border:1px solid rgba(255,255,255,.06);}
+.rp-ring{width:120px;height:120px;flex:0 0 auto;}
+.rp-ring-n{fill:var(--md-on-surface,#fff);font-family:var(--font-display,inherit);font-size:30px;font-weight:700;}
+.rp-ring-s{fill:var(--md-on-surface-variant,#9fb0bd);font-size:13px;}
+.rp-hero-tx{flex:1;min-width:0;}
+.rp-k{font-size:12px;letter-spacing:.3px;color:var(--md-on-surface-variant);font-weight:600;text-transform:uppercase;}
+.rp-hero-h{font-family:var(--font-display,inherit);font-size:22px;font-weight:700;margin-top:2px;color:var(--md-on-surface,#fff);line-height:1.1;}
+.rp-hero-s{font-size:13px;color:var(--md-on-surface-variant);margin-top:3px;}
+.rp-go{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;padding:11px 14px;border-radius:16px;
+  background:var(--md-primary);color:var(--md-on-primary,#00141a);font-weight:700;font-size:13px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;text-align:left;}
+.rp-go svg{width:18px;height:18px;fill:currentColor;flex:0 0 auto;}
+.rp-go span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rp-go:active{transform:scale(.98);}
+.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.rp-card{background:var(--md-sc-low,#0a0f16);border:1px solid rgba(255,255,255,.06);border-radius:22px;
+  padding:14px;min-height:108px;display:flex;flex-direction:column;text-align:left;color:inherit;
+  -webkit-tap-highlight-color:transparent;}
+.rp-card.tap{cursor:pointer;}
+.rp-card.tap:active{transform:scale(.98);}
+.rp-c-top{display:flex;align-items:center;justify-content:space-between;}
+.rp-c-t{font-size:12px;font-weight:600;color:var(--md-on-surface-variant);}
+.rp-chev{color:var(--md-on-surface-variant);font-size:20px;line-height:1;}
+.rp-c-big{font-family:var(--font-display,inherit);font-size:27px;font-weight:700;margin-top:6px;color:var(--md-on-surface,#fff);line-height:1;}
+.rp-c-big span{font-size:13px;font-weight:500;color:var(--md-on-surface-variant);}
+.rp-c-sub{font-size:12px;color:var(--md-on-surface-variant);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rp-bars{display:flex;align-items:flex-end;gap:4px;height:34px;margin-top:auto;padding-top:8px;}
+.rp-bar{flex:1;display:flex;align-items:flex-end;height:100%;}
+.rp-bar i{width:100%;background:var(--md-sc-high,#1a2430);border-radius:3px;display:block;}
+.rp-bar.now i{background:var(--md-primary);}
+.rp-last-t{font-size:15px;font-weight:600;margin-top:8px;color:var(--md-on-surface,#fff);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rp-last-s{font-size:12px;color:var(--md-on-surface-variant);margin-top:3px;}
+.rp-feel{display:inline-block;margin-top:8px;font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;
+  background:var(--md-secondary-container);color:var(--md-on-secondary-container);}
+.rp-feel.feel-dura{background:var(--md-primary-container);color:var(--md-primary);}
+.rp-empty2{font-size:13px;color:var(--md-on-surface-variant);margin-top:10px;}
+/* 5 tab: compatta su iPhone mini */
+@media (max-width:400px){
+  .tabbar{padding-left:4px;padding-right:4px;}
+  .tabbar button{font-size:10px;}
+  .tabbar .ic{width:46px;height:30px;}
+  .tabbar .ic svg{width:22px;height:22px;}
+}
 
-/* === v32: sessione guidata unica (serie + recupero + clock) === */
-.wo-clock{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--md-on-surface-variant);
-  font-variant-numeric:tabular-nums;min-width:48px;text-align:right;}
-.wo-sub{font-size:13px;color:var(--md-on-surface-variant);margin-top:2px;text-align:center;}
-.setlog{width:100%;margin-top:10px;}
-.sl-target{text-align:center;font-size:13px;color:var(--md-on-surface-variant);margin-bottom:14px;}
-.sl-target b{color:#fff;font-weight:700;}
-.sl-last{display:inline-block;margin-left:6px;color:var(--md-primary);}
-.sl-grid{display:flex;gap:16px;justify-content:center;}
-.sl-cell{display:flex;flex-direction:column;align-items:center;gap:6px;}
-.sl-k{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--md-primary);font-weight:700;}
-.setlog .set-step{gap:8px;}
-.setlog .ss-btn{width:46px;height:46px;font-size:24px;}
-.setlog .ss-num{min-width:84px;height:50px;font-size:26px;}
-.wo-done{height:58px;font-size:17px;margin-top:0;margin-bottom:10px;}
-#view-workout[data-mode="set"] .wo-illu{max-width:120px;margin:0 auto;}
-#view-workout[data-mode="set"] .wo-stage{justify-content:flex-start;padding-top:6px;}
-
-
-/* === v33: layout robusto (contenuti mai tagliati dalla tabbar) + libreria completa === */
-.view{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(98px + var(--safe-b));}
-#view-home{display:block;overflow-y:auto;}
-.bk{display:block;min-height:0;}
-.bk-actions{margin-top:18px;}
-.bk-go{margin-top:16px;}
-.cv-foot{margin-top:16px;}
-.lib-blk{font-size:12px;letter-spacing:.3px;color:var(--md-on-surface-variant);font-weight:600;margin:14px 4px 8px;}
-.ex-tx{flex:1;min-width:0;}
+/* =====================================================================
+   v36 - ALLENA a carte con Play (stile Apple 'Allenamento'): prossima
+   grande + griglia 7 tappe + toggle Attrezzi/Corpo + Reset. No-scroll.
+   ===================================================================== */
+.al{display:block;}
+.al-hero{padding:18px;border-radius:26px;background:var(--md-sc-low,#0a0f16);
+  border:1px solid rgba(255,255,255,.07);position:relative;overflow:hidden;}
+.al-hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
+  background:radial-gradient(circle,var(--md-primary),transparent 68%);opacity:.14;pointer-events:none;}
+.al-hero-head{display:flex;align-items:center;justify-content:space-between;}
+.al-badge{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--md-primary);}
+.al-eye svg{width:30px;height:30px;display:block;}
+.al-hero h3{font-family:var(--font-display,inherit);font-size:24px;font-weight:700;margin-top:10px;color:var(--md-on-surface,#fff);}
+.al-hero p{font-size:13px;color:var(--md-on-surface-variant);margin-top:2px;}
+.al-hero-row{display:flex;gap:10px;align-items:stretch;margin-top:14px;}
+.al-hero-play{display:flex;align-items:center;gap:8px;padding:12px 22px;border-radius:16px;
+  background:var(--md-primary);color:var(--md-on-primary,#00141a);font-weight:700;font-size:15px;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.al-hero-play svg{width:18px;height:18px;fill:currentColor;}
+.al-hero-play:active{transform:scale(.97);}
+.al-hero-open{flex:1;padding:12px;border-radius:16px;background:transparent;
+  border:1px solid var(--md-outline-variant,rgba(255,255,255,.14));color:var(--md-on-surface-variant);
+  font-weight:600;font-size:13px;cursor:pointer;}
+.al-track{display:flex;gap:6px;margin-top:14px;background:var(--md-sc-low,#0a0f16);border-radius:15px;padding:4px;
+  border:1px solid rgba(255,255,255,.06);}
+.al-tb{flex:1;padding:9px;border-radius:11px;font-size:13px;font-weight:600;color:var(--md-on-surface-variant);
+  cursor:pointer;-webkit-tap-highlight-color:transparent;background:none;}
+.al-tb.on{background:var(--md-sc-high,#1a2430);color:var(--md-on-surface,#fff);}
+.al-lab{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--md-on-surface-variant);
+  font-weight:600;margin:16px 4px 8px;}
+.al-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.al-card{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:18px;text-align:left;
+  background:var(--md-sc-low,#0a0f16);border:1px solid rgba(255,255,255,.06);min-height:98px;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;color:inherit;}
+.al-card:active{transform:scale(.98);}
+.al-card.on{border-color:var(--md-primary);box-shadow:0 0 0 1px var(--md-primary),0 0 18px rgba(0,229,255,.14);}
+.al-top{display:flex;align-items:center;justify-content:space-between;}
+.al-n{width:30px;height:30px;border-radius:10px;background:var(--md-sc-high,#1a2430);display:flex;align-items:center;
+  justify-content:center;font-family:var(--font-display,inherit);font-weight:700;font-size:15px;color:var(--md-on-surface,#fff);flex:0 0 auto;}
+.al-card.on .al-n{background:var(--md-primary);color:var(--md-on-primary,#00141a);}
+.al-play{width:34px;height:34px;border-radius:50%;background:var(--md-primary);display:flex;align-items:center;
+  justify-content:center;flex:0 0 auto;}
+.al-play svg{width:16px;height:16px;fill:var(--md-on-primary,#00141a);}
+.al-cn{font-size:14px;font-weight:600;line-height:1.15;color:var(--md-on-surface,#fff);}
+.al-cs{font-size:11px;color:var(--md-on-surface-variant);line-height:1.2;}
+.al-reset{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;margin-top:10px;width:100%;
+  text-align:left;background:var(--md-sc-low,#0a0f16);border:1px solid rgba(255,255,255,.06);
+  color:var(--md-on-surface-variant);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.al-n.mini{width:30px;height:30px;}
+.al-rtx{flex:1;font-size:13px;font-weight:600;color:var(--md-on-surface,#fff);}
+.al-play.sm{width:30px;height:30px;}
+.al-play.sm svg{width:14px;height:14px;}

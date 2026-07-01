@@ -100,7 +100,7 @@
   var currentView = "home";
   function show(view) {
     currentView = view;
-    ["home", "library", "detail", "history", "block", "settings"].forEach(function (v) {
+    ["home", "library", "detail", "history", "block", "settings", "riepilogo"].forEach(function (v) {
       byId("view-" + v).classList.toggle("hidden", v !== view);
     });
     byId("backBtn").classList.toggle("hidden", view !== "detail" && view !== "block");
@@ -109,6 +109,7 @@
       b.classList.toggle("active", b.dataset.tab === view);
     });
     var titles = {
+      riepilogo: ["Riepilogo", "I tuoi progressi"],
       home: ["L'Allenamento Aureo", "Manuale Tecnico"],
       library: ["Libreria esercizi", "17 schede tecniche"],
       history: ["Storico", "I tuoi allenamenti"],
@@ -175,6 +176,7 @@
 
   byId("tabbar").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.tab === "riepilogo" && window.renderRiepilogo) window.renderRiepilogo();
     if (b.dataset.tab === "library") renderLibrary();
     if (b.dataset.tab === "history") renderHistory();
     if (b.dataset.tab === "settings") renderSettings();
@@ -386,6 +388,8 @@
           '<div class="chev">&rsaquo;</div></button>';
         h += '<div class="hist-body hidden" id="sb_' + s.id + '">';
         if (s.durationSec || s.volume) { h += '<div class="hist-meta">' + (s.durationSec ? '<span>Durata ' + Math.max(1, Math.round(s.durationSec / 60)) + ' min</span>' : '') + (s.volume ? '<span>Volume ' + Math.round(s.volume) + ' kg</span>' : '') + '</div>'; }
+        var feelLab = { facile: "Facile", giusto: "Giusto", dura: "Dura" };
+        if (s.feel && feelLab[s.feel]) { h += '<div class="hist-feel feel-' + s.feel + '">Sensazione: <b>' + feelLab[s.feel] + '</b></div>'; }
         s.items.forEach(function (it) {
           h += '<div class="log-row"><span>' + it.n + '. ' + esc(it.nome) + '</span>' +
             '<b>' + (it.skipped ? '<span style="color:var(--muted)">saltato</span>' : (it.value + ' ' + it.unit + (it.sets ? ' &middot; ' + it.sets.length + ' serie' : '') + (it.rpe ? ' &middot; RPE ' + it.rpe : ''))) + '</b></div>';

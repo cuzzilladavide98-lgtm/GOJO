@@ -30,7 +30,8 @@
     </div>
   </header>
 
-  <section class="view" id="view-home"></section>
+  <section class="view" id="view-riepilogo"></section>
+  <section class="view hidden" id="view-home"></section>
   <section class="view hidden" id="view-library"></section>
   <section class="view hidden" id="view-detail"></section>
   <section class="view hidden" id="view-history"></section>
@@ -40,7 +41,11 @@
   <section id="view-workout" class="hidden"></section>
 
   <nav class="tabbar" id="tabbar">
-    <button data-tab="home" class="active">
+    <button data-tab="riepilogo" class="active">
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".35"/><path d="M12 4a8 8 0 0 1 6 13.3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
+      Riepilogo
+    </button>
+    <button data-tab="home">
       <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 9v6M7 7.5v9M17 7.5v9M20 9v6M7 12h10"/></svg></span>
       Allena
     </button>
@@ -68,6 +73,7 @@
 <script src="extras.js"></script>
 <script src="cavci.js"></script>
 <script src="seed.js"></script>
+<script src="riepilogo.js"></script>
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function(){}); });
