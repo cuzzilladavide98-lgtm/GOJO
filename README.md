@@ -273,3 +273,6 @@ Corretto il bug per cui la schermata Allena non scorreva e i contenuti finivano 
 
 ## v39 - Fix critico: schermate sovrapposte
 Il "fix scroll" della v38 aveva introdotto display:block !important su #view-home e #view-riepilogo, che scavalcava .hidden: risultato, Riepilogo e Allena restavano visibili su ogni tab (schermate sovrapposte). Corretto: nessun override di display, solo overflow per lo scroll. Ora ogni tab mostra solo la propria schermata e l'Allena scorre. Service worker aureo-v39.
+
+## v40 - Visual Identity: Apple Fitness (solo CSS)
+Restyle completo su fogli di stile: True Black (#000000), font San Francisco (-apple-system), titoli heavy (800), testi bianchi e didascalie #8E8E93. Carte #1C1C1E ad angoli 16px, pulsanti a pillola (100px). Tre accenti neon con significato: Rosso #FF0055 (azione/intensita': pulsante Inizia, badge Prossima, "dura"), Verde #00FF66 (esercizio: anello Riepilogo, play delle tappe, "giusto"), Azzurro #00E5FF (navigazione: tab attiva, chevron, pulsanti secondari, "facile"). Nessuna modifica a JS/HTML/struttura. Il tema vive nel file strip.css (layer sopra app.css): per cambiare estetica si tocca solo quello. Service worker aureo-v40.
