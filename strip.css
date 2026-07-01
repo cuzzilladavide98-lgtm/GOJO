@@ -1,0 +1,78 @@
+/* =====================================================================
+   strip.css - BASELINE SPOGLIATO (nessuna personalizzazione estetica).
+   Layer rimovibile: elimina questo file (e il suo <link>) per tornare
+   all'estetica Aureo. Serve a vedere lo scheletro nudo prima del restyle.
+   ===================================================================== */
+
+/* font di sistema ovunque */
+*, *::before, *::after {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif !important;
+  letter-spacing: normal !important;
+}
+
+/* palette grigia monocroma - vince su temi e wide-gamut P3 */
+:root, :root[data-theme] {
+  --md-primary: #cfd2d7 !important;
+  --md-on-primary: #17181b !important;
+  --md-primary-container: #2a2d33 !important;
+  --md-on-primary-container: #e6e7ea !important;
+  --md-secondary-container: #262a2f !important;
+  --md-on-secondary-container: #d6d8dc !important;
+  --md-tertiary: #b7bac0 !important;
+  --md-surface: #111214 !important;
+  --md-sc-lowest: #111214 !important;
+  --md-sc-low: #191b1e !important;
+  --md-sc: #191b1e !important;
+  --md-sc-high: #2a2d31 !important;
+  --md-sc-highest: #34373c !important;
+  --md-on-surface: #e9eaec !important;
+  --md-on-surface-variant: #9a9ca1 !important;
+  --md-outline: #3a3d42 !important;
+  --md-outline-variant: #2a2d31 !important;
+  --muted: #9a9ca1 !important;
+  --muted2: #6d6f74 !important;
+  --gold: #cfd2d7 !important;
+  --md-success: #cfd2d7 !important;
+  --ce-grad: #cfd2d7 !important;
+  --font-display: -apple-system, system-ui, sans-serif !important;
+  --fig-line: #b7bac0 !important;
+  --fig-fill: #2a2d31 !important;
+  --fig-accent: #cfd2d7 !important;
+  --fig-ghost: #55585d !important;
+}
+
+/* via ombre, glow, filtri, animazioni decorative */
+* { box-shadow: none !important; text-shadow: none !important; }
+svg, .ring-fg, .timer-wrap { filter: none !important; }
+.al-hero::after, .hero::after, .hero .glow, .cv-next::after,
+.domain-burst, .di-rings, .dx-over { display: none !important; }
+
+/* nascondi decori a tema (occhi, filigrane, logo, intro dominio) */
+.al-eye, .cv-eye, .bk-eye, .mu-head-ic, #logo,
+.domain-intro, .onb-eye { display: none !important; }
+
+/* superfici piatte, bordo semplice, angoli sobri */
+.al-hero, .rp-hero, .rp-card, .al-card, .al-reset, .al-track,
+.card-box, .hist-card, .feel-chip, .wo-feel, .menu-row, .bk-row,
+.ex-row, .stat, .lg-stepper, .set-step, .kp-card, .ss-num,
+.detail-illu, .cv-next, .cv-step, .a2hs, .nudge, .chip {
+  background: var(--md-sc-low) !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 8px !important;
+}
+
+/* accenti pieni resi grigio neutro */
+.al-play, .rp-ring, .al-hero-play, .btn, .cv-go, .rp-go, .feel-chip.on {
+  border-radius: 8px !important;
+}
+.al-play { border-radius: 50% !important; }
+
+/* barra inferiore piatta a 3 voci */
+.tabbar { background: var(--md-sc) !important; border-top: 1px solid var(--md-outline) !important; }
+.tabbar button.active .ic { background: var(--md-sc-high) !important; }
+
+/* appbar piatta */
+.appbar { background: var(--md-surface) !important; border-bottom: 1px solid var(--md-outline-variant) !important; }
+
+/* titoli senza font display particolare gia' forzato sopra */
+h1, h2, h3, .rp-hero-h, .al-hero h3 { font-weight: 600 !important; }

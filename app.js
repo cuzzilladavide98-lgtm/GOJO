@@ -100,13 +100,15 @@
   var currentView = "home";
   function show(view) {
     currentView = view;
-    ["home", "library", "detail", "history", "block", "settings", "riepilogo"].forEach(function (v) {
+    ["home", "library", "detail", "history", "block", "settings", "riepilogo", "menu"].forEach(function (v) {
       byId("view-" + v).classList.toggle("hidden", v !== view);
     });
-    byId("backBtn").classList.toggle("hidden", view !== "detail" && view !== "block");
-    byId("logo").classList.toggle("hidden", view === "detail" || view === "block");
+    var _bk = { detail: 1, block: 1, library: 1, history: 1, settings: 1 };
+    byId("backBtn").classList.toggle("hidden", !_bk[view]);
+    byId("logo").classList.toggle("hidden", !!_bk[view]);
+    var _tab = { riepilogo: "riepilogo", home: "home", menu: "menu", library: "menu", history: "menu", settings: "menu" };
     byId("tabbar").querySelectorAll("button").forEach(function (b) {
-      b.classList.toggle("active", b.dataset.tab === view);
+      b.classList.toggle("active", b.dataset.tab === _tab[view]);
     });
     var titles = {
       riepilogo: ["Riepilogo", "I tuoi progressi"],
@@ -114,6 +116,7 @@
       library: ["Libreria esercizi", "17 schede tecniche"],
       history: ["Storico", "I tuoi allenamenti"],
       settings: ["Profilo", "Preferenze e dati"],
+      menu: ["Altro", "Libreria, storico, profilo"],
     };
     if (titles[view]) { byId("barTitle").textContent = titles[view][0]; byId("barSub").textContent = titles[view][1]; }
     if (view !== "detail" && view !== "block") applyTheme();
@@ -177,13 +180,12 @@
   byId("tabbar").addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     if (b.dataset.tab === "riepilogo" && window.renderRiepilogo) window.renderRiepilogo();
-    if (b.dataset.tab === "library") renderLibrary();
-    if (b.dataset.tab === "history") renderHistory();
-    if (b.dataset.tab === "settings") renderSettings();
+    if (b.dataset.tab === "menu") renderMenu();
     show(b.dataset.tab);
   });
   byId("backBtn").addEventListener("click", function () {
     if (currentView === "block" && window.CAVCI && typeof window.CAVCI.back === "function" && window.CAVCI.back()) return;
+    if (currentView === "library" || currentView === "history" || currentView === "settings") { renderMenu(); show("menu"); return; }
     show(lastListView);
   });
 
@@ -192,6 +194,23 @@
     return '<button class="acc-h" id="acch-' + key + '" data-acc="' + key + '"><div class="acc-tx"><div class="acc-t">' + title + '</div><div class="acc-s">' + sub + '</div></div><span class="acc-cx">&rsaquo;</span></button>' +
       '<div class="acc-b hidden" id="acc-' + key + '">' + body + '</div>';
   }
+  function renderMenu() {
+    var rows = [
+      ["library", "Libreria", "Tutti gli esercizi illustrati"],
+      ["history", "Storico", "I tuoi allenamenti e progressi"],
+      ["settings", "Profilo", "Preferenze, temi e backup"]
+    ];
+    byId("view-menu").innerHTML = '<div class="menu">' + rows.map(function (r) {
+      return '<button class="menu-row" data-menu="' + r[0] + '"><div class="menu-tx"><div class="menu-t">' + r[1] + '</div><div class="menu-s">' + r[2] + '</div></div><span class="chev">&rsaquo;</span></button>';
+    }).join("") + '</div>';
+  }
+  byId("view-menu").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-menu]"); if (!b) return;
+    var m = b.dataset.menu;
+    if (m === "library") { renderLibrary(); show("library"); }
+    else if (m === "history") { renderHistory(); show("history"); }
+    else if (m === "settings") { renderSettings(); show("settings"); }
+  });
   function renderHome() {
     applyTheme();
     var hist = loadHistory();

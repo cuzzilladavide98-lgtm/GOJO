@@ -264,3 +264,6 @@ Nuova prima schermata "Riepilogo" a colpo d'occhio, con i TUOI dati (nessun coll
 
 ## v36 - Allena a carte con Play (stile Apple 'Allenamento')
 La schermata Allena e' ora una lista di carte: in alto la carta grande della prossima tappa con Play e "Vedi e modifica"; sotto la griglia delle 7 tappe CAVCI come carte con numero, nome e Play; toggle Attrezzi/Corpo libero e la carta Reset (Protocollo 0). Tocchi una tappa per il riepilogo (dove personalizzi e avvii), o il Play grande per partire subito con la prossima. Service worker `aureo-v36`.
+
+## v37 - Bar a 3 voci + baseline SPOGLIATO
+Barra inferiore ridotta a 3: Riepilogo, Allena, Altro. "Altro" e' un hub che raccoglie Libreria, Storico e Profilo (con ritorno al menu). Riepilogo resta la schermata pensata no-scroll. Aggiunto strip.css: un layer che spoglia l'estetica (font di sistema, grigio monocromo, niente gradienti/glow/decori) per vedere lo scheletro nudo prima del restyle. Per tornare all'estetica Aureo basta togliere strip.css e il suo <link>. Service worker aureo-v37.

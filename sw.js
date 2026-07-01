@@ -1,7 +1,7 @@
 /* Service worker - cache offline per L'Allenamento Aureo */
-var CACHE = "aureo-v36";
+var CACHE = "aureo-v37";
 var ASSETS = [
-  "./","./index.html","./app.css","./data.js","./figures.js","./chart.js","./app.js","./workout.js","./extras.js","./cavci.js","./seed.js","./riepilogo.js","./cavci_seed.json",
+  "./","./index.html","./app.css","./strip.css","./data.js","./figures.js","./chart.js","./app.js","./workout.js","./extras.js","./cavci.js","./seed.js","./riepilogo.js","./cavci_seed.json",
   "./manifest.webmanifest","./icons/icon-180.png","./icons/icon-192.png","./icons/icon-512.png","./icons/icon-512-maskable.png"
 ];
 self.addEventListener("install", function (e) {

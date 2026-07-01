@@ -1188,3 +1188,13 @@ html,body{overflow:hidden;overscroll-behavior:none;}
 .al-rtx{flex:1;font-size:13px;font-weight:600;color:var(--md-on-surface,#fff);}
 .al-play.sm{width:30px;height:30px;}
 .al-play.sm svg{width:14px;height:14px;}
+
+/* v37 - hub "Altro" (menu Libreria/Storico/Profilo) */
+.menu{display:flex;flex-direction:column;gap:10px;}
+.menu-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px;
+  border-radius:18px;background:var(--md-sc-low,#0a0f16);border:1px solid rgba(255,255,255,.06);
+  text-align:left;width:100%;color:var(--md-on-surface,#fff);-webkit-tap-highlight-color:transparent;}
+.menu-row:active{transform:scale(.99);}
+.menu-t{font-size:16px;font-weight:600;}
+.menu-s{font-size:12px;color:var(--md-on-surface-variant);margin-top:2px;}
+.menu-row .chev{color:var(--md-on-surface-variant);font-size:22px;line-height:1;}
