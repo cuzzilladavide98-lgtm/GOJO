@@ -270,3 +270,6 @@ Barra inferiore ridotta a 3: Riepilogo, Allena, Altro. "Altro" e' un hub che rac
 
 ## v38 - Fix scroll Allena + tipografia ariosa
 Corretto il bug per cui la schermata Allena non scorreva e i contenuti finivano sotto la tabbar: ora Allena scorre e nulla resta tagliato (Riepilogo resta pensato per stare in una schermata). Passata tipografica sul baseline spogliato: scala dei caratteri piu' chiara e coerente, micro-etichette piccole e distanziate, titoli e numeri piu' generosi, piu' spazio tra le carte: piu' aria e respiro. Service worker aureo-v38.
+
+## v39 - Fix critico: schermate sovrapposte
+Il "fix scroll" della v38 aveva introdotto display:block !important su #view-home e #view-riepilogo, che scavalcava .hidden: risultato, Riepilogo e Allena restavano visibili su ogni tab (schermate sovrapposte). Corretto: nessun override di display, solo overflow per lo scroll. Ora ogni tab mostra solo la propria schermata e l'Allena scorre. Service worker aureo-v39.

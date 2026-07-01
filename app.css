@@ -1199,8 +1199,8 @@ html,body{overflow:hidden;overscroll-behavior:none;}
 .menu-s{font-size:12px;color:var(--md-on-surface-variant);margin-top:2px;}
 .menu-row .chev{color:var(--md-on-surface-variant);font-size:22px;line-height:1;}
 
-/* v38 - FIX scroll: nessun contenuto tagliato dalla tabbar. Allena scorre;
-   Riepilogo scorre solo se serve (di norma sta in una schermata). */
-.view{overflow-y:auto !important;-webkit-overflow-scrolling:touch;}
-#view-home{display:block !important;overflow-y:auto !important;}
-#view-riepilogo{display:block !important;overflow-y:auto !important;}
+/* v39 - FIX scroll SENZA rompere .hidden: nessun override di display,
+   solo overflow. Le viste inattive restano nascoste da .hidden. */
+.view{-webkit-overflow-scrolling:touch;}
+#view-home{overflow-y:auto;}
+#view-riepilogo{overflow-y:auto;}
