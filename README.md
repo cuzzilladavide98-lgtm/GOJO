@@ -267,3 +267,6 @@ La schermata Allena e' ora una lista di carte: in alto la carta grande della pro
 
 ## v37 - Bar a 3 voci + baseline SPOGLIATO
 Barra inferiore ridotta a 3: Riepilogo, Allena, Altro. "Altro" e' un hub che raccoglie Libreria, Storico e Profilo (con ritorno al menu). Riepilogo resta la schermata pensata no-scroll. Aggiunto strip.css: un layer che spoglia l'estetica (font di sistema, grigio monocromo, niente gradienti/glow/decori) per vedere lo scheletro nudo prima del restyle. Per tornare all'estetica Aureo basta togliere strip.css e il suo <link>. Service worker aureo-v37.
+
+## v38 - Fix scroll Allena + tipografia ariosa
+Corretto il bug per cui la schermata Allena non scorreva e i contenuti finivano sotto la tabbar: ora Allena scorre e nulla resta tagliato (Riepilogo resta pensato per stare in una schermata). Passata tipografica sul baseline spogliato: scala dei caratteri piu' chiara e coerente, micro-etichette piccole e distanziate, titoli e numeri piu' generosi, piu' spazio tra le carte: piu' aria e respiro. Service worker aureo-v38.
