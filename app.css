@@ -1080,3 +1080,14 @@ html,body{overflow:hidden;overscroll-behavior:none;}
 .wo-done{height:58px;font-size:17px;margin-top:0;margin-bottom:10px;}
 #view-workout[data-mode="set"] .wo-illu{max-width:120px;margin:0 auto;}
 #view-workout[data-mode="set"] .wo-stage{justify-content:flex-start;padding-top:6px;}
+
+
+/* === v33: layout robusto (contenuti mai tagliati dalla tabbar) + libreria completa === */
+.view{overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(98px + var(--safe-b));}
+#view-home{display:block;overflow-y:auto;}
+.bk{display:block;min-height:0;}
+.bk-actions{margin-top:18px;}
+.bk-go{margin-top:16px;}
+.cv-foot{margin-top:16px;}
+.lib-blk{font-size:12px;letter-spacing:.3px;color:var(--md-on-surface-variant);font-weight:600;margin:14px 4px 8px;}
+.ex-tx{flex:1;min-width:0;}

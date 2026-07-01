@@ -859,6 +859,6 @@
     if (m === "editor") { openBlock(curBlk); return true; }
     return false;
   }
-  window.CAVCI = { EX: EX, BLOCKS: BLOCKS, RESET: RESET, renderHomeSection: renderHomeSection, start: start, openEx: openEx, openBlock: openBlock, back: back, nextN: nextN, _pending: null, _mode: "summary" };
+  window.CAVCI = { EX: EX, BLOCKS: BLOCKS, BLOCKS_BW: BLOCKS_BW, RESET: RESET, renderHomeSection: renderHomeSection, start: start, openEx: openEx, openBlock: openBlock, back: back, nextN: nextN, _pending: null, _mode: "summary" };
   if (AU && AU.renderHome) AU.renderHome();
 })();

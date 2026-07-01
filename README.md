@@ -243,3 +243,10 @@ Dopo gli screenshot reali, sistemati i quattro problemi:
 - **Niente piu scheda di sola lettura per sbaglio**: nell'editor il nome non apre piu il dettaglio; la consultazione e dall'anteprima (tocchi l'esercizio). E il titolo in alto e quello giusto (nome esercizio, non "Modifica").
 - **Spazi sfruttati, niente bandoni**: i pulsanti d'azione (Avvia/Modifica, Fatto/Aggiungi) sono spinti in basso a riempire lo spazio e restare comodi al pollice; la Home tiene il footer in fondo. Il tastierino numerico e ora condiviso (diario + editor).
 Service worker a `aureo-v31`.
+
+## v32 - IL CUORE: sessione guidata in tempo reale (motore unico)
+Dopo aver fissato i carichi, l'allenamento ORA PARTE davvero (non piu "compila e salva"):
+- **Motore unico** che guida serie per serie. Per la forza: per ogni serie vedi obiettivo + ultimo carico, regoli Kg/Reps (stepper grandi o tastierino), tocchi **Serie fatta** -> parte il **TIMER DI RECUPERO automatico**, poi la serie dopo, poi il prossimo esercizio. Per cardio/tenute: countdown. **Orologio di sessione** sempre in alto.
+- Alla fine: riepilogo (serie/durata/volume) e **salvataggio**. Niente piu sessioni "0 serie".
+- Eliminato il vecchio diario statico (tracker.js): un solo flusso consequenziale, nessun vicolo cieco.
+Verifica jsdom: sessione forza completa (prep -> serie -> recupero -> ... -> salva con le serie registrate, prefill 90 kg dallo storico) e sessione cardio (countdown), 0 errori. Service worker a `aureo-v32`.

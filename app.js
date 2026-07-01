@@ -266,20 +266,40 @@
   });
   byId("view-home").addEventListener("change", function (e) { var f = e.target.closest("#importFile"); if (f && f.files && f.files[0] && window.EX) window.EX.importJSON(f.files[0]); });
 
+  function libRow(nome, cat, illu, attr) {
+    return '<button class="ex-row" ' + attr + '><div class="ex-thumb">' + renderIllu(illu, true) + '</div>' +
+      '<div class="ex-tx"><div class="e-name">' + esc(nome) + '</div><div class="e-cat">' + esc(cat) + '</div></div><div class="chev">&rsaquo;</div></button>';
+  }
   function renderLibrary() {
-    var h = '<div class="lib-intro"><div class="lib-eye">' + EYE + '</div><div><h2>Libreria</h2><p>I 17 esercizi del manuale, per blocco. Tocca un blocco per esplorarlo.</p></div></div>' + '<button class="btn" data-act="start-all">' + IC.play + ' Allenamento completo</button>';
+    var seen = {};
+    var h = '<div class="lib-intro"><div class="lib-eye">' + EYE + '</div><div><h2>Libreria</h2><p>Tutti gli esercizi: CAVCI e Manuale. Tocca per la scheda.</p></div></div>';
+    if (window.CAVCI) {
+      var C = window.CAVCI;
+      var groups = [["CAVCI - Attrezzi", C.BLOCKS], ["CAVCI - Corpo libero", C.BLOCKS_BW], ["Protocollo 0 - Reset", [C.RESET]]];
+      groups.forEach(function (g) {
+        var out = "";
+        g[1].forEach(function (b) {
+          var rows = "";
+          b.ex.forEach(function (id) { if (seen[id]) return; seen[id] = 1; var e = C.EX[id]; if (!e) return; rows += libRow(e.nome, e.categoria, e.illu, 'data-cvex="' + id + '"'); });
+          if (rows) out += '<div class="lib-blk">' + esc(b.nome) + '</div>' + rows;
+        });
+        if (out) h += '<div class="section-title">' + g[0] + '</div>' + out;
+      });
+    }
+    h += '<div class="section-title">Manuale Tecnico</div>';
+    h += '<button class="btn secondary" data-act="start-all" style="margin-bottom:12px">' + IC.play + ' Allenamento completo (17)</button>';
     BLOCCHI.forEach(function (b) {
       var list = exByN(b.n); if (!list.length) return;
-      var mins = Math.round(list.reduce(function (s, e) { return s + e.work + e.rest; }, 0) / 60);
-      h += '<button class="block-card" data-block="' + b.n + '"><div class="block-num">' + b.n + '</div><div><div class="b-name">' + esc(b.nome.replace(/^Blocco \d+ . /, "")) + '</div><div class="b-desc">' + esc(b.desc) + '</div><div class="b-meta">' + list.length + ' esercizi - ~' + mins + ' min</div></div><div class="chev">&rsaquo;</div></button>';
+      h += '<div class="lib-blk">' + esc(b.nome.replace(/^Blocco \d+ . /, "")) + '</div>';
+      list.forEach(function (e) { h += libRow(e.n + ". " + e.nome, e.categoria, e.illu, 'data-ex="' + e.id + '"'); });
     });
     byId("view-library").innerHTML = h;
   }
   byId("view-library").addEventListener("click", function (e) {
     var act = e.target.closest("[data-act]");
     if (act && act.dataset.act === "start-all") { startSession(allEx(), "Allenamento completo"); return; }
-    var blk = e.target.closest("[data-block]");
-    if (blk) { lastListView = "library"; openManualeBlock(+blk.dataset.block); return; }
+    var cv = e.target.closest("[data-cvex]");
+    if (cv && window.CAVCI) { lastListView = "library"; window.CAVCI.openEx(cv.dataset.cvex); return; }
     var row = e.target.closest("[data-ex]");
     if (row) { lastListView = "library"; openDetail(row.dataset.ex); }
   });
